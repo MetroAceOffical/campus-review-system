@@ -97,10 +97,12 @@ public class ReferenceProcessor {
                 artifacts.withObject("parts").set(part.path("key").asText(),part);db.update("UPDATE reference_revision SET artifacts_json=? WHERE id=?",JsonSupport.encode(json,artifacts),revision);
             }
             libraries.markReady(generation,response.path("manifestSha256").asText());libraries.activate(generation,expected);
+            var usable=new HashSet<String>();libraries.currentManifest().path("enabledReferenceWorkIds").forEach(id->usable.add(id.asText()));
             for(var revision:revisions){
                 var artifacts=JsonSupport.parse(json,db.queryForObject("SELECT artifacts_json FROM reference_revision WHERE id=?",String.class,revision.get("id")));
                 boolean failed=false;for(var part:artifacts.path("parts"))if("FAILED".equals(part.path("status").asText()))failed=true;
-                db.update("UPDATE reference_revision SET processing_status=? WHERE id=?",failed?"PARTIAL":"READY",revision.get("id"));
+                String status=!usable.contains(revision.get("reference_work_id").toString())?"FAILED":failed?"PARTIAL":"READY";
+                db.update("UPDATE reference_revision SET processing_status=? WHERE id=?",status,revision.get("id"));
             }
         }catch(Exception error){libraries.fail(generation,error instanceof DetectorClient.DetectorFailure failure?failure.code:"LIBRARY_BUILD_FAILED");throw error instanceof RuntimeException runtime?runtime:new IllegalStateException(error);}
     }

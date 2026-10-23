@@ -1,0 +1,14 @@
+{
+  "stage": "M11",
+  "manualReferenceId": "199",
+  "manualImportNotPublished": true,
+  "newQueryMatchedManualReference": true,
+  "browserDisableSwitched": true,
+  "afterDisableQueryExcludesReference": true,
+  "oldReportAndGenerationRetained": true,
+  "beforeGeneration": "4",
+  "afterGeneration": "5",
+  "allFourAccountsReadPublishedSnapshotAndImage": true,
+  "publicationExcludesInternalDecisionAndReport": true,
+  "scope": "explicit browser-admin and HTTP acceptance fixtures; no retrieval accuracy claim"
+}

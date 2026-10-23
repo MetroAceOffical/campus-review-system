@@ -1,7 +1,7 @@
 param([Parameter(Mandatory=$true)][string]$Task, [switch]$RealModels)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$tests = @{ M01 = 'MigrationIT'; M02 = 'AuthAccessIT'; M03 = 'DocumentCodecTest,FileAccessIT,DraftIT'; M04 = 'PYTHON'; M05 = 'OCR'; M06 = 'LibraryGenerationIT'; M07 = 'QueueIT,LateResultIT,FaultPipelineIT,RealPipelineIT'; M08 = 'SubmissionIT,DecisionIT'; M09 = 'ManuscriptListIT'; M10 = 'ReportAccessIT,FileAccessIT'; ALL = '*IT,*Test' }
+$tests = @{ M01 = 'MigrationIT'; M02 = 'AuthAccessIT'; M03 = 'DocumentCodecTest,FileAccessIT,DraftIT'; M04 = 'PYTHON'; M05 = 'OCR'; M06 = 'LibraryGenerationIT'; M07 = 'QueueIT,LateResultIT,FaultPipelineIT,RealPipelineIT'; M08 = 'SubmissionIT,DecisionIT'; M09 = 'ManuscriptListIT'; M10 = 'ReportAccessIT,FileAccessIT'; M11 = 'ReferencePublicationIT,LibraryGenerationIT'; ALL = '*IT,*Test' }
 if (-not $tests.ContainsKey($Task)) { Write-Error "Task $Task has no implemented verification entry"; exit 2 }
 $configPath = Join-Path $root 'app/config/local.json'
 if (-not (Test-Path $configPath)) { $configPath = Join-Path $root 'app/config/local.example.json' }

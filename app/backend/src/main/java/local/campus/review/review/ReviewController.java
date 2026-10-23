@@ -12,5 +12,6 @@ public class ReviewController {
     public record Decision(String decision,String reason){}
     @PostMapping("/api/submissions/{id}/decision") Api decide(Authentication auth,@PathVariable String id,@RequestHeader("Idempotency-Key")String key,@RequestBody Decision input){return Api.ok(reviews.decide(users.require(auth),id,key,input.decision(),input.reason()));}
     @GetMapping("/api/publications/{id}") Api get(Authentication auth,@PathVariable String id){users.require(auth);return Api.ok(publications.get(id));}
+    @GetMapping("/api/publications") Api published(Authentication auth,@RequestParam(defaultValue="1")int page,@RequestParam(defaultValue="20")int pageSize,@RequestParam(defaultValue="")String q){users.require(auth);return Api.ok(publications.list(page,pageSize,q));}
     @GetMapping("/api/reviews") Api list(Authentication auth,@RequestParam(defaultValue="1")int page,@RequestParam(defaultValue="20")int pageSize,@RequestParam(defaultValue="")String q,@RequestParam(defaultValue="PENDING")String status){return Api.ok(queries.list(users.require(auth),page,pageSize,q,status));}
 }

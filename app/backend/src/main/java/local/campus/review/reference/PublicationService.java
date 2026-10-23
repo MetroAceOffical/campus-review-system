@@ -27,7 +27,14 @@ public class PublicationService {
     public JsonNode get(String id){
         var rows=db.queryForList("SELECT v.*,m.first_published_at,m.reprint_allowed,o.name AS organization_name FROM manuscript m JOIN submission_version v ON v.id=m.published_version_id JOIN organization o ON o.id=m.organization_id WHERE m.id=? AND m.publication_state='PUBLISHED'",id);
         if(rows.isEmpty())throw new ApiException(404,"RESOURCE_NOT_FOUND","未找到已发布稿件");var row=rows.getFirst();
-        var result=json.createObjectNode().put("manuscriptId",id).put("submissionId",row.get("id").toString()).put("title",row.get("title").toString()).put("organizationName",row.get("organization_name").toString()).put("publishedAt",((LocalDateTime)row.get("first_published_at")).atOffset(ZoneOffset.UTC).toString()).put("reprintAllowed",(Boolean)row.get("reprint_allowed"));
+        var result=json.createObjectNode().put("manuscriptId",id).put("submissionId",row.get("id").toString()).put("title",row.get("title").toString()).put("schemaVersion",row.get("schema_version").toString()).put("organizationName",row.get("organization_name").toString()).put("publishedAt",((LocalDateTime)row.get("first_published_at")).atOffset(ZoneOffset.UTC).toString()).put("reprintAllowed",(Boolean)row.get("reprint_allowed"));
         result.set("content",JsonSupport.parse(json,row.get("content_json").toString()));result.set("sources",JsonSupport.parse(json,row.get("sources_json").toString()));return result;
+    }
+    public JsonNode list(int page,int size,String q){
+        if(page<1 || size<1 || size>100 || q.length()>200)throw new ApiException(400,"VALIDATION_ERROR","列表参数无效");
+        String from=" FROM manuscript m JOIN submission_version v ON v.id=m.published_version_id JOIN organization o ON o.id=m.organization_id WHERE m.publication_state='PUBLISHED' AND v.title LIKE ?";
+        var result=json.createObjectNode().put("page",page).put("pageSize",size).put("total",db.queryForObject("SELECT COUNT(*)"+from,Long.class,"%"+q+"%"));var items=result.putArray("items");
+        for(var row:db.queryForList("SELECT m.id,m.first_published_at,v.id AS submission_id,v.title,o.name AS organization_name"+from+" ORDER BY m.first_published_at DESC,m.id DESC LIMIT ? OFFSET ?","%"+q+"%",size,(long)(page-1)*size))items.addObject().put("manuscriptId",row.get("id").toString()).put("submissionId",row.get("submission_id").toString()).put("title",row.get("title").toString()).put("organizationName",row.get("organization_name").toString()).put("publishedAt",((LocalDateTime)row.get("first_published_at")).atOffset(ZoneOffset.UTC).toString());
+        return result;
     }
 }
