@@ -9,7 +9,7 @@ def prepare_text_index(library,models):
     from campus_detection.models import frozen_text_helpers
     helper=frozen_text_helpers();config=models['textConfig']
     documents=[dict(item) for item in library.get('documents',[]) if item.get('text','').strip()]
-    by_id={str(item['sourceRevisionId']):item for item in documents}
+    by_id={str(item.get('sourceKey',item['sourceRevisionId'])):item for item in documents}
     if len(by_id)!=len(documents):raise ContractError('INVALID_LIBRARY','Duplicate reference revision identity')
     windows=[];indices={}
     for source_id,document in by_id.items():
@@ -39,7 +39,7 @@ def detect_text(request,library,models):
     if index['featureSpaceId']!=config['featureSpaceId']:raise ContractError('INCOMPATIBLE_FEATURE_SPACE','Text index configuration is incompatible')
     query_windows=helper.chunk_text(text,models['tokenizer'],config['chunk']['tokens'],config['chunk']['overlap'])
     similarities=(index['vectorizer'].transform([window['text'] for window in query_windows])@index['matrix'].T).toarray()
-    allowed={str(item['sourceRevisionId']) for item in documents}
+    allowed={str(item.get('sourceKey',item['sourceRevisionId'])) for item in documents}
     scores={sid:float(np.mean(np.sort(similarities[:,index['indices'][sid]].max(axis=1))[-min(3,len(query_windows)):])) for sid in allowed}
     # Self exclusion is applied before TopK, never after candidate truncation.
     candidates=sorted(scores,key=lambda sid:(-scores[sid],sid))[:config['candidateK']]
@@ -61,7 +61,7 @@ def detect_text(request,library,models):
         accepted=summary['matched_characters']>=params['min_chars'] and (summary['query_character_coverage']>=params['min_coverage'] or summary['longest_match']>=2*params['min_chars'])
         item={'evidenceId':evidence_id(request['attemptId'],'text',sid),'evidenceType':'TEXT_SIMILARITY',
               'sourceScope':'LIBRARY','sourceKind':source.get('sourceKind','BODY'),'sourceWorkId':str(source['sourceWorkId']),
-              'sourceRevisionId':sid,'sourceTitle':source['title'],'sourceUrl':source.get('url'),'sourceMetadata':source.get('sourceMetadata',{}),
+              'sourceRevisionId':str(source['sourceRevisionId']),'sourceTitle':source['title'],'sourceUrl':source.get('url'),'sourceMetadata':source.get('sourceMetadata',{}),
               'tfidfScore':scores[sid],'acceptedCandidate':bool(accepted),'literalSummary':summary,'matches':[],'semanticWindows':[]}
         for match in merged:
             query_piece=text[match['q_start']:match['q_end']];source_piece=source['text'][match['s_start']:match['s_end']]

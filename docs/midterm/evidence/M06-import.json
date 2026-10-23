@@ -1,0 +1,62 @@
+{
+  "stage": "M06",
+  "importedWorks": 196,
+  "officialTexts": 194,
+  "officialImages": 52,
+  "collectedImages": 59,
+  "rejectedImages": {
+    "V2I-19-07": {
+      "errorCode": "INITIAL_IMAGE_EXCEEDS_UPLOAD_LIMIT",
+      "sha256": "b560683af1aa5c8d4b9be20a0aae86fca40b94502c8731c61957af42781c78c4",
+      "width": 6106,
+      "height": 4071,
+      "sourceUrl": "https://wap.cucn.edu.cn/cucnupload/upload/attachment/20260506/1778050307_cucn_69fae5036cd7e886606297.jpg"
+    },
+    "V2I-21-01": {
+      "errorCode": "INITIAL_IMAGE_EXCEEDS_UPLOAD_LIMIT",
+      "sha256": "d119997c1c57df5f4de7c9ae355ada722f843d23f49f4f8d2ae9fcd259d9d976",
+      "width": 6720,
+      "height": 4480,
+      "sourceUrl": "https://wap.cucn.edu.cn/cucnupload/upload/attachment/20260707/1783392916_cucn_6a4c6a94eb09a288363020.jpeg"
+    },
+    "V2I-21-04": {
+      "errorCode": "INITIAL_IMAGE_EXCEEDS_UPLOAD_LIMIT",
+      "sha256": "764e35882b0935041da01b74302ca6ae24dde42e499c138e324654be3b01191c",
+      "width": 6720,
+      "height": 4480,
+      "sourceUrl": "https://wap.cucn.edu.cn/cucnupload/upload/attachment/20260707/1783392873_cucn_6a4c6a69e45e4178929787.jpeg"
+    },
+    "V2I-22-01": {
+      "errorCode": "INITIAL_IMAGE_EXCEEDS_UPLOAD_LIMIT",
+      "sha256": "b5893fc5d98a04c92521a28fdf5204783091a5b473709c9266e6aa603368973e",
+      "width": 3610,
+      "height": 2362,
+      "sourceUrl": "https://wap.cucn.edu.cn/cucnupload/upload/attachment/20260416/1776331829_cucn_69e0ac3510471967912781.png"
+    },
+    "V2I-28-01": {
+      "errorCode": "INITIAL_IMAGE_EXCEEDS_UPLOAD_LIMIT",
+      "sha256": "ee3db7c87036b0587bf1faf436a6d7488bd941c6764083cb8a211c46539a3fa3",
+      "width": 6720,
+      "height": 4480,
+      "sourceUrl": "https://wap.cucn.edu.cn/cucnupload/upload/attachment/20260327/1774577930_cucn_69c5e90a42928728527086.jpg"
+    },
+    "V2I-28-03": {
+      "errorCode": "INITIAL_IMAGE_EXCEEDS_UPLOAD_LIMIT",
+      "sha256": "78f47a1154376efe612f9976232473c9daa3bc3baae6d7578776d1c6f929a9d1",
+      "width": 5860,
+      "height": 3907,
+      "sourceUrl": "https://wap.cucn.edu.cn/cucnupload/upload/attachment/20260327/1774577958_cucn_69c5e926d9e3e690576129.jpg"
+    },
+    "V2I-29-03": {
+      "errorCode": "INITIAL_IMAGE_EXCEEDS_UPLOAD_LIMIT",
+      "sha256": "5b316294188b3fe35a320c868e4b043c736e1cfecb7c2e9fe652b07894a04ea7",
+      "width": 6048,
+      "height": 4032,
+      "sourceUrl": "https://wap.cucn.edu.cn/cucnupload/upload/attachment/20260402/1775120978_cucn_69ce32526d5b7525791787.jpg"
+    }
+  },
+  "processingStatus": "QUEUED",
+  "publishedByImport": false,
+  "syntheticQueriesImported": false,
+  "credentialsRecorded": false
+}

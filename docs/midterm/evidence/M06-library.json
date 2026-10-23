@@ -1,0 +1,15 @@
+{
+  "stage": "M06",
+  "scope": "real model isolated generation build; business queue/pointer integration belongs to M07",
+  "sourceWorks": 196,
+  "texts": 194,
+  "images": 59,
+  "sourceFilesChecksumVerified": true,
+  "addedWorkRetrievable": true,
+  "disabledWorkExcluded": true,
+  "oldGenerationRetained": true,
+  "immutableRebuildIdempotent": true,
+  "cachedImages": 59,
+  "imagePartFailures": 0,
+  "evidenceSha256": "519fdce6c643fb91ab6278c3a259459cbb45e92fec921291fe0560229f6bfac7"
+}

@@ -42,6 +42,11 @@ class Runtime:
             return cached
         value=json.loads(manifest.read_text(encoding='utf-8'))
         if str(value.get('generationId'))!=generation:raise ContractError('LIBRARY_MISMATCH','Manifest generation does not match request')
+        if value.get('textIndex'):
+            import joblib
+            descriptor=value['textIndex'];index=directory/descriptor['file']
+            if index.parent!=directory or not index.is_file() or file_sha256(index)!=descriptor['sha256']:raise ContractError('INDEX_CORRUPT','Text index checksum differs')
+            value['_textIndex']=joblib.load(index)
         value['_manifestSha256']=checksum;self.libraries[generation]=value
         return value
 
@@ -64,7 +69,7 @@ def make_server(runtime,port=18081):
             self.reply(200,runtime.health())
         def do_POST(self):
             if not self.authorized():return
-            if self.path not in ('/detect/text','/detect/image'):
+            if self.path not in ('/detect/text','/detect/image','/library/build'):
                 self.reply(404,{'errorCode':'ENDPOINT_NOT_FOUND'});return
             if runtime.models is None:self.reply(503,{'status':'FAILED','errorCode':'MODELS_NOT_READY'});return
             if not runtime.compute.acquire(blocking=False):self.reply(409,{'status':'FAILED','errorCode':'PROCESS_BUSY','runId':runtime.run_id});return
@@ -72,6 +77,14 @@ def make_server(runtime,port=18081):
                 length=int(self.headers.get('Content-Length','0'))
                 if length<=0 or length>4*1024*1024:raise ContractError('INVALID_REQUEST_SIZE','Invalid request size')
                 request=json.loads(self.rfile.read(length));runtime.active_attempt=request.get('attemptId')
+                if self.path=='/library/build':
+                    from campus_detection.library import build_library
+                    location=Path(request.get('manifestPath','')).resolve()
+                    if not location.is_relative_to(ROOT/'runtime') or not location.is_file():raise ContractError('FILE_OUTSIDE_ROOT','Library input manifest must stay in project runtime')
+                    if request.get('manifestSha256')!=file_sha256(location):raise ContractError('FILE_HASH_MISMATCH','Library input manifest hash differs')
+                    manifest=json.loads(location.read_text(encoding='utf-8'))
+                    result=build_library(manifest,{'models':runtime.models,'indexRoot':runtime.index_root})
+                    self.reply(200,result);return
                 library=runtime.library(request)
                 function=detect_text if self.path=='/detect/text' else detect_image
                 result=function(request,library,runtime.models);validate_result(result,request)

@@ -12,7 +12,8 @@ public class RuntimeSettings {
         root=Path.of(System.getenv().getOrDefault("CAMPUS_ROOT",".")).toAbsolutePath().normalize();
         var local=root.resolve("app/config/local.json");
         config=json.readTree(Files.readString(Files.exists(local)?local:root.resolve("app/config/local.example.json")));
-        runtime=root.resolve(config.path("runtimeRoot").asText()).normalize();
+        var configured=root.resolve(config.path("runtimeRoot").asText()).normalize();
+        runtime="test".equals(System.getenv("CAMPUS_RUNTIME_NAMESPACE"))?configured.resolve("test"):configured;
         if(runtime.equals(root) || !runtime.startsWith(root))throw new IllegalStateException("Runtime must stay within this project");
     }
     public Path root(){return root;}
