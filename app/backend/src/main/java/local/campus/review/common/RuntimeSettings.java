@@ -18,6 +18,7 @@ public class RuntimeSettings {
     }
     public Path root(){return root;}
     public Path runtime(){return runtime;}
+    public Path experiments(){return root.resolve(config.path("runtimeRoot").asText()).normalize().resolve("experiments");}
     public Path python(){return root.resolve(config.path("python").asText()).normalize();}
     public int limit(String name){return config.path("limits").path(name).asInt();}
     public JsonNode limits(){return config.path("limits").deepCopy();}

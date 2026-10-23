@@ -1,7 +1,7 @@
 param([Parameter(Mandatory=$true)][string]$Task, [switch]$RealModels)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$tests = @{ M01 = 'MigrationIT'; M02 = 'AuthAccessIT'; M03 = 'DocumentCodecTest,FileAccessIT,DraftIT'; M04 = 'PYTHON'; M05 = 'OCR'; M06 = 'LibraryGenerationIT'; M07 = 'QueueIT,LateResultIT,FaultPipelineIT,RealPipelineIT'; M08 = 'SubmissionIT,DecisionIT'; M09 = 'ManuscriptListIT'; M10 = 'ReportAccessIT,FileAccessIT'; M11 = 'ReferencePublicationIT,LibraryGenerationIT'; ALL = '*IT,*Test' }
+$tests = @{ M01 = 'MigrationIT'; M02 = 'AuthAccessIT'; M03 = 'DocumentCodecTest,FileAccessIT,DraftIT'; M04 = 'PYTHON'; M05 = 'OCR'; M06 = 'LibraryGenerationIT'; M07 = 'QueueIT,LateResultIT,FaultPipelineIT,RealPipelineIT'; M08 = 'SubmissionIT,DecisionIT'; M09 = 'ManuscriptListIT'; M10 = 'ReportAccessIT,FileAccessIT'; M11 = 'ReferencePublicationIT,LibraryGenerationIT'; M12 = 'ExperimentAccessIT,ExperimentCatalogTest'; ALL = '*IT,*Test' }
 if (-not $tests.ContainsKey($Task)) { Write-Error "Task $Task has no implemented verification entry"; exit 2 }
 $configPath = Join-Path $root 'app/config/local.json'
 if (-not (Test-Path $configPath)) { $configPath = Join-Path $root 'app/config/local.example.json' }
@@ -9,6 +9,12 @@ $config = Get-Content -Raw -LiteralPath $configPath | ConvertFrom-Json
 $env:CAMPUS_ROOT = $root.Replace('\','/')
 $env:JAVA_HOME = Split-Path (Split-Path $config.java -Parent) -Parent
 $runtime = Join-Path $root $config.runtimeRoot
+if ($Task -eq 'M12') {
+    & (Join-Path $root $config.python) -B (Join-Path $PSScriptRoot 'export_experiments.py') --output (Join-Path $runtime 'experiments')
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    & (Join-Path $root $config.python) -B -m unittest discover -s (Join-Path $root 'app/python/tests') -p test_experiment_export.py
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+}
 if ($Task -eq 'M04') {
     $env:PYTHONPATH = Join-Path $root 'app/python'
     $env:PYTHONDONTWRITEBYTECODE = '1'
@@ -43,7 +49,7 @@ try {
     $result = $LASTEXITCODE
 } finally { Pop-Location; Remove-Item Env:CAMPUS_TEST_DB_PASSWORD -ErrorAction SilentlyContinue }
 if ($result -ne 0) { exit $result }
-if ($Task -in @('M02','M03','ALL')) {
+if ($Task -in @('M02','M03','M12','ALL')) {
     Push-Location (Join-Path $root 'app/frontend')
     try {
         & (Join-Path (Split-Path $config.node -Parent) 'npm.cmd') test

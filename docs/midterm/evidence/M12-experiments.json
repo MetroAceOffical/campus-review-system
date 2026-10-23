@@ -1,0 +1,43 @@
+{
+  "stage": "M12",
+  "realHttp": true,
+  "trainingTriggered": false,
+  "contentVersion": "7baf2039c18de3f0f6e9b6a8d818093ccae09947ab3d3b918e7ec91b50d4018c",
+  "models": 6,
+  "searchConfigurations": 20,
+  "chartCapabilities": 20,
+  "bertMacroF1": {
+    "official_test": 0.7369837959240795,
+    "test_no_val_overlap": 0.7239446804664196
+  },
+  "testSampleCounts": {
+    "official_test": 1975,
+    "test_no_val_overlap": 1527
+  },
+  "actualHistoryPoints": {
+    "cnn/0": 3,
+    "cnn/1": 3,
+    "cnn/2": 3,
+    "cnn/3": 3,
+    "bilstm/0": 3,
+    "bilstm/1": 3,
+    "bilstm/2": 3,
+    "bilstm/3": 3,
+    "bert/0": 2,
+    "bert/1": 2
+  },
+  "rolesRejected": {
+    "member1": 403,
+    "member2": 403,
+    "reviewer": 403
+  },
+  "unchangedRefreshRetainedVersion": true,
+  "limitations": [
+    "这是PAWS-X复述二分类评价，不是校园复用检索或抄袭判定准确率。",
+    "两个测试口径为嵌套集合，不是独立重复试验；标签冲突保留，人工复核未完成。",
+    "所选模型只依据验证集；测试成绩未用于改阈值、配置或训练轮数。",
+    "SVM分数为决策间隔，不称概率。其他模型为正类输出分数，不是抄袭概率。",
+    "逐轮历史只画实际记录；CNN/BiLSTM达到3轮上限不证明收敛，BERT所选配置实际2轮、最佳第1轮；未入选退化配置也保留。",
+    "延迟为冻结实验batch8/CPU4线程、不含加载的端到端句对计时，不代表网站吞吐。工作集是进程累计峰值，GPU allocated不是全部驱动显存。"
+  ]
+}
