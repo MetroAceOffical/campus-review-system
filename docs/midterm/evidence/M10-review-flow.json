@@ -1,0 +1,14 @@
+{
+  "stage": "M10",
+  "submissionId": "5",
+  "batchId": "5",
+  "controlledActualOcrOutage": true,
+  "browserRetryCompleted": true,
+  "onlyFailedItemReceivedNewAttempt": true,
+  "evidenceIdsStableOnRefresh": true,
+  "browserDecisionPersisted": true,
+  "publishedApprovedSnapshot": true,
+  "ocrStatus": "COMPLETED",
+  "recognitionLines": 1,
+  "scope": "labelled business acceptance fixture, no OCR accuracy claim"
+}

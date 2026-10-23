@@ -1,0 +1,19 @@
+import { request } from './http'
+import type { Page, Progress } from './manuscripts'
+export interface ReviewRow { submissionId: string; manuscriptId: string; title: string; versionNo: number; organizationName: string; status: string; detectionStatus: string; submittedAt: string }
+export interface RecognitionLine { lineId: string; text: string; confidence: number; polygon: number[][] }
+export interface RecognitionResult { ocrStatus?: string; recognitionLines?: RecognitionLine[]; lowConfidenceLineIds?: string[]; combinedText?: string; originalWidth?: number; originalHeight?: number; qualityFlags?: string[]; textSearchStatus?: string; textSearchErrorCode?: string; textEvidence?: TextEvidenceItem[] }
+export interface SourceEvidence { evidenceId: string; sourceWorkId: string; sourceRevisionId: string; sourceTitle: string; sourceUrl?: string; acceptedCandidate: boolean }
+export interface TextEvidenceItem extends SourceEvidence { evidenceType: 'TEXT_SIMILARITY'; sourceKind: string; tfidfScore: number; literalSummary: { matched_characters: number; query_character_coverage: number; longest_match: number }; matches: Array<{ queryStart: number; queryEnd: number; sourceStart: number; sourceEnd: number; queryText: string; sourceText: string }>; semanticWindows: Array<{ queryStart: number; queryEnd: number; queryText: string; sourceText: string; score: number }>; sourceMetadata?: { sourceFileId?: string; ocr?: RecognitionResult; description?: string } }
+export interface ImageEvidenceItem extends SourceEvidence { evidenceType: 'IMAGE_SIMILARITY'; queryFileId: string; sourceFileId: string; similarity: number; threshold: number }
+export type Evidence = TextEvidenceItem | ImageEvidenceItem
+export const qualityLabel: Record<string, string> = { EMPTY_LIBRARY: '当前参考库为空', PARTIAL_SEMANTIC_COVERAGE: '语义辅助仅覆盖筛选后的部分窗口', INSUFFICIENT_TEXT: '文字较少，字面证据判断受限', COVERAGE_UNVERIFIED: '识别完整性尚未验证', EMPTY_OCR: '未识别到文字', LOW_CONFIDENCE: '部分识别行置信度偏低' }
+export const qualityText = (flags: readonly string[]) => flags.map(flag => qualityLabel[flag] || '存在质量限制').join(' / ')
+export interface ReportItem { itemId: string; type: string; targetKey: string; status: string; activeAttemptId: string | null; activeAttempt: { attemptId: string; attemptNo: number; status: string; modelConfig: unknown; errorCode: string; errorMessage: string; result: RecognitionResult & { evidence?: Evidence[] } } | null; evidence: Evidence[]; qualityFlags: string[] }
+export interface Report extends Omit<Progress, 'items'> { submissionId: string; versionNo: number; libraryGenerationId: string | null; pipelineManifest: Record<string, unknown> | null; items: ReportItem[] }
+export const listReviews = (page: number, q: string, status: string) => request<Page<ReviewRow>>(`/api/reviews?${new URLSearchParams({ page: String(page), q, status })}`)
+export const getFormalReport = (id: string) => request<Report>(`/api/detection-batches/${id}/report`)
+export const retryItem = (id: string, key: string, expectedAttemptId: string) => request(`/api/detection-items/${id}/retries`, { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify({ expectedAttemptId }) })
+export const decide = (id: string, key: string, decision: string, reason: string) => request(`/api/submissions/${id}/decision`, { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify({ decision, reason }) })
+export const textEvidence = (items: Evidence[]) => items.filter((item): item is TextEvidenceItem => item.evidenceType === 'TEXT_SIMILARITY')
+export const imageEvidence = (items: Evidence[]) => items.filter((item): item is ImageEvidenceItem => item.evidenceType === 'IMAGE_SIMILARITY')

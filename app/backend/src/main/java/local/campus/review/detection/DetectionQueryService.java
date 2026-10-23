@@ -30,6 +30,7 @@ public class DetectionQueryService {
     public JsonNode report(CurrentUser user,String id){
         var batch=require(user,id,true);var result=(com.fasterxml.jackson.databind.node.ObjectNode)snapshot(id);
         result.put("reportSchemaVersion","1").put("scene",batch.get("scene").toString()).put("inputSnapshotKey",batch.get("input_snapshot_key").toString()).put("inputSha256",batch.get("input_sha256").toString()).put("submissionId",batch.get("submission_version_id").toString()).put("versionNo",((Number)batch.get("version_no")).intValue());
+        result.put("generatedAt",java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC).toString());
         if(batch.get("library_generation_id")==null)result.putNull("libraryGenerationId");else result.put("libraryGenerationId",batch.get("library_generation_id").toString());
         result.set("pipelineManifest",batch.get("pipeline_manifest_json")==null?json.nullNode():JsonSupport.parse(json,batch.get("pipeline_manifest_json").toString()));
         for(var item:result.path("items")){

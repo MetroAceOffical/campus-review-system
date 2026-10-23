@@ -32,7 +32,7 @@ public class JobWorker {
                 if(rows.isEmpty())return new JobOutcome("IDLE",null);
                 var job=rows.getFirst();String id=job.get("id").toString();var main=client.health(false);var ocr=client.health(true);
                 if(!main.path("ready").asBoolean() || main.path("busy").asBoolean() || ocr.path("busy").asBoolean()){
-                    db.update("UPDATE background_job SET status='WAITING_SERVICE' WHERE id=? AND status IN ('QUEUED','WAITING_SERVICE')",id);return new JobOutcome("WAITING_SERVICE",id);
+                    db.update("UPDATE background_job SET status='WAITING_SERVICE' WHERE id=? AND status IN ('QUEUED','WAITING_SERVICE')",id);markWaiting(job);return new JobOutcome("WAITING_SERVICE",id);
                 }
                 if(!claim(id,owner))return new JobOutcome("CLAIM_LOST",id);
                 try{
@@ -45,12 +45,16 @@ public class JobWorker {
                     }
                     db.update("UPDATE background_job SET status='COMPLETED',finished_at=UTC_TIMESTAMP(3) WHERE id=? AND owner_run_id=? AND status='RUNNING'",id,owner);
                     return new JobOutcome("COMPLETED",id);
-                }catch(WaitingService e){db.update("UPDATE background_job SET status='WAITING_SERVICE' WHERE id=? AND owner_run_id=? AND status='RUNNING'",id,owner);return new JobOutcome("WAITING_SERVICE",id);
+                }catch(WaitingService e){db.update("UPDATE background_job SET status='WAITING_SERVICE' WHERE id=? AND owner_run_id=? AND status='RUNNING'",id,owner);markWaiting(job);return new JobOutcome("WAITING_SERVICE",id);
                 }catch(Exception e){String code=e instanceof DetectorClient.DetectorFailure failure?failure.code:"JOB_FAILED";
                     if("PREPARE_REFERENCE".equals(job.get("kind")))db.update("UPDATE reference_revision SET processing_status='FAILED' WHERE id=?",job.get("reference_revision_id"));
                     db.update("UPDATE background_job SET status='FAILED',error_code=?,finished_at=UTC_TIMESTAMP(3) WHERE id=? AND owner_run_id=? AND status='RUNNING'",code,id,owner);return new JobOutcome("FAILED",id);}
             }finally{try(var release=connection.prepareStatement("SELECT RELEASE_LOCK(?)")){release.setString(1,lockName);release.execute();}}
         }catch(Exception e){throw new IllegalStateException("Queue database operation failed",e);}
+    }
+    private void markWaiting(Map<String,Object> job){
+        Object batch=job.get("batch_id");if(batch==null && job.get("item_id")!=null)batch=db.queryForObject("SELECT batch_id FROM detection_item WHERE id=?",String.class,job.get("item_id"));
+        if(batch!=null)db.update("UPDATE detection_batch SET status='WAITING_SERVICE' WHERE id=? AND cancelled_at IS NULL",batch);
     }
     private void runBatch(String batchId,String onlyItem,JsonNode main,JsonNode ocr){
         var batch=db.queryForMap("SELECT b.*,v.manuscript_id,v.plain_text FROM detection_batch b JOIN submission_version v ON v.id=b.submission_version_id WHERE b.id=?",batchId);
@@ -62,6 +66,7 @@ public class JobWorker {
             var library=db.queryForMap("SELECT manifest_sha256 FROM library_generation WHERE id=?",generation);pin.put("libraryManifestSha256",library.get("manifest_sha256").toString());
             pipeline=detection.pin(batchId,generation,pin);
         }else pipeline=JsonSupport.parse(json,batch.get("pipeline_manifest_json").toString());
+        db.update("UPDATE detection_batch SET status='RUNNING',started_at=COALESCE(started_at,UTC_TIMESTAMP(3)) WHERE id=?",batchId);
         var items=db.queryForList("SELECT * FROM detection_item WHERE batch_id=? AND status='QUEUED' ORDER BY CASE type WHEN 'TEXT' THEN 0 WHEN 'IMAGE' THEN 1 ELSE 2 END,id",batchId);
         for(var item:items){
             String itemId=item.get("id").toString();if(onlyItem!=null && !onlyItem.equals(itemId))continue;

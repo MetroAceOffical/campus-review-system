@@ -44,6 +44,7 @@ public class SubmissionService {
         if(user.role()!=CurrentUser.Role.REVIEWER)AccessPolicy.requireOrganization(user,row.get("organization_id").toString());
         var result=json.createObjectNode().put("submissionId",id).put("manuscriptId",row.get("manuscript_id").toString()).put("versionNo",((Number)row.get("version_no")).intValue()).put("title",row.get("title").toString()).put("schemaVersion",row.get("schema_version").toString()).put("lifecycleStatus",row.get("lifecycle_status").toString()).put("submittedAt",((LocalDateTime)row.get("submitted_at")).atOffset(ZoneOffset.UTC).toString());
         result.set("content",JsonSupport.parse(json,row.get("content_json").toString()));result.set("sources",JsonSupport.parse(json,row.get("sources_json").toString()));
+        if(user.role()==CurrentUser.Role.REVIEWER){result.put("plainText",row.get("plain_text").toString());result.set("positionMap",JsonSupport.parse(json,row.get("position_map_json").toString()));}
         var decisions=db.queryForList("SELECT id,decision,reason,decided_at FROM review_decision WHERE submission_version_id=?",id);
         if(!decisions.isEmpty()){var decision=decisions.getFirst();var value=json.createObjectNode().put("decisionId",decision.get("id").toString()).put("decision",decision.get("decision").toString()).put("reason",Objects.toString(decision.get("reason"),"")).put("decidedAt",((LocalDateTime)decision.get("decided_at")).atOffset(ZoneOffset.UTC).toString());result.set("decision",value);}else result.putNull("decision");
         return result;
