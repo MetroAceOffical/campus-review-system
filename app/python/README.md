@@ -1,6 +1,6 @@
 # 检测计算模块
 
-主环境复用 `validation/text/env/python.exe`。不要重新安装训练环境。OCR使用另一独立环境，在M05接入。
+主环境复用 `validation/text/env/python.exe`。不要重新安装训练环境。OCR复用 `validation/remaining/vision/env-ocr/Scripts/python.exe` 独立环境。
 
 ```powershell
 app/scripts/check.ps1 -Task M04
@@ -20,3 +20,17 @@ M04实际验证包括194篇参考内容的冻结排序/分数回归、候选前�
 模型先从基础配置构造后加载已冻结微调checkpoint，基础构造阶段的classifier初始化提示不代表重新训练或最终使用随机分类头；实际微调权重SHA256和冻结分数回归见docs/midterm/evidence/M04-*.json。
 
 完整本地报告与输入只存runtime/probes；仓库仅上传不含源材料的哈希和检查摘要。M04仍是独立计算/HTTP验证，持久队列和实际投稿连接由M06—M08实现。
+
+## 隔离OCR服务
+
+```powershell
+app/scripts/check.ps1 -Task M05 -RealModels
+$env:PYTHONPATH = "$PWD/app/python"
+& validation/remaining/vision/env-ocr/Scripts/python.exe -B -m campus_ocr.http_service
+```
+
+OCR仅绑定127.0.0.1:18082，GET /health及POST /recognize使用同一项目内部令牌。Worker在进程内将USERPROFILE和Paddle缓存定位到runtime/ocr-cache，不改系统环境或原冻结目录。保持已验证的CPU两线程、960边限制及关闭方向辅助模型配置，不启用GPU或额外安装ccache。
+
+recognize返回原图像素坐标、逐行文字/置信度/多边形及限制标记，识别与来源检索分阶段。空识别的textSearchStatus为NOT_RUN、noReuseClaim=false，不解释为无复用。真实转录准确率尚未完成，COVERAGE_UNVERIFIED保留。
+
+统一检查入口按main/ocr分组选择测试后再导入，避免在主PyTorch解释器运行Paddle推理；未加-RealModels的跳过项不计入模型成功。

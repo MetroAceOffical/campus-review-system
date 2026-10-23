@@ -3,7 +3,7 @@
   "maven": "D:/Dev/Runtime/Maven/apache-maven-3.9.6/bin/mvn.cmd",
   "node": "D:/Dev/Runtime/Node.js/node.exe",
   "python": "validation/text/env/python.exe",
-  "ocrPython": "validation/remaining/vision/env-ocr/python.exe",
+  "ocrPython": "validation/remaining/vision/env-ocr/Scripts/python.exe",
   "mysqlBin": "C:/Program Files/MySQL/MySQL Server 8.0/bin",
   "runtimeRoot": "runtime",
   "ports": {"mysql": 3308, "java": 8080, "detector": 18081, "ocr": 18082, "frontend": 5173},

@@ -109,3 +109,15 @@ M03 GitHub插件上传已完成：main提交eb7fea7fd3d14d36c3a0385902f22dbe8dcb
 - 主检测服务127.0.0.1:18081已ready，runId=16fd6d6f-b3f0-4d4f-9241-1ea21bd5166f，busy=false。内部令牌仅私有配置，未上传。
 - 独立探针用正式形状的输入身份但不查询送审数据库；完整来源输入和报告只存runtime/probes，不作为网站实际投稿或新增准确率评价。动态参考入库/持久队列尚待M06—M08。
 - Task M04: complete。M05开始，复用原独立OCR环境，不安装新环境。
+
+M04 GitHub插件上传完成：main提交3070a04ecc4ee35c2fd24ad1bc510aa3bed04296。
+
+## M05最终验收
+
+- 复用原env-ocr/Scripts/python.exe；原示例误写env-ocr/python.exe，已按实存路径纠正，没有新建/重装环境。
+- PP-OCRv5 mobile CPU原配置不变，六个模型文件SHA256核对。缓存/USERPROFILE仅该子进程定位runtime/ocr-cache，原环境与系统设置不变。
+- 契约覆盖空识别NOT_RUN/noReuseClaim=false、低置信、行/框一致、缩放逆映射与越界拒绝。
+- 实际清晰图5行；实际强模糊图0行，保留EMPTY_OCR与COVERAGE_UNVERIFIED。未把渲染真值传入识别器，不声称真实校园CER或漏字评价完成。
+- check -Task M05 -RealModels：6/6通过、无跳过；实际HTTP与直接调用识别行完全相同。摘要M05-ocr.json、M05-http.json，完整本地输出runtime/probes/M05。
+- OCR服务18082 ready，runId=11508017-b211-4638-be0f-bc07694acf79，busy=false。Paddle的ccache/OMP非致命提示保持记录，不为消除提示安装环境或改冻结参数。
+- 冻结580文件哈希复核通过。Task M05: complete。下一任务M06为动态参考库与兼容索引，尚未实现；投稿链仍未完成。

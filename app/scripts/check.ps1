@@ -1,7 +1,7 @@
 param([Parameter(Mandatory=$true)][string]$Task, [switch]$RealModels)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$tests = @{ M01 = 'MigrationIT'; M02 = 'AuthAccessIT'; M03 = 'DocumentCodecTest,FileAccessIT,DraftIT'; M04 = 'PYTHON'; ALL = '*IT,*Test' }
+$tests = @{ M01 = 'MigrationIT'; M02 = 'AuthAccessIT'; M03 = 'DocumentCodecTest,FileAccessIT,DraftIT'; M04 = 'PYTHON'; M05 = 'OCR'; ALL = '*IT,*Test' }
 if (-not $tests.ContainsKey($Task)) { Write-Error "Task $Task has no implemented verification entry"; exit 2 }
 $configPath = Join-Path $root 'app/config/local.json'
 if (-not (Test-Path $configPath)) { $configPath = Join-Path $root 'app/config/local.example.json' }
@@ -15,7 +15,15 @@ if ($Task -eq 'M04') {
     $env:HF_HUB_OFFLINE = '1'
     $env:TRANSFORMERS_OFFLINE = '1'
     $env:CAMPUS_REAL_MODELS = if ($RealModels) { '1' } else { '0' }
-    & (Join-Path $root $config.python) -B -m unittest discover -s (Join-Path $root 'app/python/tests')
+    & (Join-Path $root $config.python) -B (Join-Path $root 'app/python/run_checks.py') main
+    exit $LASTEXITCODE
+}
+if ($Task -eq 'M05') {
+    $env:PYTHONPATH = Join-Path $root 'app/python'
+    $env:PYTHONDONTWRITEBYTECODE = '1'
+    $env:PYTHONUTF8 = '1'
+    $env:CAMPUS_REAL_MODELS = if ($RealModels) { '1' } else { '0' }
+    & (Join-Path $root $config.ocrPython) -B (Join-Path $root 'app/python/run_checks.py') ocr
     exit $LASTEXITCODE
 }
 $env:CAMPUS_MIGRATIONS = Join-Path $root 'app/backend/src/main/resources/db/migrations'
@@ -52,7 +60,9 @@ if ($Task -eq 'ALL') {
     $env:HF_HUB_OFFLINE = '1'
     $env:TRANSFORMERS_OFFLINE = '1'
     $env:CAMPUS_REAL_MODELS = if ($RealModels) { '1' } else { '0' }
-    & (Join-Path $root $config.python) -B -m unittest discover -s (Join-Path $root 'app/python/tests')
+    & (Join-Path $root $config.python) -B (Join-Path $root 'app/python/run_checks.py') main
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    & (Join-Path $root $config.ocrPython) -B (Join-Path $root 'app/python/run_checks.py') ocr
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 exit $result
