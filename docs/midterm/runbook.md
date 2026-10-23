@@ -69,3 +69,15 @@ M13实测：备份 `20261023T134406Z-f02aedea`，恢复 `runtime/restores/M13-20
 导出只读取冻结CSV/JSON/逐条分数，不加载或训练模型。目录指针只在完整版本包校验通过后原子切换。管理员网页手动或每10秒检查更新，不触发训练；新包坏损时保留上次已验证图表。
 
 默认测试使用独立 `campus_review_midterm_test`，真实模型测试默认明确跳过；单元/故障测试与真实业务探针分开记录。正式恢复探针 `probe_recovery.py interrupt/verify` 只用于明确标记的验收稿件，会有意中断已登记的项目服务，不用于日常演示。真实批次8已完成13项，原成功attempt保留，未完成项换新attempt，旧发布快照仍可读。详见 `evidence/M13-recovery.json`。
+
+## 最终候选核对
+
+M15最新业务备份为 `runtime/backups/20261023T145134Z-9d23d70b`，280文件SHA校验通过；未对该新快照重复隔离恢复。M13还原实测与此最新备份须分开理解。最终生产构建日志 `runtime/logs/M15-build.log`，回归日志 `M15-final.log`，重启后复验 `M15-deployed-verify.log`。
+
+只读核对候选源文件：
+
+```powershell
+& validation/text/env/python.exe -B app/scripts/delivery_manifest.py --verify
+```
+
+清单只含app源码及公开配置示例，排除私有配置、构建物、依赖目录与运行资产。若有后续改动会列出差异；独立检查时不要重新生成清单覆盖差异。独立验收入口见 `independent-review-handoff.md`。

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
+import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import CampusEditor from '../components/CampusEditor.vue'
 import { request } from '../api/http'
@@ -12,24 +12,27 @@ const route = useRoute(), router = useRouter()
 const value = ref<DocumentInput>({ title: '', schemaVersion: '1', content: { type: 'doc', content: [] }, sources: [] })
 const revision = ref('0'), savedAt = ref(''), id = ref(''), baseline = ref(''), loading = ref(true), saving = ref(false), uploading = ref(false), error = ref('')
 const submitting = ref(false), uploadError = ref(false)
-let submitted = false, submissionSignature = '', submissionKey = ''
+let submitted = false, submissionSignature = '', submissionKey = '',disposed=false
 const dirty = computed(() => !!baseline.value && JSON.stringify(value.value) !== baseline.value)
 const size=computed(()=>documentSize(value.value)),limitError=computed(()=>validationMessage(value.value,limits.value))
 function accept(draft: SavedDraft) { value.value = { title: draft.title, schemaVersion: draft.schemaVersion, content: draft.content, sources: draft.sources }; revision.value = draft.revision; savedAt.value = draft.savedAt; baseline.value = JSON.stringify(value.value) }
 async function load() {
   try {
     await loadLimits()
+    if(disposed)return
     id.value = String(route.params.id ?? '')
     if (route.name === 'new-manuscript') {
       const organizationId = session.user?.organizations[0]?.organizationId
       if (!organizationId) throw new Error('当前账号没有可投稿组织')
       const result = await request<{ manuscriptId: string }>('/api/manuscripts', { method: 'POST', body: JSON.stringify({ organizationId }) })
+      if(disposed)return
       id.value = result.manuscriptId
       await router.replace(`/manuscripts/${id.value}/edit`)
+      return // AppLayout mounts the new draft route with a fresh component identity.
     }
-    accept(await request<SavedDraft>(`/api/manuscripts/${id.value}/draft`))
-  } catch (failure) { error.value = failure instanceof Error ? failure.message : '读取失败，请重试' }
-  finally { loading.value = false }
+    const draft=await request<SavedDraft>(`/api/manuscripts/${id.value}/draft`);if(!disposed)accept(draft)
+  } catch (failure) { if(!disposed)error.value = failure instanceof Error ? failure.message : '读取失败，请重试' }
+  finally { if(!disposed)loading.value = false }
 }
 async function save() {
   if (saving.value || uploading.value) return
@@ -38,6 +41,7 @@ async function save() {
   const sent: DocumentInput = JSON.parse(JSON.stringify(value.value))
   try {
     const result = await saveDraft(id.value, revision.value, sent)
+    if(disposed)return
     if (JSON.stringify(value.value) === JSON.stringify(sent)) accept(result)
     else { revision.value = result.revision; savedAt.value = result.savedAt; baseline.value = JSON.stringify({ title: result.title, schemaVersion: result.schemaVersion, content: result.content, sources: result.sources }) }
   } catch (failure) { error.value = failure instanceof Error ? failure.message : '保存失败，当前内容仍保留' }
@@ -47,12 +51,14 @@ async function submit() {
   if (saving.value || submitting.value || uploading.value || uploadError.value) return
   if(limitError.value){error.value=limitError.value;return}
   try { await ElMessageBox.confirm('送审将保存当前内容并生成独立版本，待审期间不能编辑。确认送审？', '送审确认', { confirmButtonText: '送审', cancelButtonText: '继续编辑' }) } catch { return }
+  if(disposed)return
   submitting.value = true; error.value = ''
   const sent: DocumentInput = JSON.parse(JSON.stringify(value.value))
   const signature = JSON.stringify({ id: id.value, revision: revision.value, input: sent })
   if (signature !== submissionSignature) { submissionSignature = signature; submissionKey = crypto.randomUUID() }
   try {
     const receipt = await submitDraft(id.value, submissionKey, revision.value, sent)
+    if(disposed)return
     submitted = true; baseline.value = JSON.stringify(sent)
     await router.replace(`/manuscripts/${id.value}/history?submission=${receipt.submissionId}`)
   } catch (failure) { error.value = failure instanceof Error ? failure.message : '送审未确认，当前内容仍保留，可重试同次操作' }
@@ -60,9 +66,11 @@ async function submit() {
 }
 function beforeUnload(event: BeforeUnloadEvent) { if (dirty.value || uploading.value) { event.preventDefault(); event.returnValue = '' } }
 function addSource() { value.value.sources.push({ sourceId: crypto.randomUUID(), url: '' }) }
-onBeforeRouteLeave(async () => { if (submitted || (!dirty.value && !uploading.value)) return true; try { await ElMessageBox.confirm('当前修改尚未保存，确认离开？', '未保存修改', { confirmButtonText: '离开', cancelButtonText: '继续编辑' }); return true } catch { return false } })
+async function confirmLeave() { if (submitted || (!dirty.value && !uploading.value)) return true; try { await ElMessageBox.confirm('当前修改尚未保存，确认离开？', '未保存修改', { confirmButtonText: '离开', cancelButtonText: '继续编辑' }); return true } catch { return false } }
+onBeforeRouteLeave(confirmLeave)
+onBeforeRouteUpdate((to,from)=>to.path===from.path?true:confirmLeave())
 onMounted(() => { load(); window.addEventListener('beforeunload', beforeUnload) })
-onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
+onBeforeUnmount(() => {disposed=true;window.removeEventListener('beforeunload', beforeUnload)})
 </script>
 <template>
   <div v-loading="loading"><el-alert v-if="error" :title="error" type="error" :closable="false" show-icon />

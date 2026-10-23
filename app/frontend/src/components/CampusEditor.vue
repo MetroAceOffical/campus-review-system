@@ -13,6 +13,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: DocumentInput]; uploadin
 const failedUpload = ref(false)
 function clearUploadError() { failedUpload.value = false; emit('uploadError', false) }
 const fileInput = ref<HTMLInputElement>(), busy = ref(false), replacing = ref<string | null>(null)
+let disposed=false
 const editor = useEditor({
   extensions: [StarterKit.configure({ heading: { levels: [2, 3] }, code: false, codeBlock: false, horizontalRule: false, strike: false, underline: false, link: { openOnClick: false, protocols: ['http', 'https'], defaultProtocol: 'https' } }), CampusImage, StableNodeIdentities],
   content: normalizeNodeIdentities(props.modelValue.content), editable: !props.disabled,
@@ -28,28 +29,29 @@ const editor = useEditor({
 watch(() => props.disabled, value => editor.value?.setEditable(!value))
 watch(() => props.modelValue.content, value => { if (editor.value && JSON.stringify(value) !== JSON.stringify(editor.value.getJSON())) editor.value.commands.setContent(normalizeNodeIdentities(value), { emitUpdate: false }) })
 function countImages(node: DocumentNode): number { return (node.type === 'campusImage' ? 1 : 0) + (node.content?.reduce((count, child) => count + countImages(child), 0) ?? 0) }
-function chooseImage(nodeId: string | null = null) { replacing.value = nodeId; fileInput.value?.click() }
+function chooseImage(nodeId: string | null = null) { if(busy.value||props.disabled||disposed)return;replacing.value = nodeId; fileInput.value?.click() }
 async function upload(event: Event) {
   const input = event.target as HTMLInputElement, file = input.files?.[0]
-  if (!file || !editor.value) return
+  if (!file || !editor.value || busy.value || props.disabled || disposed) return
+  const target=replacing.value
   if(!limits.value){ElMessage.error('输入限额尚未读取，请稍后重试');input.value='';return}
-  if (!replacing.value && countImages(editor.value.getJSON() as DocumentNode) >= limits.value.images) { ElMessage.error(`每稿最多${limits.value.images}张配图`); input.value = ''; return }
+  if (!target && countImages(editor.value.getJSON() as DocumentNode) >= limits.value.images) { ElMessage.error(`每稿最多${limits.value.images}张配图`); input.value = ''; return }
   if(file.size>limits.value.imageBytes){ElMessage.error(`单图最多${limits.value.imageBytes/1048576}MiB，原编辑内容已保留`);input.value='';return}
   busy.value = true; emit('uploading', true)
   try {
     const body = new FormData(); body.append('file', file)
-    const result = await request<UploadedFile>('/api/files', { method: 'POST', body }); clearUploadError()
-    if (replacing.value) {
-      editor.value.commands.setContent(replaceImage(editor.value.getJSON() as DocumentNode, replacing.value, result.fileId))
+    const result = await request<UploadedFile>('/api/files', { method: 'POST', body });if(disposed)return;clearUploadError()
+    if (target) {
+      editor.value.commands.setContent(replaceImage(editor.value.getJSON() as DocumentNode, target, result.fileId))
       ElMessage.info('图片已替换，请重新确认来源')
     } else insertUploadedImage(editor.value, result.fileId)
-  } catch (error) { failedUpload.value = true; emit('uploadError', true); ElMessage.error(error instanceof Error ? error.message : '上传失败，请重试') }
-  finally { busy.value = false; emit('uploading', false); input.value = ''; replacing.value = null }
+  } catch (error) { if(!disposed){failedUpload.value = true; emit('uploadError', true); ElMessage.error(error instanceof Error ? error.message : '上传失败，请重试')} }
+  finally { busy.value = false;if(!disposed)emit('uploading', false); input.value = ''; replacing.value = null }
 }
 function imageReplace(event: Event) { const detail = (event as CustomEvent).detail; if (editor.value?.isEditable && detail.editor === editor.value) chooseImage(detail.nodeId) }
 function setLink() { const value = window.prompt('请输入http/https链接', editor.value?.getAttributes('link').href ?? ''); if (value === null) return; if (!value) { editor.value?.chain().focus().unsetLink().run(); return }; if (!/^https?:\/\//i.test(value)) { ElMessage.error('链接须以http://或https://开头'); return }; editor.value?.chain().focus().extendMarkRange('link').setLink({ href: value }).run() }
 onMounted(() => {window.addEventListener('campus-replace-image', imageReplace);void loadLimits().catch(error=>ElMessage.error(error instanceof Error?error.message:'读取限额失败'))})
-onBeforeUnmount(() => window.removeEventListener('campus-replace-image', imageReplace))
+onBeforeUnmount(() => {disposed=true;window.removeEventListener('campus-replace-image', imageReplace)})
 </script>
 <template>
   <el-alert v-if="failedUpload" title="本次图片上传失败，尚未加入正文。请重新上传，或明确忽略本次上传后再送审。" type="error" :closable="false"><el-button size="small" @click="clearUploadError">忽略本次失败上传</el-button></el-alert>

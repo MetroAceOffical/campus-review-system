@@ -1,0 +1,971 @@
+{
+  "schemaVersion": "1",
+  "scope": "Candidate app source bytes; excludes local config, generated assets, environments and runtime data.",
+  "files": [
+    {
+      "path": "app/backend/pom.xml",
+      "bytes": 1848,
+      "sha256": "32d688cb86492f87e53bd4199556212a0522ebf404c348d276e8bc9b27cd417c"
+    },
+    {
+      "path": "app/backend/settings.xml",
+      "bytes": 1126,
+      "sha256": "4bc876d3b675826c789eccdd9b75a035c44d37ee70f666df99f1b44976ba6241"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/auth/AccessPolicy.java",
+      "bytes": 813,
+      "sha256": "ec56b753caa00ecc3db3870c73a7ac8394a92851506967bfb867ce81c1bd9f21"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/auth/AuthController.java",
+      "bytes": 2443,
+      "sha256": "d45881d10bb36b4455d63864cca74dfb0e1f16c8430fbde5e56536f5eebe598a"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/auth/CurrentUser.java",
+      "bytes": 309,
+      "sha256": "42b828a5af0c8517ef8522d36b7265c9ee143fe13cbd12f7fd0cbbf8377f173e"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/auth/CurrentUserService.java",
+      "bytes": 1201,
+      "sha256": "174d5fa8e0c9081a479fd1cd357f2ff69d11a871de18ed28bec8011af3c8eb32"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/auth/SecurityConfig.java",
+      "bytes": 3934,
+      "sha256": "4ca5f8b7720b655178bda1a6f1b87cf958ad99717bebd5e64c96f84a4305152b"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/auth/UserMapper.java",
+      "bytes": 683,
+      "sha256": "1e104d7df150262dde5385abefc7bf4361ea32120b37956b59a92abca31c4b41"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/bootstrap/Bootstrap.java",
+      "bytes": 2716,
+      "sha256": "0b34d917698798c77ec714a802e9b8003bacdd0ee0df66421f942f454e23b336"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/bootstrap/DatabaseTarget.java",
+      "bytes": 647,
+      "sha256": "e9ca2dab6fd11c5bea8ec5d6f45e97fd2c9201ef2185119c4aa05515463029a1"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/bootstrap/MigrationRunner.java",
+      "bytes": 3920,
+      "sha256": "b810f24b2aaddb90de34b3e239b797aaf2e56664b53a825c3fe1ad318cb74982"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/CampusReviewApplication.java",
+      "bytes": 381,
+      "sha256": "e7a2fd75a70afe9ef8381eefe99613abd72326d6b306c545909a45f0ba724101"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/common/Api.java",
+      "bytes": 837,
+      "sha256": "ff16724ba5602ad9dac43be017dc2f058fc908a3e226f89fbfc0355689ee2d54"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/common/ApiAdvice.java",
+      "bytes": 1183,
+      "sha256": "acbb0f99abfee37f5e934c124bedaacdc34eb23f7717f996f82a6bcb87120467"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/common/ApiException.java",
+      "bytes": 270,
+      "sha256": "8d81d28260effd2b9a9c725c0fdf90dfd17ed26d1a5af7127b6cfcaa7b3c6438"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/common/IdempotencyStore.java",
+      "bytes": 2259,
+      "sha256": "5dabf8f8a64ef9f23f6dd8d6b6c800cd22dc4ca3947c0aac38dd1f6e39f4562d"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/common/JsonSupport.java",
+      "bytes": 1375,
+      "sha256": "bf3243b8732145aee48dcdc56b596984921d369288fff967ad5804919ce85bc7"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/common/RuntimeSettings.java",
+      "bytes": 1663,
+      "sha256": "a319504bc53e8ba0eea002432f02a8aa3141ffdb5ab4b46d69b4d6ca21fc08a4"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/common/SettingsController.java",
+      "bytes": 606,
+      "sha256": "fe56aaa9904bc032859b7bdef760f2d0b9f462a16d73fbdc91db7f3e0bb96b99"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/common/SqlSupport.java",
+      "bytes": 710,
+      "sha256": "eeaab0b6b4b07534d6a2cc7e18e470562b937fefb93190798235b243422e2574"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/content/DocumentCodec.java",
+      "bytes": 11374,
+      "sha256": "57f7e149f61dbed1354067b70672d003900efba79a631414cb842eb337d12246"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/content/DocumentModels.java",
+      "bytes": 751,
+      "sha256": "a9621344a6b8dee561097289998cc69ac693caba5cd5af412313abf2336b78bd"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/content/FileController.java",
+      "bytes": 1225,
+      "sha256": "1574f203d5369f4ee2299c3535e4a13fabb85c92b3e66bdd395faf12a6f0ed4f"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/content/FileService.java",
+      "bytes": 7565,
+      "sha256": "5c0d431558e93c64e6cea8ceed8b9d6fca28104739f2deb253abe6d98f8f66ae"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/detection/AttemptRepository.java",
+      "bytes": 4274,
+      "sha256": "de7c0737e88633b43296140e0044cf1a49038bdec2b423efa45e9961be6280a7"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/detection/DetectionController.java",
+      "bytes": 1254,
+      "sha256": "c2ff9392c39327b4203acd3dbd144017b991fe5139a43500c575b7a56dfa2cff"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/detection/DetectionQueryService.java",
+      "bytes": 5160,
+      "sha256": "2d065db5909e5e54eaef481eeb907a1293c1442d009b0a5f793a89dd74e72dc6"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/detection/DetectionRetryService.java",
+      "bytes": 2586,
+      "sha256": "ecff1e7c22bb41e55ab766451499fdab76e40a08c95a2ea5d07bab7dfbfe7596"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/detection/DetectionService.java",
+      "bytes": 3393,
+      "sha256": "469e125abf01ae75468278c53b6e01fce5c91a6773da2e123d82100802a44064"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/detection/DetectorClient.java",
+      "bytes": 3283,
+      "sha256": "821d8f424eade993333b9fdc3f424512107a8725b0ec8e69a6ce87017dc98a2f"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/detection/JobWorker.java",
+      "bytes": 10399,
+      "sha256": "86ad3fdb11332103a6ce1138e2988f41b596f70649dc25301123f1eb86117eb1"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/detection/ProcessSupervisor.java",
+      "bytes": 542,
+      "sha256": "ac209a9ca61c01808af91b91f68c9f35ed97f46df52c888b548d2d526b11c278"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/detection/RecoveryService.java",
+      "bytes": 3928,
+      "sha256": "7a3bf028f98a4eaecb3607619ca70b2f74e84ac2c7463add707e236eccc6d282"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/experiment/ExperimentCatalog.java",
+      "bytes": 5176,
+      "sha256": "325c0f32c3d88238a8a4624ae6b5d7d18ce3fb603968cde1ef09255062811291"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/experiment/ExperimentController.java",
+      "bytes": 1188,
+      "sha256": "707c04fa57569f7ba581edb5fb1b7ac31669c756f2f5c3bf918d5915c0200580"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/manuscript/DraftController.java",
+      "bytes": 2303,
+      "sha256": "498874b3eb8fe353916e6f24754b39ed99a7b5701f75dbdcef92cdcf9123f16a"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/manuscript/DraftService.java",
+      "bytes": 6527,
+      "sha256": "c06af726778ed6e99b7d827bb5bd286da22047d2f6ab2bf351fce348a685b8bc"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/manuscript/ManuscriptQueryService.java",
+      "bytes": 3990,
+      "sha256": "924dc780d7b7c08ab11fab189178c2e407a1af8d425a825c004b866cdd630372"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/manuscript/SubmissionController.java",
+      "bytes": 1411,
+      "sha256": "e1fbb4da6269d4ca509945624a5dd1ca4ce0fe68004565c7b485222c2c75ed7a"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/manuscript/SubmissionService.java",
+      "bytes": 6607,
+      "sha256": "7f9d3baecd5391719f8d8f919fc5caf509991bd5fb163662dc566e775101f293"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/reference/LibraryGenerationService.java",
+      "bytes": 5019,
+      "sha256": "9e5f8f2728e330c5bed1b3eedba33a95f518e29cd911200b726e2a75fae2acef"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/reference/PublicationService.java",
+      "bytes": 5442,
+      "sha256": "9c1b54924f5188ddfb9e308b63b9216c6f2815732b21adc0b5a25aca847bc22e"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/reference/ReferenceController.java",
+      "bytes": 1856,
+      "sha256": "fadad489ca3aff0cbb05650b878415618fb07433ffe8e2df48df035ad6b42fb7"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/reference/ReferenceProcessor.java",
+      "bytes": 10928,
+      "sha256": "00185a6687e5a505f279e7db21d501756265efc6f32f6f72de52e6620c25136c"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/reference/ReferenceService.java",
+      "bytes": 11904,
+      "sha256": "7183fd70ec577f5bc11d049efbe262c76186d9f6b416831af2b46d46314b75e3"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/review/ReviewController.java",
+      "bytes": 1799,
+      "sha256": "e584dec1134074eaf410bcb2588eab431b831c343e75ed07e8438be0995725f9"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/review/ReviewQueryService.java",
+      "bytes": 2333,
+      "sha256": "91a926f3d512aba725a98b258dd04403646dee4f7578d391b830ebe4d8f48bfd"
+    },
+    {
+      "path": "app/backend/src/main/java/local/campus/review/review/ReviewService.java",
+      "bytes": 4162,
+      "sha256": "e381ba787c850b52c007b70377b413561b9970c570c141c1f39c59c91be7c05a"
+    },
+    {
+      "path": "app/backend/src/main/resources/application.yml",
+      "bytes": 675,
+      "sha256": "14b3e69ca9f78d532137574e062148aa11b2217025e22c934c6f85e3927c5616"
+    },
+    {
+      "path": "app/backend/src/main/resources/db/migrations/001_core.sql",
+      "bytes": 10807,
+      "sha256": "3a76b3e90bab085ed5eaa1da475b669afc9c24b58de434a6adc8cb33728348a1"
+    },
+    {
+      "path": "app/backend/src/main/resources/db/migrations/002_circular_constraints.sql",
+      "bytes": 597,
+      "sha256": "bac888c82a7bdd881035acc4166f052bf4921a9f10147da090e9c22872e55104"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/auth/AuthAccessIT.java",
+      "bytes": 4930,
+      "sha256": "ed25c7e0ea86a527720159b81fecd477807d4478874561b43e2141831e8cac8b"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/bootstrap/MigrationIT.java",
+      "bytes": 3016,
+      "sha256": "0a65ec78a23b21b1f0ae838b6f1da6d1198516491fd96731ff7aaa93b0c157e2"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/content/DocumentCodecTest.java",
+      "bytes": 4309,
+      "sha256": "a93cb92486cd3510d888b95670dbd317767cae85cbc3cea6d9f1007ede638139"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/content/FileAccessIT.java",
+      "bytes": 3771,
+      "sha256": "a0db37de16b8dbb880d8def6ad24cb247c282a9f1394390d4d0b26cb5c5cc280"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/detection/DetectionFixtures.java",
+      "bytes": 891,
+      "sha256": "3ec0adeefbce9682ccfb5693f3bf74306c7cf76bad215d3b46dcc81a09e66b09"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/detection/DetectorBudgetTest.java",
+      "bytes": 2493,
+      "sha256": "72dc22e080b8d2b8f3ce41fa46e51e24e60231af958b96f6be0d964bd51cea6e"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/detection/FaultPipelineIT.java",
+      "bytes": 7577,
+      "sha256": "38b23138afda90d9c8cc53cbb560ce1eb05bbb9dbdb8519cf5f4fbb0da8b4bf8"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/detection/LateResultIT.java",
+      "bytes": 4443,
+      "sha256": "4a234541c90e4080ccbf775caed56da06c87820e6d71d245309f4ffa9414a55c"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/detection/QueueIT.java",
+      "bytes": 1857,
+      "sha256": "750a88abdf1d63049da8059f4538916dc199f3636511f2195e9bc3f4b78e9d6f"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/detection/RealPipelineIT.java",
+      "bytes": 5549,
+      "sha256": "da1be15cb60cab23047142c9ddf96ed531cbf0cdd4ba8c5ecc1a817c16f6c86b"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/detection/RecoveryIT.java",
+      "bytes": 5369,
+      "sha256": "bf8833049a6ffe31a9a39f7a5ffb02ec6d84d92848dab16c2a9116b3e676f078"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/detection/ReportAccessIT.java",
+      "bytes": 1261,
+      "sha256": "d2457a64eed71c252083d8b40ef91fccfe84e3e81caa68eec42771db62b1b3ba"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/experiment/ExperimentAccessIT.java",
+      "bytes": 2096,
+      "sha256": "dfae1007bb8268a0306db657afd3afe77c88ca413dcbf37eb74ba9d271c2da27"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/experiment/ExperimentCatalogTest.java",
+      "bytes": 2816,
+      "sha256": "5c2e5c6fbef4b367ef6fd430ad65e914776053aed1e01351b435f74be357cfe3"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/HttpTestSupport.java",
+      "bytes": 1868,
+      "sha256": "df64319ab761f54c1edb90a410df70864f8c1e04b11945275c8d359c4a9ea0db"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/manuscript/DraftIT.java",
+      "bytes": 2226,
+      "sha256": "43768bf83b790dc3127b0c492dda6d34f432d5be6ef25b41270bfcfe70635906"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/manuscript/ManuscriptListIT.java",
+      "bytes": 1912,
+      "sha256": "e2af5603a2cf79d8aa2af08925af9102d3980cf920e128de8dbd4cd49cfc22ed"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/manuscript/SubmissionIT.java",
+      "bytes": 3850,
+      "sha256": "ac854f58823d88ee3e61b7189aae68e4d7cd295ba2c9fc625bfb660b547ae994"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/reference/LibraryGenerationIT.java",
+      "bytes": 4958,
+      "sha256": "f229b5f9aa041fe9f73f591dffb2e2edf38b661404fcc772cea02eb832376a88"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/reference/ReferencePublicationIT.java",
+      "bytes": 8132,
+      "sha256": "dbdc95e7231980f6a94e1ffd457bb81f0c7541ec9e3b1429308f0d85413daeba"
+    },
+    {
+      "path": "app/backend/src/test/java/local/campus/review/review/DecisionIT.java",
+      "bytes": 5949,
+      "sha256": "502fb6fed132b0a219171ab1866efd343b52aaeb19a7adac11dd3c398a70be92"
+    },
+    {
+      "path": "app/backend/src/test/resources/mockito-extensions/org.mockito.plugins.MockMaker",
+      "bytes": 20,
+      "sha256": "8eca853a5a457f17e0479b71dfbe95f2a13aff9eeff250261ecdc8ca9b847a6a"
+    },
+    {
+      "path": "app/config/frozen-ocr.json",
+      "bytes": 1296,
+      "sha256": "01e68dfcff8997b2cd5a87f3738c4403452e55f1cb43621fe2fa87f339901fc2"
+    },
+    {
+      "path": "app/config/local.example.json",
+      "bytes": 861,
+      "sha256": "cd656ae1f798e4ed6a4eab12c1a637fec42646bf284b01b9c2124058976ea1a4"
+    },
+    {
+      "path": "app/frontend/index.html",
+      "bytes": 261,
+      "sha256": "661fafcda82994538e45e2836662cc861a456e61d92f01ad82df2a6f7381062d"
+    },
+    {
+      "path": "app/frontend/package-lock.json",
+      "bytes": 108164,
+      "sha256": "e7fb35736c083f64804078b763bfb7e7484cb353bbdbe5fb7484878263eb50dc"
+    },
+    {
+      "path": "app/frontend/package.json",
+      "bytes": 706,
+      "sha256": "82468478bb60ceda7f11c4a7bd3e262e078162a96302f589bd93fbb380f5ac22"
+    },
+    {
+      "path": "app/frontend/src/api/experiments.ts",
+      "bytes": 3395,
+      "sha256": "5fe4a867976dfe289dbbbf86f583dee56e6c9a9d77cb6e82fb8aed29a855f868"
+    },
+    {
+      "path": "app/frontend/src/api/http.ts",
+      "bytes": 1311,
+      "sha256": "2340ef2d5df047a26095c63caafa0033be4d1d9adbb9f30f200411d8adae0de8"
+    },
+    {
+      "path": "app/frontend/src/api/manuscripts.ts",
+      "bytes": 2701,
+      "sha256": "ab395ed385c5025330179ad9b2f05ef616e67e2fdd4b2ec2579e129ac7d57007"
+    },
+    {
+      "path": "app/frontend/src/api/references.ts",
+      "bytes": 3004,
+      "sha256": "c425302feb944f085a9f812d810f2b7e04ad3c387fd9efe524aec841aa044442"
+    },
+    {
+      "path": "app/frontend/src/api/review.ts",
+      "bytes": 3795,
+      "sha256": "d1c558b9c08413b692fe40035973fc1bea173273b7979934bff29c974ab05671"
+    },
+    {
+      "path": "app/frontend/src/App.vue",
+      "bytes": 585,
+      "sha256": "d600fc78d6394c3bd2c55d70b2ef2198f5d73c0e7a3b564a7c4ee2f586d7a414"
+    },
+    {
+      "path": "app/frontend/src/components/CampusEditor.vue",
+      "bytes": 6619,
+      "sha256": "038a8bf3c32816fe914b8979f6a2961789b84e2e7467e7b6968a9073a78272b3"
+    },
+    {
+      "path": "app/frontend/src/components/CampusImageView.vue",
+      "bytes": 2341,
+      "sha256": "b00d254e67e177f33465f716c66f1aebb168641672afebaca5edd32c4af0215d"
+    },
+    {
+      "path": "app/frontend/src/components/experiments/charts.ts",
+      "bytes": 7330,
+      "sha256": "85c843378ec3580a044e7a56b5ebf642890b0a4daa5715ca950964fea57f7668"
+    },
+    {
+      "path": "app/frontend/src/components/experiments/ComparisonCharts.vue",
+      "bytes": 1118,
+      "sha256": "59a56905780a06735ad278d97cfe8d4698bb7724dccbb5185f28ea771c7db48f"
+    },
+    {
+      "path": "app/frontend/src/components/experiments/EvaluationCharts.vue",
+      "bytes": 511,
+      "sha256": "3bf1abc7fffcfe48795be552e4ed22726c5e8a2b1f0a4cc8862c17cdc0829b9a"
+    },
+    {
+      "path": "app/frontend/src/components/experiments/ExperimentChart.vue",
+      "bytes": 2217,
+      "sha256": "e11c348bd597af17bccc3f80995f05e1b845399e7262ba94118d83d8d679fc68"
+    },
+    {
+      "path": "app/frontend/src/components/experiments/OverviewCharts.vue",
+      "bytes": 527,
+      "sha256": "cf46732d129ba17c1a964bc33e006a43172d307de4ce579c547c348a6c56bde6"
+    },
+    {
+      "path": "app/frontend/src/components/experiments/TrainingCharts.vue",
+      "bytes": 1400,
+      "sha256": "e2f501590dbdc34eb06844fcc8cfab0904f332dc37cd6cc9bb96958e9a37a9e2"
+    },
+    {
+      "path": "app/frontend/src/components/ImageEvidence.vue",
+      "bytes": 1435,
+      "sha256": "99f3daca2d7deb6fd121d8777afb9194d236813436efc37dcfe60c5905f22f0a"
+    },
+    {
+      "path": "app/frontend/src/components/LoginForm.vue",
+      "bytes": 1212,
+      "sha256": "c0648a61fbb8d772c63837145ea3dd44f87d008b2ccd90e2da768e489170e116"
+    },
+    {
+      "path": "app/frontend/src/components/OcrEvidence.vue",
+      "bytes": 2265,
+      "sha256": "c3ff93b33b37b0281cca358dea425b80b6fbe4d492f37b7400de218c6aa6a71b"
+    },
+    {
+      "path": "app/frontend/src/components/ReadOnlyDocument.vue",
+      "bytes": 3249,
+      "sha256": "99ed5c84191197c4515cfcfbe5068918b43aa072a61636be645bc1497ad787f7"
+    },
+    {
+      "path": "app/frontend/src/components/TextEvidence.vue",
+      "bytes": 3001,
+      "sha256": "6577c3d7f1b9cdc683a170e9e2317c91e519cbff14d425b092f009c8b59ff3e1"
+    },
+    {
+      "path": "app/frontend/src/editor/CampusImage.ts",
+      "bytes": 2667,
+      "sha256": "139fa9a93b0587f4d9ea37047d25c02da80ca421d5d625ec48f92997109ae9f3"
+    },
+    {
+      "path": "app/frontend/src/editor/document.ts",
+      "bytes": 1707,
+      "sha256": "0b0ab50a6e43ef5ed1870b50e2f980e02d2042ff72b10b3328d7e861a1f1a21d"
+    },
+    {
+      "path": "app/frontend/src/editor/limits.ts",
+      "bytes": 2295,
+      "sha256": "9cfbec5adbbf01c6d3b67debd23f7bcd3f5bb53e3f21459a6464d71b0bb6a71f"
+    },
+    {
+      "path": "app/frontend/src/editor/positions.ts",
+      "bytes": 2113,
+      "sha256": "45ed062faf77668bf00e96d2d8461d67d9b952fd00e58dadba746e905696f988"
+    },
+    {
+      "path": "app/frontend/src/layouts/AppLayout.vue",
+      "bytes": 2949,
+      "sha256": "3c78c8710b6f6d2cb9068b03a8dc695f7c3a7d33d9a0c5c43cebe79f208cc4bb"
+    },
+    {
+      "path": "app/frontend/src/main.ts",
+      "bytes": 482,
+      "sha256": "eb6e74313d5901070a3b07b20aa010a664c094fc1bb604370d128ade78ef0d67"
+    },
+    {
+      "path": "app/frontend/src/router.ts",
+      "bytes": 2243,
+      "sha256": "861e09e995ad342c4012b9d9a75767c6208aeee737c4cef2916d671c424a6f1b"
+    },
+    {
+      "path": "app/frontend/src/session.ts",
+      "bytes": 1030,
+      "sha256": "72ad268bcb32f3b4bde46a68ce2d233003812e5b54d2cb9e4311d26bd2911209"
+    },
+    {
+      "path": "app/frontend/src/style.css",
+      "bytes": 9885,
+      "sha256": "544c81c15c80db050d3fe24bdd55e5f77f2968442e6da75d592c464fc15345b4"
+    },
+    {
+      "path": "app/frontend/src/theme.ts",
+      "bytes": 1802,
+      "sha256": "ba192cd310feff4f1d7d2a43470c166e2178678d4dae1da16314fa6d63980a44"
+    },
+    {
+      "path": "app/frontend/src/types/document.ts",
+      "bytes": 638,
+      "sha256": "5aae64a85f366fbb0e3c42a4d8f325dcb0b5c3e23518b9340380cff332e0b463"
+    },
+    {
+      "path": "app/frontend/src/views/EditorView.vue",
+      "bytes": 7347,
+      "sha256": "a49b30c2e9a24968359a5ff5dd890b821a55f18c3024c08bdafc878507adfabb"
+    },
+    {
+      "path": "app/frontend/src/views/ExperimentView.vue",
+      "bytes": 5327,
+      "sha256": "8d6122548ca398467fd9d3b44ca758c1a0a507e76be4c77b56f4ecbcfe031723"
+    },
+    {
+      "path": "app/frontend/src/views/LoginView.vue",
+      "bytes": 554,
+      "sha256": "132417d25ccf77b3ed1ea6af1a805824cbf94b11be87c7c0fd68720f45eb7885"
+    },
+    {
+      "path": "app/frontend/src/views/ManuscriptListView.vue",
+      "bytes": 3460,
+      "sha256": "74bdb9d871c83a2c55690c0a8c7221631c66df0598d8a5d942c45730225b218a"
+    },
+    {
+      "path": "app/frontend/src/views/PublicationDetailView.vue",
+      "bytes": 1002,
+      "sha256": "65d931a238f58c216374b4636f67bdf974723348b740c89b0a5566797006c92b"
+    },
+    {
+      "path": "app/frontend/src/views/PublicationListView.vue",
+      "bytes": 1702,
+      "sha256": "d565282ca465eba7bf3eeceb968910bd760362e3fdcd92c0e6e086bc2fc7b4c9"
+    },
+    {
+      "path": "app/frontend/src/views/ReferenceEditorView.vue",
+      "bytes": 5134,
+      "sha256": "8f219460a093dcc3d118e7f6e8803612da7215cbd86ef3f7122da3ab67166681"
+    },
+    {
+      "path": "app/frontend/src/views/ReferenceListView.vue",
+      "bytes": 8565,
+      "sha256": "4ca6151f7baebf30307fdb171a66f37dbe5a889b913dbf1fcdee936612a31f88"
+    },
+    {
+      "path": "app/frontend/src/views/ReviewDetailView.vue",
+      "bytes": 10870,
+      "sha256": "0f9accc79d7a22b98d28ea6d16cf26694bfda39e242077e593908a083fbbe996"
+    },
+    {
+      "path": "app/frontend/src/views/ReviewQueueView.vue",
+      "bytes": 2537,
+      "sha256": "fe73e9045a8b4a9b3e90b3119a97d7a7ae6a11b136a38b518ba7d1ddda9230d3"
+    },
+    {
+      "path": "app/frontend/src/views/SubmissionHistoryView.vue",
+      "bytes": 4045,
+      "sha256": "ef3556e09126597b8038298ec400c3300d3e4ef1e787f85693c07db4e53e3cd5"
+    },
+    {
+      "path": "app/frontend/tests/boundary-flow.spec.ts",
+      "bytes": 3379,
+      "sha256": "00a91ac0fbda2e21937864a8ffc18f007bbfffbc144de8aa97d506b0c22c082f"
+    },
+    {
+      "path": "app/frontend/tests/document.test.ts",
+      "bytes": 2074,
+      "sha256": "2a259a6573f22c2be12d48c08dc3d4a19d7d0a47f540f392d19c6c058f2f3031"
+    },
+    {
+      "path": "app/frontend/tests/editor-identities.test.ts",
+      "bytes": 1921,
+      "sha256": "10a22ee2430ad8155981cec90d1c01556322b34691a0b28d0e3c5d29ef663221"
+    },
+    {
+      "path": "app/frontend/tests/editor-navigation.spec.ts",
+      "bytes": 4508,
+      "sha256": "a702d32c9c2ba3bd50133b976b574aed004614ef78b7830648b988416bc8a30d"
+    },
+    {
+      "path": "app/frontend/tests/experiment-refresh.spec.ts",
+      "bytes": 1621,
+      "sha256": "86bbe9143db057ca41b42ca5f78b94925c50020d16edebd107af52675e124298"
+    },
+    {
+      "path": "app/frontend/tests/http.test.ts",
+      "bytes": 1626,
+      "sha256": "8ddbc687d746a7d81b244112c94cef3fe0ba66b46ae6b70560fec436e0b10304"
+    },
+    {
+      "path": "app/frontend/tests/login-form.test.ts",
+      "bytes": 1419,
+      "sha256": "2c3f6d51630e7aff2844b09e0c31fd125edc7dd70b288855e220659a5dd7bcf4"
+    },
+    {
+      "path": "app/frontend/tests/reference-publication.spec.ts",
+      "bytes": 2285,
+      "sha256": "2f526e6b0b273a549f7f259667fb310cbdd466f2daa4c7c26ba21b0f0e899e9a"
+    },
+    {
+      "path": "app/frontend/tests/review-flow.spec.ts",
+      "bytes": 1864,
+      "sha256": "13a2e8471ed4286fc9419f933abdb294b02cc4732328d7e8aba1c4538a3d5921"
+    },
+    {
+      "path": "app/frontend/tests/submission-flow.spec.ts",
+      "bytes": 3528,
+      "sha256": "886c5c526dcb73a33423ae54d68784ebdab595b46431e101f1c713bbda2b9706"
+    },
+    {
+      "path": "app/frontend/tests/theme.test.ts",
+      "bytes": 482,
+      "sha256": "44d9e90ad8695e3be6f201215c5c2cccf538cd1b5debaf7dd510256a26844fc2"
+    },
+    {
+      "path": "app/frontend/tests/upload-serialization.spec.ts",
+      "bytes": 3228,
+      "sha256": "685e86f99750777e5d6527e60c056ea2e2174e1c46879c99de4cf58ec8ec6e2b"
+    },
+    {
+      "path": "app/frontend/tsconfig.json",
+      "bytes": 393,
+      "sha256": "8a4d7531ed5c2d8524ca4f969bf30eb2ca9c6fc83188381227ad3a34520699e0"
+    },
+    {
+      "path": "app/frontend/vite.config.ts",
+      "bytes": 332,
+      "sha256": "c24f5109cf71add91a602abe5b3ef4a36d573daccab18e2d20cabb3279a1a4b5"
+    },
+    {
+      "path": "app/python/campus_detection/__init__.py",
+      "bytes": 75,
+      "sha256": "4d3c795966dadddc14f65c4840240c04633c8b2cc6eb8da049a87eaed5703930"
+    },
+    {
+      "path": "app/python/campus_detection/http_service.py",
+      "bytes": 7309,
+      "sha256": "13376d79c76a4f9724e1d938d21d899d292ddd501e3a46f1d59ecb6b879b087c"
+    },
+    {
+      "path": "app/python/campus_detection/image.py",
+      "bytes": 2957,
+      "sha256": "fe03c5f00e679aa3bd2e5d30e199496e15129da7050f8c6ec4a11e513e0da726"
+    },
+    {
+      "path": "app/python/campus_detection/library.py",
+      "bytes": 5876,
+      "sha256": "a23c9e024ae80302a7a3b14d225dd2282e5f936ffd784668986451fbcffd1de5"
+    },
+    {
+      "path": "app/python/campus_detection/library_probe.py",
+      "bytes": 3548,
+      "sha256": "e7bc7e4625386c94191265aee61924ad05b30056e652c6629b450bb7659107b5"
+    },
+    {
+      "path": "app/python/campus_detection/models.py",
+      "bytes": 3750,
+      "sha256": "55e948d0f3a7b3c5d06d95b6da9a99cc506b160d74dd39750ffebd8875209a44"
+    },
+    {
+      "path": "app/python/campus_detection/probe.py",
+      "bytes": 5261,
+      "sha256": "5bd70844c89657bdb758c4202a549e9a890cc4c9e21d10e52d156257122871fe"
+    },
+    {
+      "path": "app/python/campus_detection/text.py",
+      "bytes": 7225,
+      "sha256": "2abb8d584a6529fa4a2e6d78c36786f2dcf73ae8257752d92a6a371802fd5b88"
+    },
+    {
+      "path": "app/python/campus_ocr/__init__.py",
+      "bytes": 73,
+      "sha256": "616faa36ab4884316a061dad80a2eed051961a29bb5239ea5cccad77ec252c31"
+    },
+    {
+      "path": "app/python/campus_ocr/http_service.py",
+      "bytes": 3555,
+      "sha256": "6087ab7da04cd718f615e5eb4bac45535ddbe8475656032c74f45106103599c4"
+    },
+    {
+      "path": "app/python/campus_ocr/probe.py",
+      "bytes": 1801,
+      "sha256": "a3bf632db07c9e1167f85c85dc2a773328773c838ed3c574450b122e9c5d79db"
+    },
+    {
+      "path": "app/python/campus_ocr/recognizer.py",
+      "bytes": 6271,
+      "sha256": "727484ad152e7f9f530234e42ea512aaebc2550c26d9f7bf55dabde3b8a53afd"
+    },
+    {
+      "path": "app/python/campus_shared/__init__.py",
+      "bytes": 53,
+      "sha256": "9d37a9ef9081a5befad6270b4051fe1b59aca21ce736f0a1f303af3de1035893"
+    },
+    {
+      "path": "app/python/campus_shared/contracts.py",
+      "bytes": 2874,
+      "sha256": "b4bfb308262591b490b822346b4465cfa3540dc4abb4b0786d5a196857ab385a"
+    },
+    {
+      "path": "app/python/README.md",
+      "bytes": 2789,
+      "sha256": "061675bf94f3e82dce35e7f20fba8d2f9ff7b0bb0a1f9930339ede9dfdda5b65"
+    },
+    {
+      "path": "app/python/run_checks.py",
+      "bytes": 651,
+      "sha256": "4b7ed07456d6a0d66600a5945dd53c691b5a64cc44d4a4609ec5c2eccc71c6ef"
+    },
+    {
+      "path": "app/python/run_service.py",
+      "bytes": 253,
+      "sha256": "49dd3e32de3c25c140e80bf80ee09373720e150c32a4d6f56edeebd3c1814361"
+    },
+    {
+      "path": "app/python/tests/test_detection_contract.py",
+      "bytes": 1774,
+      "sha256": "3372356023e90b996a65df564071d3b7718e3929980490821cf92e487e249583"
+    },
+    {
+      "path": "app/python/tests/test_detection_http.py",
+      "bytes": 2711,
+      "sha256": "7b66c14ce279bf7a94ba99519126e6f3fd441d5e243cee1a572c9eed97ea6dd2"
+    },
+    {
+      "path": "app/python/tests/test_experiment_export.py",
+      "bytes": 2472,
+      "sha256": "c0bb5cb13235ea440cd3c5a36e9ce4ff27c22441d3e6915aae6af381dd0ac3ac"
+    },
+    {
+      "path": "app/python/tests/test_http_real.py",
+      "bytes": 2820,
+      "sha256": "b5346f925dc262b0ff4ce8dcdc7973b43511abb7f9f99397825f69cfc0cdba2b"
+    },
+    {
+      "path": "app/python/tests/test_image_real.py",
+      "bytes": 537,
+      "sha256": "39145efd8f1d3ee72f088ef8ff7738637e1b2206da5e833ef4e359b039feaeeb"
+    },
+    {
+      "path": "app/python/tests/test_library.py",
+      "bytes": 907,
+      "sha256": "336b727ed8dc973f1eb68a97cd332619765cee2ab356fbc56235ec93cde0a341"
+    },
+    {
+      "path": "app/python/tests/test_ocr_contract.py",
+      "bytes": 1332,
+      "sha256": "6e92ef8611bc6db581823bd876166ae977063775108cd3dddea302ebcc83e13e"
+    },
+    {
+      "path": "app/python/tests/test_ocr_http.py",
+      "bytes": 1059,
+      "sha256": "dbdd86fdffe952bb598f79e5a5bc7c422a5aafce8b6a730f256e5b41bccdcd79"
+    },
+    {
+      "path": "app/python/tests/test_ocr_real.py",
+      "bytes": 2173,
+      "sha256": "0cd68efd95d8ffd13179dbce258e122614faac521deb6c5268a1e94ad3a11000"
+    },
+    {
+      "path": "app/python/tests/test_pipeline_compatibility.py",
+      "bytes": 631,
+      "sha256": "6daa224339e7480d8b8f44fd29ec4f9ca4406958a736a1638464d88616b26c11"
+    },
+    {
+      "path": "app/python/tests/test_text_real.py",
+      "bytes": 631,
+      "sha256": "9453b11d4b85f078a21064b6542b0deb20875e91748f5343f09902187f76c21e"
+    },
+    {
+      "path": "app/README.md",
+      "bytes": 7500,
+      "sha256": "d208a32120a601f5d1bf2cf77606ebadc801505aa06683f9d267ab7c4907c49d"
+    },
+    {
+      "path": "app/scripts/backup.ps1",
+      "bytes": 412,
+      "sha256": "8fa52c38f912f2907261abf3d1b2b43ed20a3435a0899688bd5bd0318bd02e8d"
+    },
+    {
+      "path": "app/scripts/backup_restore.py",
+      "bytes": 10996,
+      "sha256": "27b3c9595f8ba03ff59967242422d054595c470a5654b69bf4b04b1ab8145333"
+    },
+    {
+      "path": "app/scripts/build.ps1",
+      "bytes": 1438,
+      "sha256": "da59d0469beaac133d989f385b2af54cb71afbb4064fe66665711828220d5224"
+    },
+    {
+      "path": "app/scripts/check.ps1",
+      "bytes": 4747,
+      "sha256": "68d8ca8e609aeb1078b7de8422362203e1e62eff055928e2307ceee575503805"
+    },
+    {
+      "path": "app/scripts/check_capacity.py",
+      "bytes": 28139,
+      "sha256": "296e8a1c4dfed842b52b3d5c7986f29475a22adc572c453ff06b306029dd26bd"
+    },
+    {
+      "path": "app/scripts/delivery_manifest.py",
+      "bytes": 1990,
+      "sha256": "7842c7cb81ebeff43f4c19f9743420d07aac9c8cee4944702f8dafb25c2ad379"
+    },
+    {
+      "path": "app/scripts/export_experiments.py",
+      "bytes": 12954,
+      "sha256": "e809ff2c481175f6b6b3ac186babafe3d84fdf5a121fd3c013217637319db05c"
+    },
+    {
+      "path": "app/scripts/import_initial_sources.py",
+      "bytes": 4924,
+      "sha256": "97d7534e3b6ce37846687543492488eabfd253cc4cdf2697a11107660d69cccb"
+    },
+    {
+      "path": "app/scripts/init.ps1",
+      "bytes": 1924,
+      "sha256": "5f3b1ee42475c5e6d02caff24321ca5a01f49399aadd8033c10533cc30214852"
+    },
+    {
+      "path": "app/scripts/initial_sources.py",
+      "bytes": 3021,
+      "sha256": "78eddd6b4aa778b18088b8085f0ce4a04d3cdbcb5ba2c8ef9f274119d0002853"
+    },
+    {
+      "path": "app/scripts/inspect_image.py",
+      "bytes": 1231,
+      "sha256": "1e5ce226d853f40352a9d3b3313af1fbc699cf85a0eafe74ea145545016feef7"
+    },
+    {
+      "path": "app/scripts/probe_auth.py",
+      "bytes": 2729,
+      "sha256": "02ed0688c8c5bba1a844df8c1024f3fb53a4fefce12fd06beefbd835b467a9ed"
+    },
+    {
+      "path": "app/scripts/probe_draft.py",
+      "bytes": 2979,
+      "sha256": "944d0136223f7458164cc9b11c7f9ac1bb5962ee364821a7eb2bda40a6769c5e"
+    },
+    {
+      "path": "app/scripts/probe_experiments.py",
+      "bytes": 2431,
+      "sha256": "ac4857f2d200369b8215346ab8def0b8f75d5d132f1a2886621fe927519419b1"
+    },
+    {
+      "path": "app/scripts/probe_final_flow.py",
+      "bytes": 9588,
+      "sha256": "ba54d2bacbc621504229d5853731f5f48e663ba2ee5febacf516a82970a74932"
+    },
+    {
+      "path": "app/scripts/probe_recovery.py",
+      "bytes": 6222,
+      "sha256": "ab7d30a54fe2263c68698815b972ad88a726af3e02263312a89d0dbab01715db"
+    },
+    {
+      "path": "app/scripts/probe_reference_flow.py",
+      "bytes": 5641,
+      "sha256": "ee7d7adc04a655aef48bcee2deaca30d4060ce6b5536bc03a06b03a6223f36e4"
+    },
+    {
+      "path": "app/scripts/probe_review_failure.py",
+      "bytes": 5185,
+      "sha256": "9fa489aac446ca57db7c1f51ef0cf7b16d5ff61da6fc448aa2c22a9d7c4e7a08"
+    },
+    {
+      "path": "app/scripts/probe_submission_flow.py",
+      "bytes": 6646,
+      "sha256": "41509776623088096b7cef35e421d20f327a1e68bba867dc4f8c6d060a04e83d"
+    },
+    {
+      "path": "app/scripts/probe_versions.py",
+      "bytes": 3158,
+      "sha256": "b71bf4062f5e43fbdcec3892ff62cdc5921be74076bff5fa2d4652afab8b2f1d"
+    },
+    {
+      "path": "app/scripts/process_supervisor.py",
+      "bytes": 9479,
+      "sha256": "9d77b18f76ffea92e20ba2fde461446d546cc91e2032e887d2d6f5e6a3d56c31"
+    },
+    {
+      "path": "app/scripts/restore.ps1",
+      "bytes": 571,
+      "sha256": "da91ae006ddebd73d946476571df973d8bed6e88aec66b6768431d77e02cfef3"
+    },
+    {
+      "path": "app/scripts/runtime_manager.py",
+      "bytes": 9520,
+      "sha256": "dcd013fd807ef10ce7d1bc4d00ec19745a0da658cd90e72c6e468cb90f22417d"
+    },
+    {
+      "path": "app/scripts/start.ps1",
+      "bytes": 514,
+      "sha256": "75a62ca54e55a384a5a5a1f7efa039193f79f83ce19c3db8eb823f14a4aaba1f"
+    },
+    {
+      "path": "app/scripts/status.ps1",
+      "bytes": 433,
+      "sha256": "02cb565f223ff81b6fe3c3f1072900522b88f5f5196f54ef7e8165a0489cc1fc"
+    },
+    {
+      "path": "app/scripts/stop.ps1",
+      "bytes": 665,
+      "sha256": "58234d4b087386088c760a0398a185fc7dc9524e7d536f8023af660e3f8e22e7"
+    },
+    {
+      "path": "app/scripts/tests/test_backup_restore.py",
+      "bytes": 1201,
+      "sha256": "6a39071601e9b7f2c545415258262f80c82a7bb76b2a56aaeffa88422e3c83f4"
+    },
+    {
+      "path": "app/scripts/tests/test_initial_sources.py",
+      "bytes": 890,
+      "sha256": "0bcde9612441ca19b4a586873573d6531e2a4d69d7ced23d513daeef64073fb9"
+    },
+    {
+      "path": "app/scripts/tests/test_inspect_image.py",
+      "bytes": 1383,
+      "sha256": "e2b71df0f5223450e4274cbd83707b948395996ca2e56cfbd4c59583364518ac"
+    },
+    {
+      "path": "app/scripts/tests/test_process_supervisor.py",
+      "bytes": 1187,
+      "sha256": "aae853be7bb6a2430fd4446d949f70a7036ee2d6ee6226ac590cf3f1cd8b15a5"
+    },
+    {
+      "path": "app/scripts/tests/test_runtime_manager.py",
+      "bytes": 926,
+      "sha256": "544d35adcc1788fdf2d10ab6101c8265eb4debc7aab27ce5f8b178c20813cd75"
+    }
+  ]
+}

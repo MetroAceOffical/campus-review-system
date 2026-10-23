@@ -1,0 +1,56 @@
+{
+  "stage": "M15",
+  "freshRealInput": true,
+  "manuscriptId": "15",
+  "first": {
+    "draftRevision": "1",
+    "versionNo": 1,
+    "status": "PENDING",
+    "batchId": "13",
+    "submissionId": "13"
+  },
+  "second": {
+    "draftRevision": "2",
+    "versionNo": 2,
+    "status": "PENDING",
+    "batchId": "14",
+    "submissionId": "14"
+  },
+  "query": {
+    "draftRevision": "1",
+    "versionNo": 1,
+    "status": "PENDING",
+    "batchId": "15",
+    "submissionId": "15"
+  },
+  "reviewerUiReturnAndApprove": true,
+  "priorVersionUnchanged": true,
+  "publishedVersionIsApprovedSecond": true,
+  "referenceId": "200",
+  "queryLibraryGenerationId": "6",
+  "realQueryMatchedNewPublishedSource": true,
+  "evidenceIds": [
+    "101:text:b2665accca61caca14c2"
+  ],
+  "roleChecks": {
+    "member1": {
+      "formalReport": 403,
+      "experiments": 403
+    },
+    "member2": {
+      "formalReport": 403,
+      "experiments": 403
+    },
+    "reviewer": {
+      "formalReport": 200,
+      "experiments": 403
+    },
+    "admin": {
+      "formalReport": 403,
+      "experiments": 200
+    }
+  },
+  "crossOrganizationDraftDenied": true,
+  "frozenDashboardBertMacroF1Verified": true,
+  "scope": "Labelled real functional acceptance, not detection accuracy evaluation."
+}

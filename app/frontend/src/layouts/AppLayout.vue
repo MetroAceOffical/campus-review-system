@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, reactive } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, isNavigationFailure, NavigationFailureType } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
-import { session, logout } from '../session'
+import { session, logout, home } from '../session'
 import { applyTheme, readTheme } from '../theme'
 const route = useRoute(), router = useRouter(), theme = reactive(readTheme())
 const links = computed(() => [
@@ -12,7 +12,11 @@ const links = computed(() => [
   { to: '/publications', label: '已发布' },
 ])
 async function signOut() {
-  try { await ElMessageBox.confirm('确认退出当前账号？', '退出登录', { confirmButtonText: '退出', cancelButtonText: '取消' }); await logout(); await router.replace('/login') }
+  try { await ElMessageBox.confirm('确认退出当前账号？', '退出登录', { confirmButtonText: '退出', cancelButtonText: '取消' });
+    // Run the current page's unsaved-work guard before invalidating its session.
+    const navigation=await router.push(session.user?home(session.user.role):'/login')
+    if(isNavigationFailure(navigation)&&!isNavigationFailure(navigation,NavigationFailureType.duplicated))return
+    await logout(); await router.replace('/login') }
   catch { /* User cancelled or server did not confirm logout; retain current page. */ }
 }
 </script>
@@ -24,7 +28,7 @@ async function signOut() {
       </el-popover><span>{{ session.user?.displayName }}</span><el-button @click="signOut">退出</el-button>
     </div></header>
     <div class="shell-body"><aside class="sidebar"><div class="organization-label">{{ session.user?.organizations.map(o => o.name).join(' / ') || '工作空间' }}</div><nav><RouterLink v-for="link in links" :key="link.to" :to="link.to">{{ link.label }}</RouterLink></nav></aside>
-      <main class="page-content"><h1>{{ route.meta.title }}</h1><RouterView /></main>
+      <main class="page-content"><h1>{{ route.meta.title }}</h1><RouterView :key="route.path" /></main>
     </div>
   </div>
 </template>
