@@ -2,7 +2,7 @@
 
 ## 实施基线
 
-当前完成状态：M01—M06完成；M07持久队列尚未接通。下文各阶段中的“进行中”是当时记录，以对应最终验收为准。
+当前完成状态：M01—M07完成；M08送审/审核/发布闭环尚未实现。下文各阶段中的“进行中”是当时记录，以对应最终验收为准。
 
 2026-10-23（Asia/Shanghai）开始。已完整读取交接、设计（含第22节）、实施计划、可行性报告第16节及剩余验证B/C和最终结论。无适用AGENTS.md，无Git仓库，无正式app工程。
 
@@ -137,3 +137,19 @@ M05 GitHub插件上传完成：main提交f5f1709bb3a450f972bf410c60e9904cdbffe32
 - 独立真实模型探针构建194正文/59图索引，59图零失败；实际新增条目可检索、停用后新代排除、旧代保留、同输入READY重复返回相同哈希。该探针目录与业务库分开，业务指针切换由Java集成测试验证，队列串联留待M07。摘要M06-library.json。
 - 最终check -Task ALL：Java16/16、前端9/9及生产构建通过，Python脚本3/3、主环境11项（3项真实模型探针按默认跳过）、OCR6项（2项真实探针按默认跳过）通过。真实M06建库另运行成功，runtime/logs/M06-real-library.log；冻结580文件再核验通过。
 - Task M06: complete。M07开始，投稿和审核全链路尚未完成。
+
+M06 GitHub插件上传完成：main提交1b5b7131454a62332a248aa846a38efdd1f0d053；已回读真实建库摘要核对。
+
+## M07进行中
+
+- 先编写13项、并发认领、DECIDED继续接受结果、取消/旧attempt拒绝迟到结果的数据库集成测试；尚未实现worker。
+
+### M07最终验收
+
+- MySQL条件认领，同一任务并发只成功一次；worker跨模型调用持有独立连接的数据库advisory lock，不持有业务事务。默认调度不开启，显式CAMPUS_WORKER_ENABLED=true才消费业务队列；不擅自回收旧RUNNING任务，M13实现恢复入口。
+- 批次开始固定库代、manifest哈希和三模块完整配置；人工DECIDED仍接受报告，取消/撤回/替换及旧attempt结果被拒绝。失败项重试校验expectedAttemptId，清除active并新建持久任务；旧attempt不覆盖。
+- 正文/逐图DINO/OCR文字检索逐项保存，OCR成功结果按文件和完整配置缓存。空识别不启动文字检索；OCR服务故障保留失败，其他项目成功。参考准备与索引刷新复用同一worker调度，失败部分可重试。
+- 真实Java→独立18083检测进程(runtime/test/indexes)→现有18082 OCR→测试DB验证：正文+6图共13项全部COMPLETED，DINO原图匹配>0.99、OCR5行及文字检索完成，见M07-real-pipeline.json。该明确测试夹具未进入业务参考库。
+- 受控故障验证：未就绪WAITING_SERVICE且不建attempt；OCR不可用时仅OCR项失败；原批次配置不被新配置覆盖；超时但busy仍为true时剩余2项保持QUEUED，不新建attempt，空闲后继续。mock仅用于故障控制，真实链另留证据。
+- TDD记录：类缺失编译失败(M07-red.log)、重试服务缺失失败(M07-retry-red.log)后实现；最终check M07 -RealModels 7/7无跳过(runtime/logs/M07-final.log)。check ALL后端23项(默认跳过1项真实链)、前端9/9与构建、Python脚本3/3、主环境11项默认跳过3、OCR6项默认跳过2均通过。
+- Task M07: complete。M08开始，尚未声称真实站内送审发布业务闭环完成。

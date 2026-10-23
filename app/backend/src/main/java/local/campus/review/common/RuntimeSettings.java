@@ -21,4 +21,6 @@ public class RuntimeSettings {
     public Path python(){return root.resolve(config.path("python").asText()).normalize();}
     public int limit(String name){return config.path("limits").path(name).asInt();}
     public JsonNode limits(){return config.path("limits").deepCopy();}
+    public int port(String name){return Integer.parseInt(System.getenv().getOrDefault("CAMPUS_"+name.toUpperCase()+"_PORT",config.path("ports").path(name).asText()));}
+    public int timeout(String name){return config.path("timeoutsSeconds").path(name).asInt();}
 }

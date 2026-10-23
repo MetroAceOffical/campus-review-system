@@ -1,0 +1,10 @@
+{
+  "stage" : "M07",
+  "scope" : "real Java worker to both Python processes and isolated test database",
+  "items" : 13,
+  "allCompleted" : true,
+  "imageSelfSimilarityAbove099" : true,
+  "ocrLines" : 5,
+  "ocrTextSearchCompleted" : true,
+  "referenceRevisionId" : "15"
+}

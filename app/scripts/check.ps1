@@ -1,7 +1,7 @@
 param([Parameter(Mandatory=$true)][string]$Task, [switch]$RealModels)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$tests = @{ M01 = 'MigrationIT'; M02 = 'AuthAccessIT'; M03 = 'DocumentCodecTest,FileAccessIT,DraftIT'; M04 = 'PYTHON'; M05 = 'OCR'; M06 = 'LibraryGenerationIT'; ALL = '*IT,*Test' }
+$tests = @{ M01 = 'MigrationIT'; M02 = 'AuthAccessIT'; M03 = 'DocumentCodecTest,FileAccessIT,DraftIT'; M04 = 'PYTHON'; M05 = 'OCR'; M06 = 'LibraryGenerationIT'; M07 = 'QueueIT,LateResultIT,FaultPipelineIT,RealPipelineIT'; ALL = '*IT,*Test' }
 if (-not $tests.ContainsKey($Task)) { Write-Error "Task $Task has no implemented verification entry"; exit 2 }
 $configPath = Join-Path $root 'app/config/local.json'
 if (-not (Test-Path $configPath)) { $configPath = Join-Path $root 'app/config/local.example.json' }
@@ -36,6 +36,7 @@ if (Test-Path $credentialPath) {
 }
 $env:CAMPUS_TEST_DB_URL = "jdbc:mysql://127.0.0.1:$($config.ports.mysql)/$($config.testDatabase)?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true"
 $env:CAMPUS_RUNTIME_NAMESPACE = 'test'
+$env:CAMPUS_REAL_MODELS = if ($RealModels) { '1' } else { '0' }
 Push-Location (Join-Path $root 'app/backend')
 try {
     & $config.maven -B -ntp -s settings.xml "-Dmaven.repo.local=$runtime/m2-repository" "-Dtest=$($tests[$Task])" test

@@ -14,5 +14,7 @@ public class ReferenceController {
     @PostMapping Api create(Authentication auth,@RequestHeader("Idempotency-Key")String key,@RequestBody ReferenceService.ReferenceInput input){return Api.ok(references.create(users.require(auth),key,input));}
     @GetMapping Api list(Authentication auth,@RequestParam(defaultValue="1")int page,@RequestParam(defaultValue="20")int pageSize){return Api.ok(references.list(users.require(auth),page,pageSize));}
     public record Enabled(boolean enabled){}
+    public record Retry(java.util.List<String> failedPartKeys){}
+    @PostMapping("/{id}/retries") Api retry(Authentication auth,@PathVariable String id,@RequestHeader("Idempotency-Key")String key,@RequestBody(required=false) Retry input){return Api.ok(references.retry(users.require(auth),id,key,input==null?null:input.failedPartKeys()));}
     @PatchMapping("/{id}/enabled") ResponseEntity<Api> enabled(Authentication auth,@PathVariable String id,@RequestHeader("Idempotency-Key")String key,@RequestBody Enabled input){return ResponseEntity.accepted().body(Api.ok(references.setEnabled(users.require(auth),id,key,input.enabled())));}
 }

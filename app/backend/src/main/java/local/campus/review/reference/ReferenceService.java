@@ -56,4 +56,18 @@ public class ReferenceService {
         boolean effective=false;for(var item:libraries.currentManifest().path("enabledReferenceWorkIds"))if(id.equals(item.asText()))effective=true;
         var receipt=json.valueToTree(Map.of("jobId",Long.toString(job),"requestedEnabled",enabled,"effectiveEnabled",effective,"status","PENDING_SWITCH"));keys.complete(user.userId(),"REFERENCE_ENABLED",key,receipt);return receipt;
     }
+    @Transactional public JsonNode retry(CurrentUser user,String id,String key,List<String> failedPartKeys){
+        AccessPolicy.requireAdmin(user);var requested=failedPartKeys==null?List.<String>of():List.copyOf(failedPartKeys);
+        var cached=keys.begin(user.userId(),"REFERENCE_RETRY",key,JsonSupport.hash(json,Map.of("id",id,"failedPartKeys",requested)));if(cached!=null)return cached;
+        var rows=db.queryForList("SELECT * FROM reference_revision WHERE reference_work_id=? ORDER BY revision_no DESC LIMIT 1 FOR UPDATE",id);
+        if(rows.isEmpty())throw new ApiException(404,"RESOURCE_NOT_FOUND","未找到参考材料");var row=rows.getFirst();
+        if(Set.of("QUEUED","PROCESSING").contains(row.get("processing_status")))throw new ApiException(409,"INVALID_STATE","材料正在处理，请稍后重试");
+        var parts=JsonSupport.parse(json,row.get("artifacts_json").toString()).path("parts");var failed=new HashSet<String>();
+        parts.fields().forEachRemaining(part->{if("FAILED".equals(part.getValue().path("status").asText()))failed.add(part.getKey());});
+        if(failed.isEmpty() && !"FAILED".equals(row.get("processing_status")))throw new ApiException(409,"INVALID_STATE","没有可重试的失败部分");
+        if(!failed.containsAll(requested))throw new ApiException(400,"VALIDATION_ERROR","重试项目不是失败部分");
+        String revision=row.get("id").toString();db.update("UPDATE reference_revision SET processing_status='QUEUED' WHERE id=?",revision);
+        long job=SqlSupport.insert(db,"INSERT INTO background_job(kind,reference_revision_id,status,payload_json,created_at) VALUES('PREPARE_REFERENCE',?,'QUEUED',?,UTC_TIMESTAMP(3))",revision,JsonSupport.encode(json,Map.of("failedPartKeys",requested.isEmpty()?failed:requested)));
+        var receipt=json.valueToTree(Map.of("jobId",Long.toString(job),"revisionId",revision,"status","QUEUED"));keys.complete(user.userId(),"REFERENCE_RETRY",key,receipt);return receipt;
+    }
 }
