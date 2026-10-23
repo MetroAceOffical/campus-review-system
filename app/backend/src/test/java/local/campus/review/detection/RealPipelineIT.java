@@ -25,7 +25,7 @@ class RealPipelineIT {
         assertTrue(client.health(false).path("ready").asBoolean(),"Dedicated test detector must be ready");
         assertTrue(client.health(true).path("ready").asBoolean(),"OCR must be ready");
         assertEquals("campus_review_midterm_test",db.queryForObject("SELECT DATABASE()",String.class));
-        db.update("UPDATE background_job SET status='INTERRUPTED',error_code='TEST_FIXTURE_RESET' WHERE status IN ('QUEUED','WAITING_SERVICE')");
+        db.update("UPDATE background_job SET status='INTERRUPTED',error_code='TEST_FIXTURE_RESET' WHERE status IN ('QUEUED','WAITING_SERVICE','RUNNING')");
         String adminId=db.queryForObject("SELECT id FROM app_user WHERE username='admin'",String.class);
         var admin=new CurrentUser(adminId,"test admin",CurrentUser.Role.ADMIN,Set.of(),List.of());
         var bytes=Files.readAllBytes(settings.root().resolve("validation/remaining/vision/inputs/mixed-known.png"));

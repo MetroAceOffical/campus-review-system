@@ -17,11 +17,12 @@ public class JobWorker {
     private final JdbcTemplate db;private final DataSource source;private final ObjectMapper json;
     private final DetectorClient client;private final DetectionService detection;private final AttemptRepository attempts;
     private final LibraryGenerationService libraries;private final ReferenceProcessor references;
-    private final String owner=UUID.randomUUID().toString();
-    public JobWorker(JdbcTemplate db,DataSource source,ObjectMapper json,DetectorClient client,DetectionService detection,AttemptRepository attempts,LibraryGenerationService libraries,ReferenceProcessor references){this.db=db;this.source=source;this.json=json;this.client=client;this.detection=detection;this.attempts=attempts;this.libraries=libraries;this.references=references;}
+    private final String owner=UUID.randomUUID().toString();private final RecoveryService recovery;
+    public JobWorker(JdbcTemplate db,DataSource source,ObjectMapper json,DetectorClient client,DetectionService detection,AttemptRepository attempts,LibraryGenerationService libraries,ReferenceProcessor references,RecoveryService recovery){this.db=db;this.source=source;this.json=json;this.client=client;this.detection=detection;this.attempts=attempts;this.libraries=libraries;this.references=references;this.recovery=recovery;}
     @Scheduled(fixedDelay=2000) public void poll(){if("true".equalsIgnoreCase(System.getenv("CAMPUS_WORKER_ENABLED")))runOne();}
     public boolean claim(String id,String run){return db.update("UPDATE background_job SET status='RUNNING',owner_run_id=?,started_at=UTC_TIMESTAMP(3),error_code=NULL WHERE id=? AND status IN ('QUEUED','WAITING_SERVICE')",run,id)==1;}
     public JobOutcome runOne(){
+        if(!recovery.recoverPreviousRun(owner))return new JobOutcome("WAITING_SERVICE",null);
         // The advisory lock is held on this physical connection across model calls.
         // It serializes workers without keeping a business transaction open.
         try(var connection=source.getConnection();var lock=connection.prepareStatement("SELECT GET_LOCK(?,0)")){
@@ -71,7 +72,7 @@ public class JobWorker {
         for(var item:items){
             String itemId=item.get("id").toString();if(onlyItem!=null && !onlyItem.equals(itemId))continue;
             String type=item.get("type").toString();String attempt=attempts.start(itemId,pipeline);
-            try{
+            try(var budget=client.budget("TEXT".equals(type)?"text":"IMAGE".equals(type)?"image":"ocrAndText")){
                 ObjectNode request=json.createObjectNode();request.put("taskId",itemId).put("attemptId",attempt).put("scene",batch.get("scene").toString()).put("versionId",batch.get("submission_version_id").toString()).put("inputSnapshotKey",batch.get("input_snapshot_key").toString()).put("inputSha256",batch.get("input_sha256").toString()).put("libraryGenerationId",pipeline.path("libraryGenerationId").asText()).put("libraryManifestSha256",pipeline.path("libraryManifestSha256").asText()).put("excludeManuscriptId",batch.get("manuscript_id").toString());
                 JsonNode result;
                 if("TEXT".equals(type)){

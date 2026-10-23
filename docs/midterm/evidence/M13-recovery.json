@@ -1,0 +1,25 @@
+{
+  "stage": "M13",
+  "realModelInterruption": true,
+  "receipt": {
+    "submissionId": "8",
+    "batchId": "8",
+    "status": "PENDING",
+    "versionNo": 1,
+    "draftRevision": "1"
+  },
+  "items": 13,
+  "finalStatus": "COMPLETED",
+  "completedAttemptIdsPreserved": [
+    "36"
+  ],
+  "interruptedItemsReceivedNewAttempt": [
+    "37"
+  ],
+  "oldPublishedSnapshotsStillReadable": true,
+  "modelsReady": {
+    "detector": true,
+    "ocr": true
+  },
+  "scope": "Labelled synthetic functional fixture. Not an accuracy or throughput estimate."
+}

@@ -1,0 +1,22 @@
+{
+  "stage": "M13",
+  "backupFiles": 220,
+  "restoreVerified": true,
+  "isolatedRestorePort": 3318,
+  "restoredDatabase": "campus_review_restore",
+  "rowCounts": "manuscript\t7\r\nsubmission_version\t7\r\ndetection_attempt\t36\r\nreference_work\t199\r\npublication\t2",
+  "businessDirectoryOverwritten": false,
+  "automaticActivation": false,
+  "temporaryInstanceStopped": true,
+  "systemMySQL80": "Running",
+  "realInterruptedAttempt": "38",
+  "oldAttemptStatus": "INTERRUPTED",
+  "oldAttemptError": "PROCESS_INTERRUPTED",
+  "javaTests": 38,
+  "javaSkipped": 1,
+  "frontendTests": 15,
+  "scriptTests": 7,
+  "mainPythonTests": 13,
+  "ocrPythonTests": 6,
+  "frozenFilesVerified": 580
+}

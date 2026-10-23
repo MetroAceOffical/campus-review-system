@@ -36,7 +36,7 @@ public class AttemptRepository {
         var row=locked(attempt);if(!current(row,attempt))return false;
         var retained=(com.fasterxml.jackson.databind.node.ObjectNode)JsonSupport.parse(json,row.get("result_json").toString());
         if(retained.has("ocrStatus") && !"COMPLETED".equals(retained.path("textSearchStatus").asText()))retained.put("textSearchStatus","FAILED").put("textSearchErrorCode",code);
-        end(row,attempt,cancelled(row)?"CANCELLED":"FAILED",retained,code,message);return true;
+        end(row,attempt,cancelled(row)?"CANCELLED":"DETECTOR_TIMEOUT".equals(code)?"TIMED_OUT":"FAILED",retained,code,message);return true;
     }
     @Transactional public boolean checkpointIfCurrent(String attempt,JsonNode result){
         var row=locked(attempt);if(!current(row,attempt) || cancelled(row))return false;
@@ -44,6 +44,6 @@ public class AttemptRepository {
     }
     private void end(Map<String,Object> row,String attempt,String status,JsonNode result,String code,String message){
         db.update("UPDATE detection_attempt SET status=?,result_json=?,error_code=?,error_message=?,finished_at=UTC_TIMESTAMP(3) WHERE id=? AND status='RUNNING'",status,JsonSupport.encode(json,result),code,message,attempt);
-        db.update("UPDATE detection_item SET status=?,updated_at=UTC_TIMESTAMP(3) WHERE id=? AND active_attempt_id=?",status,row.get("item_id"),attempt);
+        db.update("UPDATE detection_item SET status=?,updated_at=UTC_TIMESTAMP(3) WHERE id=? AND active_attempt_id=?","TIMED_OUT".equals(status)?"FAILED":status,row.get("item_id"),attempt);
     }
 }

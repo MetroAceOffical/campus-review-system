@@ -23,7 +23,7 @@ class FaultPipelineIT {
     @MockitoBean DetectorClient client;
     @Test void unavailableWaitsAndOcrFailureKeepsOtherItemsAndPinnedPipeline()throws Exception{
         assertEquals("campus_review_midterm_test",db.queryForObject("SELECT DATABASE()",String.class));
-        db.update("UPDATE background_job SET status='INTERRUPTED' WHERE status IN ('QUEUED','WAITING_SERVICE')");
+        db.update("UPDATE background_job SET status='INTERRUPTED' WHERE status IN ('QUEUED','WAITING_SERVICE','RUNNING')");
         String generation=libraries.reserve();var directory=settings.runtime().resolve("indexes").resolve(generation);Files.createDirectories(directory);
         String manifest="{\"generationId\":\""+generation+"\",\"documents\":[],\"images\":[],\"enabledReferenceWorkIds\":[]}";
         Files.writeString(directory.resolve("manifest.json"),manifest);String hash=HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(manifest.getBytes(java.nio.charset.StandardCharsets.UTF_8)));Files.writeString(directory.resolve("READY"),hash);libraries.markReady(generation,hash);libraries.activate(generation,libraries.currentId());

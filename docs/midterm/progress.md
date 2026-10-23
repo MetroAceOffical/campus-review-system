@@ -2,7 +2,7 @@
 
 ## 实施基线
 
-当前完成状态：M01—M12完成；M13恢复、M14容量与M15交付待完成。下文各阶段中的“进行中”是当时记录，以对应最终验收为准。
+当前完成状态：M01—M13完成；M14容量与M15交付待完成。下文各阶段中的“进行中”是当时记录，以对应最终验收为准。
 
 2026-10-23（Asia/Shanghai）开始。已完整读取交接、设计（含第22节）、实施计划、可行性报告第16节及剩余验证B/C和最终结论。无适用AGENTS.md，无Git仓库，无正式app工程。
 
@@ -224,3 +224,22 @@ M10 GitHub插件上传完成：main提交0f3abaafd7a0079fadeae6bf808f00d683579ba
 - 真实HTTP验收及浏览器核对官方/子集BERT指标、两轮历史、SVM分数与无历史提示、四页签；手动检查只改变最近检查时间。其他三个角色均403。摘要evidence/M12-experiments.json；本地截图M12-evaluation.png、M12-training.png、M12-comparison.png。
 - check ALL通过：Java33项（默认跳过1真实模型链），前端15/15及类型/构建，脚本3/3，主Python12项默认跳3、OCR6项默认跳2。补充新版本/坏工件断言后M12专项2项Java、1项导出、前端15项及构建通过；冻结580项哈希一致。日志runtime/logs/M12-final.log、M12-final-parts.log。Vite保留既有大包体积提示，不影响构建。
 - Task M12: complete。接续M13，不将尚未完成的恢复、容量或交付视为通过。
+
+## M13：恢复与运行入口（进行中）
+
+- M12已通过GitHub插件上传main：c53a0e21ffa2abc2d45021a640c18a70a8042134；树d6d415f36fa69cd7acdcdf91f3cd38842255c4a4。
+- 已实现RecoveryService：持MySQL单worker锁、两服务ready+idle+runId证明后回收旧owner RUNNING任务；保留成功结果和旧中间结果，将旧attempt记INTERRUPTED，只重排未完成项；取消状态不自动重试。ProcessSupervisor仅负责Java侧readiness证明，OS管理在项目启动器中。
+- 超时attempt记TIMED_OUT，业务item仍为可人工重试的FAILED；OCR及文本子阶段共享180秒总预算。测试先缺类/缺budget方法失败，再M13专项11项Java及7项脚本通过；真实本机HTTP延迟故障验证超时后busy=true，明确为故障测试，非模型准确率证据。
+- 测试隔离补充：FaultPipelineIT/RealPipelineIT在严格测试库名断言后也隔离RUNNING遗留夹具，防止恢复器将上次测试的任务当业务恢复。
+- 已建立start/status/stop：现有psutil已在主环境中，无安装；记录进程PID+创建时间+exe+完整命令+cwd+子进程+runId，未知/复用PID拒绝停止；Windows venv launcher父子分别核验。真实服务已交接至统一启动器，MySQL80保持Running。
+- 备份20261023T134406Z-f02aedea：Java停止、模型空闲下的SQL+uploads/derived/indexes/experiments/private-config/config+冻结清单共220文件。恢复首次因Windows CRLF/LF字符串比较误报，保留失败目录，补数值比较测试；新目录runtime/restores/M13-20261023T2146与3318临时实例恢复验证通过，220文件哈希、manuscript7/version7/attempt36/reference199/published2计数一致，验证实例已关闭。
+- Ruling: 恢复入口只向全新runtime/restores子目录与3310..3399独立实例还原并核验，不自动覆盖或激活业务目录 — 避免演示脚本误毁数据；历史manifest绝对路径和哈希保留，原运行目录替换须作为后续明确恢复操作，不能把隔离核验说成已迁移生产环境。
+- 真实中断夹具：probe_recovery.py interrupt经HTTP上传六张明确M13测试海报并送审（manuscript8/submission8/batch8）；完成1项且下一项RUNNING时停止已登记Java/主检测，成功重建/重启。当前verify阶段仍在等待真实OCR及文字检索结束，尚未宣布M13通过。日志M13-interrupt.log、M13-recovery-start.log、M13-recovery-verify.log。启动主runId aa5d0d87-a2e3-42ce-a5ce-763eea3c38c4，OCR45b48d61-b648-4d0f-b147-0ac90fc6b7b6，JavaPID33676（管理时仍须以registry核验，不凭此PID终止）。
+- 尚需：verify实际结果；M13 runbook、全套回归与冻结核验、GitHub阶段上传；然后M14容量与M15交付。源代码尚未把恢复/容量/最终交付视为完成。
+
+### M13最终验证
+
+- 实际batch8重启后13/13 COMPLETED；原成功item36的attempt37保留，中断item37创建新attempt39；旧attempt38仍INTERRUPTED/PROCESS_INTERRUPTED。旧发布稿2的版本1可读。摘要evidence/M13-recovery.json。六张OCR海报每项OCR+文字约10—11秒，仅是功能恢复样例，不作为容量结论。
+- 统一启动器Java/两个模型均owned=true且ready；项目MySQL3308继续运行，系统MySQL80仍Running；恢复验证端口3318已无监听。项目管理入口增加Windows文件锁，阻止同时启动/停止/备份；仍不接管未知进程。runbook已包含构建、启动、状态、停止、故障、备份和隔离恢复说明及其边界。
+- 最终check ALL：Java38项（默认跳过1真实模型链）、前端15/15及类型/构建、脚本7/7、主Python13项默认跳3、OCR6项默认跳2通过；冻结580项哈希一致。日志runtime/logs/M13-final.log。M13真实探针另外执行，不计入默认跳过的模型测试。
+- Task M13: complete。M14容量和M15最终审查/交付仍未完成。
