@@ -7,6 +7,7 @@ import { CampusImage, StableNodeIdentities, insertUploadedImage } from '../edito
 import { normalizeNodeIdentities, replaceImage } from '../editor/document'
 import { request } from '../api/http'
 import type { DocumentInput, DocumentNode, UploadedFile } from '../types/document'
+import { limits,loadLimits } from '../editor/limits'
 const props = defineProps<{ modelValue: DocumentInput; disabled?: boolean }>()
 const emit = defineEmits<{ 'update:modelValue': [value: DocumentInput]; uploading: [busy: boolean]; uploadError: [failed: boolean] }>()
 const failedUpload = ref(false)
@@ -31,7 +32,9 @@ function chooseImage(nodeId: string | null = null) { replacing.value = nodeId; f
 async function upload(event: Event) {
   const input = event.target as HTMLInputElement, file = input.files?.[0]
   if (!file || !editor.value) return
-  if (!replacing.value && countImages(editor.value.getJSON() as DocumentNode) >= 6) { ElMessage.error('每稿最多6张配图'); input.value = ''; return }
+  if(!limits.value){ElMessage.error('输入限额尚未读取，请稍后重试');input.value='';return}
+  if (!replacing.value && countImages(editor.value.getJSON() as DocumentNode) >= limits.value.images) { ElMessage.error(`每稿最多${limits.value.images}张配图`); input.value = ''; return }
+  if(file.size>limits.value.imageBytes){ElMessage.error(`单图最多${limits.value.imageBytes/1048576}MiB，原编辑内容已保留`);input.value='';return}
   busy.value = true; emit('uploading', true)
   try {
     const body = new FormData(); body.append('file', file)
@@ -45,7 +48,7 @@ async function upload(event: Event) {
 }
 function imageReplace(event: Event) { const detail = (event as CustomEvent).detail; if (editor.value?.isEditable && detail.editor === editor.value) chooseImage(detail.nodeId) }
 function setLink() { const value = window.prompt('请输入http/https链接', editor.value?.getAttributes('link').href ?? ''); if (value === null) return; if (!value) { editor.value?.chain().focus().unsetLink().run(); return }; if (!/^https?:\/\//i.test(value)) { ElMessage.error('链接须以http://或https://开头'); return }; editor.value?.chain().focus().extendMarkRange('link').setLink({ href: value }).run() }
-onMounted(() => window.addEventListener('campus-replace-image', imageReplace))
+onMounted(() => {window.addEventListener('campus-replace-image', imageReplace);void loadLimits().catch(error=>ElMessage.error(error instanceof Error?error.message:'读取限额失败'))})
 onBeforeUnmount(() => window.removeEventListener('campus-replace-image', imageReplace))
 </script>
 <template>

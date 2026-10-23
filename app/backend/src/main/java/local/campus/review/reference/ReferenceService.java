@@ -23,7 +23,7 @@ public class ReferenceService {
         var result=codec.validateForSubmission(new DocumentInput(input.title(),input.schemaVersion(),input.content(),input.sources()));
         if(input.sourceMetadata()==null || !input.sourceMetadata().isObject())throw new ApiException(400,"VALIDATION_ERROR","请填写参考材料来源");
         var metadata=(com.fasterxml.jackson.databind.node.ObjectNode)input.sourceMetadata().deepCopy();String type=metadata.path("sourceType").asText();
-        if("URL".equals(type))DocumentCodec.checkUrl(metadata.path("url").asText(),false);
+        if("URL".equals(type))codec.checkUrl(metadata.path("url").asText(),false);
         else if(!"MANUAL".equals(type) || metadata.path("description").asText().isBlank() || metadata.path("description").asText().length()>2000)throw new ApiException(400,"VALIDATION_ERROR","请填写有效的来源类型和说明");
         metadata.set("bodySources",json.valueToTree(result.document().sources()));
         LocalDateTime originalPublishedAt=null;

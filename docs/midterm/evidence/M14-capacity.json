@@ -1,0 +1,914 @@
+{
+  "stage": "M14",
+  "createdAt": "2026-10-23T14:09:34.052549+00:00",
+  "transport": "real authenticated HTTP and real model services",
+  "limits": {
+    "titleCodePoints": 200,
+    "bodyCodePoints": 10000,
+    "images": 6,
+    "imageBytes": 10485760,
+    "imagePixels": 20000000,
+    "imageSide": 8000,
+    "urlCharacters": 2000
+  },
+  "inputManifest": {
+    "representative": [
+      {
+        "sha256": "8e92a23e65caa52c65b863cb4247cedd2d07d04e56c7e17c75896e73a061fab0",
+        "bytes": 76677,
+        "width": 1416,
+        "height": 312,
+        "kind": "existing_official_original"
+      },
+      {
+        "sha256": "939eefb58a791f7e39660c18b7b652905a3d9c2e2449feaf85e501115725f2a7",
+        "bytes": 1239546,
+        "width": 2172,
+        "height": 1350,
+        "kind": "existing_official_original"
+      },
+      {
+        "sha256": "48a1ea9ab9b1a2726bd073e3883286cc8dafa82e1db9eefa83b090a2bf10fb33",
+        "bytes": 3116222,
+        "width": 1080,
+        "height": 720,
+        "kind": "existing_official_original"
+      },
+      {
+        "sha256": "0811c676dda5f2e50b7c4f56c4cfa52c98e647a6afe65d3093e96e1ba3019fa6",
+        "bytes": 2308406,
+        "width": 1280,
+        "height": 600,
+        "kind": "existing_official_original"
+      },
+      {
+        "sha256": "237598d66c35a209d4f6843ad4ca57fb16852ffbdd9c208569ea726c14fdebd9",
+        "bytes": 3580319,
+        "width": 1280,
+        "height": 698,
+        "kind": "existing_official_original"
+      },
+      {
+        "sha256": "9b6082f91eedaf20969460befa58ca336fbf39cf5234d8aaa662119f1d394329",
+        "bytes": 2337367,
+        "width": 1080,
+        "height": 720,
+        "kind": "existing_official_original"
+      }
+    ],
+    "nearLimit": [
+      {
+        "sha256": "c66b66642516a1527196a0063f3109712cff2c53d147e452e6ef78f0b6763165",
+        "bytes": 10361202,
+        "width": 4000,
+        "height": 5000,
+        "kind": "synthetic_natural_encoded_noise"
+      },
+      {
+        "sha256": "6120577d514c7f24633392975bd45c89d5da1bed212b0e130fd04d3abe74db1d",
+        "bytes": 10361410,
+        "width": 5000,
+        "height": 4000,
+        "kind": "synthetic_natural_encoded_noise"
+      },
+      {
+        "sha256": "73eb9a2d05b2da4d0d798b713d34d3322cb4c11d4171ee66f8624f6abd8a1855",
+        "bytes": 10374632,
+        "width": 8000,
+        "height": 2500,
+        "kind": "synthetic_natural_encoded_noise"
+      },
+      {
+        "sha256": "b4db6bfd5f0ea1eacda29e76167b554935d68304d645ef060364e08ed895ab44",
+        "bytes": 10360606,
+        "width": 4000,
+        "height": 5000,
+        "kind": "synthetic_natural_encoded_noise"
+      },
+      {
+        "sha256": "52d41697125f79aa059a3a866ce84203368f336116a0509ff1416a683ee64ba1",
+        "bytes": 10363143,
+        "width": 5000,
+        "height": 4000,
+        "kind": "synthetic_natural_encoded_noise"
+      },
+      {
+        "sha256": "0ac72eaaf31ec604dbc00a8c7c3a4193135931563a5b7a379b254a38417d149a",
+        "bytes": 10374875,
+        "width": 8000,
+        "height": 2500,
+        "kind": "synthetic_natural_encoded_noise"
+      }
+    ],
+    "ocrCorners": [
+      {
+        "sha256": "b60800eb753ea30f4798386a66b26ff058b0900e65841b571ce83bca15444082",
+        "bytes": 8487,
+        "width": 1600,
+        "height": 1200,
+        "kind": "synthetic_blank"
+      },
+      {
+        "sha256": "08bf0f50cd28e017993649bd8eba7451d17efba24837266f7e8383e7f8d89f2e",
+        "bytes": 129100,
+        "width": 1416,
+        "height": 312,
+        "kind": "blurred_copy_for_quality_check"
+      }
+    ]
+  },
+  "bodySha256": "7426cc4f2cb015f883f63bde5008e0266312f236d7a12ee5d9cf76573a95d16c",
+  "bodyCodePoints": 10000,
+  "boundaryCases": [
+    {
+      "case": "bytes-below",
+      "bytes": 10485759,
+      "httpStatus": 200,
+      "status": "PASS",
+      "fixture": "valid small PNG with explicit trailing padding for byte-boundary transport test"
+    },
+    {
+      "case": "bytes-exact",
+      "bytes": 10485760,
+      "httpStatus": 200,
+      "status": "PASS",
+      "fixture": "valid small PNG with explicit trailing padding for byte-boundary transport test"
+    },
+    {
+      "case": "bytes-over",
+      "bytes": 10485761,
+      "httpStatus": 413,
+      "status": "PASS",
+      "fixture": "valid small PNG with explicit trailing padding for byte-boundary transport test"
+    },
+    {
+      "case": "pixels-exact",
+      "width": 4000,
+      "height": 5000,
+      "httpStatus": 200,
+      "status": "PASS"
+    },
+    {
+      "case": "pixels-over",
+      "width": 4000,
+      "height": 5001,
+      "httpStatus": 413,
+      "status": "PASS"
+    },
+    {
+      "case": "side-exact",
+      "width": 8000,
+      "height": 1,
+      "httpStatus": 200,
+      "status": "PASS"
+    },
+    {
+      "case": "side-over",
+      "width": 8001,
+      "height": 1,
+      "httpStatus": 413,
+      "status": "PASS"
+    },
+    {
+      "case": "disguised-invalid-image",
+      "httpStatus": 415,
+      "status": "PASS"
+    },
+    {
+      "case": "unsupported-gif",
+      "httpStatus": 415,
+      "status": "PASS"
+    },
+    {
+      "case": "actual-decoded-format-used",
+      "httpStatus": 200,
+      "mimeType": "image/png",
+      "status": "PASS"
+    },
+    {
+      "case": "static-webp",
+      "httpStatus": 200,
+      "status": "PASS"
+    },
+    {
+      "case": "title-200-and-body-10000-codepoints",
+      "httpStatus": 200,
+      "status": "PASS"
+    },
+    {
+      "case": "title-201-codepoints",
+      "httpStatus": 413,
+      "status": "PASS"
+    },
+    {
+      "case": "body-10001-codepoints",
+      "httpStatus": 413,
+      "status": "PASS"
+    },
+    {
+      "case": "six-images",
+      "httpStatus": 200,
+      "status": "PASS"
+    },
+    {
+      "case": "seventh-image-rejected-and-prior-draft-preserved",
+      "httpStatus": 413,
+      "status": "PASS"
+    },
+    {
+      "case": "source-url-exact-limit",
+      "characters": 2000,
+      "httpStatus": 200,
+      "status": "PASS"
+    },
+    {
+      "case": "source-url-over-limit-prior-draft-preserved",
+      "characters": 2001,
+      "httpStatus": 400,
+      "status": "PASS"
+    }
+  ],
+  "batches": {
+    "representative": {
+      "receipt": {
+        "draftRevision": "1",
+        "versionNo": 1,
+        "status": "PENDING",
+        "batchId": "9",
+        "submissionId": "9"
+      },
+      "status": "PASS",
+      "batchStatus": "COMPLETED",
+      "totalItems": 13,
+      "completedItems": 13,
+      "createdAt": "2026-10-23T14:09:17.927Z",
+      "startedAt": "2026-10-23T14:09:19.086Z",
+      "finishedAt": "2026-10-23T14:09:20.563Z",
+      "queueWaitSeconds": 1.159,
+      "computeWallSeconds": 1.477,
+      "libraryGenerationId": "5",
+      "pipelineManifest": {
+        "ocrConfig": {
+          "model": "PP-OCRv5-mobile",
+          "device": "cpu",
+          "mkldnn": false,
+          "configId": "ocr-c6b8101cb2cfb7e4acf136c60595ecdb29de837898a33624512d8defb3bed15e",
+          "unwarping": false,
+          "cpuThreads": 2,
+          "modelFiles": {
+            "PP-OCRv5_mobile_det_infer/inference.yml": "98069072e1b6b37d727fd9d9f11725faa46d6ea0de012f2ed26caea011c37699",
+            "PP-OCRv5_mobile_rec_infer/inference.yml": "5dfeb2777f6d0db8177d8128a8acfcf6e6276dc4ac73ea3bf0dc06d6a5e85d8e",
+            "PP-OCRv5_mobile_det_infer/inference.json": "05feef1acb00aa4cd7362b15f7f501fc4f99d7b1fa73c1c871e0c7b1504b0f5c",
+            "PP-OCRv5_mobile_rec_infer/inference.json": "24587345250c7332d0fc6f9a44e794d078cdaeb64c302fef906f325619de2569",
+            "PP-OCRv5_mobile_det_infer/inference.pdiparams": "afa1820cb16c1fd0dad589d0f8b389139061c1ef6d68019685fd07be997dda5b",
+            "PP-OCRv5_mobile_rec_infer/inference.pdiparams": "2460da90875937c94db97eba74ae3d9e5d4c4c57c42f1f41531c09a26bcc771a"
+          },
+          "schemaVersion": "ocr-v1",
+          "featureSpaceId": "ocr-02f6d19b9d2c1b6238ca059eda3687bfdb30688eb84b807b97b710a0412a3d85",
+          "detectionLimitSide": 960,
+          "detectionLimitType": "max",
+          "textlineOrientation": false,
+          "recognitionBatchSize": 1,
+          "lowConfidenceThreshold": 0.8,
+          "orientationClassification": false,
+          "recognitionScoreThreshold": 0.0
+        },
+        "textConfig": {
+          "chunk": {
+            "tokens": 48,
+            "overlap": 12
+          },
+          "method": "V1-A-20261022",
+          "params": {
+            "min_chars": 64,
+            "min_coverage": 0.25,
+            "literal_minimum": 32
+          },
+          "configId": "text-393f674ef0ce299ee2f2cc0c99a84a056a1df9dba9c6a2b3c93e4e785602f02a",
+          "candidateK": 10,
+          "templateGram": 16,
+          "weightSha256": "95171253f783750a17859981624da33af7d619ebc7e3eac9a25f5530c0deba51",
+          "bertPrecision": "bfloat16-autocast",
+          "schemaVersion": "text-v1",
+          "semanticAlpha": 0,
+          "templateRatio": 0.8,
+          "featureSpaceId": "text-7da285ed72fd987a2f70651402183c316ce275b11cce22828e813201f41a19a6",
+          "selectionSha256": "4e2b1aa1670d0d4912904324abd96b9e8f4a1aa18013e55df3864e65e12300d9",
+          "tokenizerSha256": "55c5edcfb8936895e019b2d8f97dcb547734f25b29f95009155f4c8c15649aae",
+          "bertPairMaxTokens": 128,
+          "literalSearchMinimum": 20,
+          "templateDocumentRatio": 0.1,
+          "semanticWindowsPerSource": 2
+        },
+        "imageConfig": {
+          "model": "facebook/dinov2-small",
+          "feature": "L2-normalized-CLS",
+          "configId": "image-1ca97aa01f6fe2d5bea1455ea2f9da04e1e78f9c39facd4c3782c1acfba014e4",
+          "revision": "ed25f3a31f01632728cabb09d1542f84ab7b0056",
+          "precision": "FP32",
+          "processor": "slow-PIL",
+          "threshold": 0.8157106637954712,
+          "dimensions": 384,
+          "weightSha256": "ae1e99fcefd534ed978cdeb8326f08030c96e28b7a81ffcbc98a857c84d14be1",
+          "schemaVersion": "image-v1",
+          "featureSpaceId": "dino-a4cb3d5daf117cab19c9296a30c576b332f942554876526decbc164d33c014e3",
+          "processorSha256": "14e780d86fa1861f8751f868d7f45425b5feb55c38ca26f152ca5097ab30f828"
+        },
+        "libraryGenerationId": "5",
+        "libraryManifestSha256": "36bd3f4b3a563bf3ae4219bc28c8bfabe12be4e43b3ee69223487cc886082259"
+      },
+      "items": [
+        {
+          "itemId": "49",
+          "type": "TEXT",
+          "status": "COMPLETED",
+          "attemptId": "51",
+          "elapsedSeconds": 0.551,
+          "errorCode": "",
+          "ocrStatus": null,
+          "qualityFlags": [
+            "PARTIAL_SEMANTIC_COVERAGE"
+          ],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "50",
+          "type": "IMAGE",
+          "status": "COMPLETED",
+          "attemptId": "52",
+          "elapsedSeconds": 0.033,
+          "errorCode": "",
+          "ocrStatus": null,
+          "qualityFlags": [],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "51",
+          "type": "OCR_AND_TEXT",
+          "status": "COMPLETED",
+          "attemptId": "58",
+          "elapsedSeconds": 0.126,
+          "errorCode": "",
+          "ocrStatus": "COMPLETED",
+          "qualityFlags": [
+            "COVERAGE_UNVERIFIED"
+          ],
+          "recognitionCacheHit": true
+        },
+        {
+          "itemId": "52",
+          "type": "IMAGE",
+          "status": "COMPLETED",
+          "attemptId": "53",
+          "elapsedSeconds": 0.083,
+          "errorCode": "",
+          "ocrStatus": null,
+          "qualityFlags": [],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "53",
+          "type": "OCR_AND_TEXT",
+          "status": "COMPLETED",
+          "attemptId": "59",
+          "elapsedSeconds": 0.073,
+          "errorCode": "",
+          "ocrStatus": "COMPLETED",
+          "qualityFlags": [
+            "COVERAGE_UNVERIFIED",
+            "LOW_CONFIDENCE"
+          ],
+          "recognitionCacheHit": true
+        },
+        {
+          "itemId": "54",
+          "type": "IMAGE",
+          "status": "COMPLETED",
+          "attemptId": "54",
+          "elapsedSeconds": 0.04,
+          "errorCode": "",
+          "ocrStatus": null,
+          "qualityFlags": [],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "55",
+          "type": "OCR_AND_TEXT",
+          "status": "COMPLETED",
+          "attemptId": "60",
+          "elapsedSeconds": 0.071,
+          "errorCode": "",
+          "ocrStatus": "COMPLETED",
+          "qualityFlags": [
+            "COVERAGE_UNVERIFIED",
+            "LOW_CONFIDENCE"
+          ],
+          "recognitionCacheHit": true
+        },
+        {
+          "itemId": "56",
+          "type": "IMAGE",
+          "status": "COMPLETED",
+          "attemptId": "55",
+          "elapsedSeconds": 0.04,
+          "errorCode": "",
+          "ocrStatus": null,
+          "qualityFlags": [],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "57",
+          "type": "OCR_AND_TEXT",
+          "status": "COMPLETED",
+          "attemptId": "61",
+          "elapsedSeconds": 0.058,
+          "errorCode": "",
+          "ocrStatus": "COMPLETED",
+          "qualityFlags": [
+            "COVERAGE_UNVERIFIED",
+            "LOW_CONFIDENCE"
+          ],
+          "recognitionCacheHit": true
+        },
+        {
+          "itemId": "58",
+          "type": "IMAGE",
+          "status": "COMPLETED",
+          "attemptId": "56",
+          "elapsedSeconds": 0.045,
+          "errorCode": "",
+          "ocrStatus": null,
+          "qualityFlags": [],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "59",
+          "type": "OCR_AND_TEXT",
+          "status": "COMPLETED",
+          "attemptId": "62",
+          "elapsedSeconds": 0.086,
+          "errorCode": "",
+          "ocrStatus": "COMPLETED",
+          "qualityFlags": [
+            "COVERAGE_UNVERIFIED",
+            "LOW_CONFIDENCE"
+          ],
+          "recognitionCacheHit": true
+        },
+        {
+          "itemId": "60",
+          "type": "IMAGE",
+          "status": "COMPLETED",
+          "attemptId": "57",
+          "elapsedSeconds": 0.042,
+          "errorCode": "",
+          "ocrStatus": null,
+          "qualityFlags": [],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "61",
+          "type": "OCR_AND_TEXT",
+          "status": "COMPLETED",
+          "attemptId": "63",
+          "elapsedSeconds": 0.059,
+          "errorCode": "",
+          "ocrStatus": "COMPLETED",
+          "qualityFlags": [
+            "COVERAGE_UNVERIFIED",
+            "LOW_CONFIDENCE"
+          ],
+          "recognitionCacheHit": true
+        }
+      ]
+    },
+    "nearLimit": {
+      "receipt": {
+        "draftRevision": "1",
+        "versionNo": 1,
+        "status": "PENDING",
+        "batchId": "10",
+        "submissionId": "10"
+      },
+      "status": "PASS",
+      "batchStatus": "COMPLETED",
+      "totalItems": 13,
+      "completedItems": 13,
+      "createdAt": "2026-10-23T14:09:21.204Z",
+      "startedAt": "2026-10-23T14:09:22.592Z",
+      "finishedAt": "2026-10-23T14:09:30.033Z",
+      "queueWaitSeconds": 1.388,
+      "computeWallSeconds": 7.441,
+      "libraryGenerationId": "5",
+      "pipelineManifest": {
+        "ocrConfig": {
+          "model": "PP-OCRv5-mobile",
+          "device": "cpu",
+          "mkldnn": false,
+          "configId": "ocr-c6b8101cb2cfb7e4acf136c60595ecdb29de837898a33624512d8defb3bed15e",
+          "unwarping": false,
+          "cpuThreads": 2,
+          "modelFiles": {
+            "PP-OCRv5_mobile_det_infer/inference.yml": "98069072e1b6b37d727fd9d9f11725faa46d6ea0de012f2ed26caea011c37699",
+            "PP-OCRv5_mobile_rec_infer/inference.yml": "5dfeb2777f6d0db8177d8128a8acfcf6e6276dc4ac73ea3bf0dc06d6a5e85d8e",
+            "PP-OCRv5_mobile_det_infer/inference.json": "05feef1acb00aa4cd7362b15f7f501fc4f99d7b1fa73c1c871e0c7b1504b0f5c",
+            "PP-OCRv5_mobile_rec_infer/inference.json": "24587345250c7332d0fc6f9a44e794d078cdaeb64c302fef906f325619de2569",
+            "PP-OCRv5_mobile_det_infer/inference.pdiparams": "afa1820cb16c1fd0dad589d0f8b389139061c1ef6d68019685fd07be997dda5b",
+            "PP-OCRv5_mobile_rec_infer/inference.pdiparams": "2460da90875937c94db97eba74ae3d9e5d4c4c57c42f1f41531c09a26bcc771a"
+          },
+          "schemaVersion": "ocr-v1",
+          "featureSpaceId": "ocr-02f6d19b9d2c1b6238ca059eda3687bfdb30688eb84b807b97b710a0412a3d85",
+          "detectionLimitSide": 960,
+          "detectionLimitType": "max",
+          "textlineOrientation": false,
+          "recognitionBatchSize": 1,
+          "lowConfidenceThreshold": 0.8,
+          "orientationClassification": false,
+          "recognitionScoreThreshold": 0.0
+        },
+        "textConfig": {
+          "chunk": {
+            "tokens": 48,
+            "overlap": 12
+          },
+          "method": "V1-A-20261022",
+          "params": {
+            "min_chars": 64,
+            "min_coverage": 0.25,
+            "literal_minimum": 32
+          },
+          "configId": "text-393f674ef0ce299ee2f2cc0c99a84a056a1df9dba9c6a2b3c93e4e785602f02a",
+          "candidateK": 10,
+          "templateGram": 16,
+          "weightSha256": "95171253f783750a17859981624da33af7d619ebc7e3eac9a25f5530c0deba51",
+          "bertPrecision": "bfloat16-autocast",
+          "schemaVersion": "text-v1",
+          "semanticAlpha": 0,
+          "templateRatio": 0.8,
+          "featureSpaceId": "text-7da285ed72fd987a2f70651402183c316ce275b11cce22828e813201f41a19a6",
+          "selectionSha256": "4e2b1aa1670d0d4912904324abd96b9e8f4a1aa18013e55df3864e65e12300d9",
+          "tokenizerSha256": "55c5edcfb8936895e019b2d8f97dcb547734f25b29f95009155f4c8c15649aae",
+          "bertPairMaxTokens": 128,
+          "literalSearchMinimum": 20,
+          "templateDocumentRatio": 0.1,
+          "semanticWindowsPerSource": 2
+        },
+        "imageConfig": {
+          "model": "facebook/dinov2-small",
+          "feature": "L2-normalized-CLS",
+          "configId": "image-1ca97aa01f6fe2d5bea1455ea2f9da04e1e78f9c39facd4c3782c1acfba014e4",
+          "revision": "ed25f3a31f01632728cabb09d1542f84ab7b0056",
+          "precision": "FP32",
+          "processor": "slow-PIL",
+          "threshold": 0.8157106637954712,
+          "dimensions": 384,
+          "weightSha256": "ae1e99fcefd534ed978cdeb8326f08030c96e28b7a81ffcbc98a857c84d14be1",
+          "schemaVersion": "image-v1",
+          "featureSpaceId": "dino-a4cb3d5daf117cab19c9296a30c576b332f942554876526decbc164d33c014e3",
+          "processorSha256": "14e780d86fa1861f8751f868d7f45425b5feb55c38ca26f152ca5097ab30f828"
+        },
+        "libraryGenerationId": "5",
+        "libraryManifestSha256": "36bd3f4b3a563bf3ae4219bc28c8bfabe12be4e43b3ee69223487cc886082259"
+      },
+      "items": [
+        {
+          "itemId": "62",
+          "type": "TEXT",
+          "status": "COMPLETED",
+          "attemptId": "64",
+          "elapsedSeconds": 0.361,
+          "errorCode": "",
+          "ocrStatus": null,
+          "qualityFlags": [
+            "PARTIAL_SEMANTIC_COVERAGE"
+          ],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "63",
+          "type": "IMAGE",
+          "status": "COMPLETED",
+          "attemptId": "65",
+          "elapsedSeconds": 0.425,
+          "errorCode": "",
+          "ocrStatus": null,
+          "qualityFlags": [],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "64",
+          "type": "OCR_AND_TEXT",
+          "status": "COMPLETED",
+          "attemptId": "71",
+          "elapsedSeconds": 0.95,
+          "errorCode": "",
+          "ocrStatus": "EMPTY",
+          "qualityFlags": [
+            "COVERAGE_UNVERIFIED",
+            "EMPTY_OCR"
+          ],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "65",
+          "type": "IMAGE",
+          "status": "COMPLETED",
+          "attemptId": "66",
+          "elapsedSeconds": 0.422,
+          "errorCode": "",
+          "ocrStatus": null,
+          "qualityFlags": [],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "66",
+          "type": "OCR_AND_TEXT",
+          "status": "COMPLETED",
+          "attemptId": "72",
+          "elapsedSeconds": 0.87,
+          "errorCode": "",
+          "ocrStatus": "EMPTY",
+          "qualityFlags": [
+            "COVERAGE_UNVERIFIED",
+            "EMPTY_OCR"
+          ],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "67",
+          "type": "IMAGE",
+          "status": "COMPLETED",
+          "attemptId": "67",
+          "elapsedSeconds": 0.381,
+          "errorCode": "",
+          "ocrStatus": null,
+          "qualityFlags": [],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "68",
+          "type": "OCR_AND_TEXT",
+          "status": "COMPLETED",
+          "attemptId": "73",
+          "elapsedSeconds": 0.419,
+          "errorCode": "",
+          "ocrStatus": "EMPTY",
+          "qualityFlags": [
+            "COVERAGE_UNVERIFIED",
+            "EMPTY_OCR"
+          ],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "69",
+          "type": "IMAGE",
+          "status": "COMPLETED",
+          "attemptId": "68",
+          "elapsedSeconds": 0.368,
+          "errorCode": "",
+          "ocrStatus": null,
+          "qualityFlags": [],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "70",
+          "type": "OCR_AND_TEXT",
+          "status": "COMPLETED",
+          "attemptId": "74",
+          "elapsedSeconds": 0.89,
+          "errorCode": "",
+          "ocrStatus": "EMPTY",
+          "qualityFlags": [
+            "COVERAGE_UNVERIFIED",
+            "EMPTY_OCR"
+          ],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "71",
+          "type": "IMAGE",
+          "status": "COMPLETED",
+          "attemptId": "69",
+          "elapsedSeconds": 0.384,
+          "errorCode": "",
+          "ocrStatus": null,
+          "qualityFlags": [],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "72",
+          "type": "OCR_AND_TEXT",
+          "status": "COMPLETED",
+          "attemptId": "75",
+          "elapsedSeconds": 0.882,
+          "errorCode": "",
+          "ocrStatus": "EMPTY",
+          "qualityFlags": [
+            "COVERAGE_UNVERIFIED",
+            "EMPTY_OCR"
+          ],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "73",
+          "type": "IMAGE",
+          "status": "COMPLETED",
+          "attemptId": "70",
+          "elapsedSeconds": 0.393,
+          "errorCode": "",
+          "ocrStatus": null,
+          "qualityFlags": [],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "74",
+          "type": "OCR_AND_TEXT",
+          "status": "COMPLETED",
+          "attemptId": "76",
+          "elapsedSeconds": 0.443,
+          "errorCode": "",
+          "ocrStatus": "EMPTY",
+          "qualityFlags": [
+            "COVERAGE_UNVERIFIED",
+            "EMPTY_OCR"
+          ],
+          "recognitionCacheHit": null
+        }
+      ]
+    },
+    "ocrCorners": {
+      "receipt": {
+        "draftRevision": "1",
+        "versionNo": 1,
+        "status": "PENDING",
+        "batchId": "11",
+        "submissionId": "11"
+      },
+      "status": "PASS",
+      "batchStatus": "COMPLETED",
+      "totalItems": 5,
+      "completedItems": 5,
+      "createdAt": "2026-10-23T14:09:21.791Z",
+      "startedAt": "2026-10-23T14:09:32.246Z",
+      "finishedAt": "2026-10-23T14:09:33.473Z",
+      "queueWaitSeconds": 10.455,
+      "computeWallSeconds": 1.227,
+      "libraryGenerationId": "5",
+      "pipelineManifest": {
+        "ocrConfig": {
+          "model": "PP-OCRv5-mobile",
+          "device": "cpu",
+          "mkldnn": false,
+          "configId": "ocr-c6b8101cb2cfb7e4acf136c60595ecdb29de837898a33624512d8defb3bed15e",
+          "unwarping": false,
+          "cpuThreads": 2,
+          "modelFiles": {
+            "PP-OCRv5_mobile_det_infer/inference.yml": "98069072e1b6b37d727fd9d9f11725faa46d6ea0de012f2ed26caea011c37699",
+            "PP-OCRv5_mobile_rec_infer/inference.yml": "5dfeb2777f6d0db8177d8128a8acfcf6e6276dc4ac73ea3bf0dc06d6a5e85d8e",
+            "PP-OCRv5_mobile_det_infer/inference.json": "05feef1acb00aa4cd7362b15f7f501fc4f99d7b1fa73c1c871e0c7b1504b0f5c",
+            "PP-OCRv5_mobile_rec_infer/inference.json": "24587345250c7332d0fc6f9a44e794d078cdaeb64c302fef906f325619de2569",
+            "PP-OCRv5_mobile_det_infer/inference.pdiparams": "afa1820cb16c1fd0dad589d0f8b389139061c1ef6d68019685fd07be997dda5b",
+            "PP-OCRv5_mobile_rec_infer/inference.pdiparams": "2460da90875937c94db97eba74ae3d9e5d4c4c57c42f1f41531c09a26bcc771a"
+          },
+          "schemaVersion": "ocr-v1",
+          "featureSpaceId": "ocr-02f6d19b9d2c1b6238ca059eda3687bfdb30688eb84b807b97b710a0412a3d85",
+          "detectionLimitSide": 960,
+          "detectionLimitType": "max",
+          "textlineOrientation": false,
+          "recognitionBatchSize": 1,
+          "lowConfidenceThreshold": 0.8,
+          "orientationClassification": false,
+          "recognitionScoreThreshold": 0.0
+        },
+        "textConfig": {
+          "chunk": {
+            "tokens": 48,
+            "overlap": 12
+          },
+          "method": "V1-A-20261022",
+          "params": {
+            "min_chars": 64,
+            "min_coverage": 0.25,
+            "literal_minimum": 32
+          },
+          "configId": "text-393f674ef0ce299ee2f2cc0c99a84a056a1df9dba9c6a2b3c93e4e785602f02a",
+          "candidateK": 10,
+          "templateGram": 16,
+          "weightSha256": "95171253f783750a17859981624da33af7d619ebc7e3eac9a25f5530c0deba51",
+          "bertPrecision": "bfloat16-autocast",
+          "schemaVersion": "text-v1",
+          "semanticAlpha": 0,
+          "templateRatio": 0.8,
+          "featureSpaceId": "text-7da285ed72fd987a2f70651402183c316ce275b11cce22828e813201f41a19a6",
+          "selectionSha256": "4e2b1aa1670d0d4912904324abd96b9e8f4a1aa18013e55df3864e65e12300d9",
+          "tokenizerSha256": "55c5edcfb8936895e019b2d8f97dcb547734f25b29f95009155f4c8c15649aae",
+          "bertPairMaxTokens": 128,
+          "literalSearchMinimum": 20,
+          "templateDocumentRatio": 0.1,
+          "semanticWindowsPerSource": 2
+        },
+        "imageConfig": {
+          "model": "facebook/dinov2-small",
+          "feature": "L2-normalized-CLS",
+          "configId": "image-1ca97aa01f6fe2d5bea1455ea2f9da04e1e78f9c39facd4c3782c1acfba014e4",
+          "revision": "ed25f3a31f01632728cabb09d1542f84ab7b0056",
+          "precision": "FP32",
+          "processor": "slow-PIL",
+          "threshold": 0.8157106637954712,
+          "dimensions": 384,
+          "weightSha256": "ae1e99fcefd534ed978cdeb8326f08030c96e28b7a81ffcbc98a857c84d14be1",
+          "schemaVersion": "image-v1",
+          "featureSpaceId": "dino-a4cb3d5daf117cab19c9296a30c576b332f942554876526decbc164d33c014e3",
+          "processorSha256": "14e780d86fa1861f8751f868d7f45425b5feb55c38ca26f152ca5097ab30f828"
+        },
+        "libraryGenerationId": "5",
+        "libraryManifestSha256": "36bd3f4b3a563bf3ae4219bc28c8bfabe12be4e43b3ee69223487cc886082259"
+      },
+      "items": [
+        {
+          "itemId": "75",
+          "type": "TEXT",
+          "status": "COMPLETED",
+          "attemptId": "77",
+          "elapsedSeconds": 0.264,
+          "errorCode": "",
+          "ocrStatus": null,
+          "qualityFlags": [
+            "PARTIAL_SEMANTIC_COVERAGE"
+          ],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "76",
+          "type": "IMAGE",
+          "status": "COMPLETED",
+          "attemptId": "78",
+          "elapsedSeconds": 0.047,
+          "errorCode": "",
+          "ocrStatus": null,
+          "qualityFlags": [],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "77",
+          "type": "OCR_AND_TEXT",
+          "status": "COMPLETED",
+          "attemptId": "80",
+          "elapsedSeconds": 0.668,
+          "errorCode": "",
+          "ocrStatus": "EMPTY",
+          "qualityFlags": [
+            "COVERAGE_UNVERIFIED",
+            "EMPTY_OCR"
+          ],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "78",
+          "type": "IMAGE",
+          "status": "COMPLETED",
+          "attemptId": "79",
+          "elapsedSeconds": 0.026,
+          "errorCode": "",
+          "ocrStatus": null,
+          "qualityFlags": [],
+          "recognitionCacheHit": null
+        },
+        {
+          "itemId": "79",
+          "type": "OCR_AND_TEXT",
+          "status": "COMPLETED",
+          "attemptId": "81",
+          "elapsedSeconds": 0.191,
+          "errorCode": "",
+          "ocrStatus": "EMPTY",
+          "qualityFlags": [
+            "COVERAGE_UNVERIFIED",
+            "EMPTY_OCR"
+          ],
+          "recognitionCacheHit": null
+        }
+      ]
+    }
+  },
+  "multipleQueuedBatchesExecutedSerially": true,
+  "resources": {
+    "samples": 40,
+    "observationSeconds": 21.609000000004016,
+    "minimumSystemAvailableBytes": 1474015232,
+    "peakProjectRssSumBytes": 2355404800,
+    "peakProjectCpuPercentOneCoreBasis": 221.4,
+    "peakTotalGpuUsedMiB": 1056,
+    "notes": [
+      "RSS sum may double-count shared pages; system available memory is separately observed.",
+      "GPU value is total device memory, not solely this application. CPU percentages can exceed 100 on multiple cores.",
+      "Sampled observations, not a guaranteed minimum RAM requirement or production throughput estimate."
+    ]
+  },
+  "limitations": [
+    "Near-limit JPEGs are deterministic synthetic stress data, not evidence of OCR accuracy.",
+    "The long-form fixture explicitly selects exactly 10000 code points from existing official source text after a test label; original sources are untouched.",
+    "Single local acceptance observation, not a production throughput or accuracy estimate.",
+    "All fixtures are explicitly labelled and remain unpublished. Failure tests and byte padding are separately identified."
+  ]
+}

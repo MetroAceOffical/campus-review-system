@@ -20,6 +20,7 @@ public class DetectionQueryService {
     public JsonNode snapshot(String id){
         var batch=db.queryForMap("SELECT * FROM detection_batch WHERE id=?",id);
         var result=json.createObjectNode().put("batchId",id).put("status",batch.get("status").toString());var items=result.putArray("items");int completed=0;
+        for(String field:new String[]{"created_at","started_at","finished_at"}){String key=switch(field){case "created_at"->"createdAt";case "started_at"->"startedAt";default->"finishedAt";};if(batch.get(field)==null)result.putNull(key);else result.put(key,((java.time.LocalDateTime)batch.get(field)).atOffset(java.time.ZoneOffset.UTC).toString());}
         for(var item:db.queryForList("SELECT * FROM detection_item WHERE batch_id=? ORDER BY id",id)){
             var value=items.addObject().put("itemId",item.get("id").toString()).put("type",item.get("type").toString()).put("targetKey",item.get("target_key").toString()).put("status",item.get("status").toString());
             if(item.get("active_attempt_id")==null)value.putNull("activeAttemptId");else value.put("activeAttemptId",item.get("active_attempt_id").toString());
@@ -38,6 +39,7 @@ public class DetectionQueryService {
             if(item.path("activeAttemptId").isNull()){value.putNull("activeAttempt");value.set("evidence",json.createArrayNode());continue;}
             var attempt=db.queryForMap("SELECT * FROM detection_attempt WHERE id=?",item.path("activeAttemptId").asText());
             var execution=json.createObjectNode().put("attemptId",attempt.get("id").toString()).put("attemptNo",((Number)attempt.get("attempt_no")).intValue()).put("status",attempt.get("status").toString());
+            execution.put("startedAt",((java.time.LocalDateTime)attempt.get("started_at")).atOffset(java.time.ZoneOffset.UTC).toString());if(attempt.get("finished_at")==null)execution.putNull("finishedAt");else execution.put("finishedAt",((java.time.LocalDateTime)attempt.get("finished_at")).atOffset(java.time.ZoneOffset.UTC).toString());
             execution.set("modelConfig",JsonSupport.parse(json,attempt.get("model_config_json").toString()));execution.put("errorCode",Objects.toString(attempt.get("error_code"),"")).put("errorMessage",Objects.toString(attempt.get("error_message"),""));
             var output=JsonSupport.parse(json,attempt.get("result_json").toString());execution.set("result",output);value.set("activeAttempt",execution);
             value.set("evidence",output.path("evidence").isArray()?output.path("evidence"):output.path("textEvidence").isArray()?output.path("textEvidence"):json.createArrayNode());value.set("qualityFlags",output.path("qualityFlags").isArray()?output.path("qualityFlags"):json.createArrayNode());

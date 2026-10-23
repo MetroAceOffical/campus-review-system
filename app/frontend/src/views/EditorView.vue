@@ -7,15 +7,18 @@ import { request } from '../api/http'
 import { session } from '../session'
 import type { DocumentInput, SavedDraft } from '../types/document'
 import { saveDraft, submitDraft } from '../api/manuscripts'
+import { limits,loadLimits,documentSize,validationMessage } from '../editor/limits'
 const route = useRoute(), router = useRouter()
 const value = ref<DocumentInput>({ title: '', schemaVersion: '1', content: { type: 'doc', content: [] }, sources: [] })
 const revision = ref('0'), savedAt = ref(''), id = ref(''), baseline = ref(''), loading = ref(true), saving = ref(false), uploading = ref(false), error = ref('')
 const submitting = ref(false), uploadError = ref(false)
 let submitted = false, submissionSignature = '', submissionKey = ''
 const dirty = computed(() => !!baseline.value && JSON.stringify(value.value) !== baseline.value)
+const size=computed(()=>documentSize(value.value)),limitError=computed(()=>validationMessage(value.value,limits.value))
 function accept(draft: SavedDraft) { value.value = { title: draft.title, schemaVersion: draft.schemaVersion, content: draft.content, sources: draft.sources }; revision.value = draft.revision; savedAt.value = draft.savedAt; baseline.value = JSON.stringify(value.value) }
 async function load() {
   try {
+    await loadLimits()
     id.value = String(route.params.id ?? '')
     if (route.name === 'new-manuscript') {
       const organizationId = session.user?.organizations[0]?.organizationId
@@ -30,6 +33,7 @@ async function load() {
 }
 async function save() {
   if (saving.value || uploading.value) return
+  if(limitError.value){error.value=limitError.value;return}
   saving.value = true; error.value = ''
   const sent: DocumentInput = JSON.parse(JSON.stringify(value.value))
   try {
@@ -41,6 +45,7 @@ async function save() {
 }
 async function submit() {
   if (saving.value || submitting.value || uploading.value || uploadError.value) return
+  if(limitError.value){error.value=limitError.value;return}
   try { await ElMessageBox.confirm('送审将保存当前内容并生成独立版本，待审期间不能编辑。确认送审？', '送审确认', { confirmButtonText: '送审', cancelButtonText: '继续编辑' }) } catch { return }
   submitting.value = true; error.value = ''
   const sent: DocumentInput = JSON.parse(JSON.stringify(value.value))
@@ -61,9 +66,9 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
 </script>
 <template>
   <div v-loading="loading"><el-alert v-if="error" :title="error" type="error" :closable="false" show-icon />
-    <template v-if="!loading && baseline"><div class="editor-actions panel"><span :class="{ 'unsaved': dirty }">{{ dirty ? '有未保存修改' : '已保存' }}</span><span class="muted">{{ savedAt ? `最近保存：${new Date(savedAt).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}` : '' }}</span><el-button :loading="saving" :disabled="uploading || submitting" @click="save">保存草稿</el-button><el-button type="primary" :loading="submitting" :disabled="uploading || uploadError || saving || submitting" @click="submit">送审</el-button></div>
-      <section class="panel"><el-input v-model="value.title" :disabled="submitting" aria-label="稿件标题" placeholder="稿件标题" maxlength="400" class="article-title-input" /><CampusEditor v-model="value" :disabled="submitting" @uploading="uploading = $event" @upload-error="uploadError = $event" /><p class="muted upload-note">最多6张静态JPG、PNG或WebP；每张不超过10MiB、2000万像素，任一边不超过8000像素。</p></section>
-      <section class="panel"><div class="section-heading"><h2>正文来源</h2><el-button size="small" :disabled="submitting" @click="addSource">添加来源</el-button></div><div v-for="(source, index) in value.sources" :key="source.sourceId" class="source-row"><el-input v-model="source.url" :disabled="submitting" placeholder="http/https来源链接" maxlength="2000" /><el-button :disabled="submitting" @click="value.sources.splice(index, 1)">删除</el-button></div><span v-if="!value.sources.length" class="muted">没有引用可不填写</span></section>
+    <template v-if="!loading && baseline"><div class="editor-actions panel"><span :class="{ 'unsaved': dirty }">{{ dirty ? '有未保存修改' : '已保存' }}</span><span class="muted">{{ savedAt ? `最近保存：${new Date(savedAt).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}` : '' }}</span><el-button :loading="saving" :disabled="uploading || submitting" @click="save">保存草稿</el-button><el-button type="primary" :loading="submitting" :disabled="uploading || uploadError || saving || submitting || !!limitError" @click="submit">送审</el-button></div>
+      <section class="panel"><el-input v-model="value.title" :disabled="submitting" aria-label="稿件标题" placeholder="稿件标题"  class="article-title-input" /><el-alert v-if="limitError" :title="limitError" type="warning" :closable="false" /><CampusEditor v-model="value" :disabled="submitting" @uploading="uploading = $event" @upload-error="uploadError = $event" /><p class="muted upload-note">标题 {{ size.title }}/{{ limits?.titleCodePoints }} 字符 · 正文 {{ size.body }}/{{ limits?.bodyCodePoints }} 字符 · 图片 {{ size.images }}/{{ limits?.images }} 张。静态JPG、PNG或WebP，每张≤{{ (limits?.imageBytes??0)/1048576 }}MiB、{{ limits?.imagePixels }}像素，任边≤{{ limits?.imageSide }}像素。</p></section>
+      <section class="panel"><div class="section-heading"><h2>正文来源</h2><el-button size="small" :disabled="submitting" @click="addSource">添加来源</el-button></div><div v-for="(source, index) in value.sources" :key="source.sourceId" class="source-row"><el-input v-model="source.url" :disabled="submitting" placeholder="http/https来源链接"  /><el-button :disabled="submitting" @click="value.sources.splice(index, 1)">删除</el-button></div><span v-if="!value.sources.length" class="muted">没有引用可不填写</span></section>
     </template>
   </div>
 </template>

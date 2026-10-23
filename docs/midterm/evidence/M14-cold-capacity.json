@@ -1,0 +1,234 @@
+{
+  "stage": "M14",
+  "mode": "cold OCR, six representative images with identical decoded pixels",
+  "receipt": {
+    "draftRevision": "1",
+    "versionNo": 1,
+    "status": "PENDING",
+    "batchId": "12",
+    "submissionId": "12"
+  },
+  "status": "PASS",
+  "bodyCodePoints": 10000,
+  "bodySha256": "7426cc4f2cb015f883f63bde5008e0266312f236d7a12ee5d9cf76573a95d16c",
+  "inputs": [
+    {
+      "originalSha256": "8e92a23e65caa52c65b863cb4247cedd2d07d04e56c7e17c75896e73a061fab0",
+      "inputSha256": "67845f9e830db69e597bd5b26d4a3000c4a9b21833ef8a6f4b7e3069e8e10ad7",
+      "decodedRgbaSha256": "ca3d0e818c11d9ec1534b08f65b828bbdcbeab92466cfef713d1bf8644fbcd33",
+      "decodedPixelsUnchanged": true,
+      "bytes": 72893,
+      "width": 1416,
+      "height": 312
+    },
+    {
+      "originalSha256": "939eefb58a791f7e39660c18b7b652905a3d9c2e2449feaf85e501115725f2a7",
+      "inputSha256": "05c2deb9bd8be51e1c36a6bea3c496a112e918e943079fa46a58f2ef2f92f164",
+      "decodedRgbaSha256": "8fcda21ca081a2a2a7be467ceb16fb2c2199b4fdf349ee5a1253f686883d6b98",
+      "decodedPixelsUnchanged": true,
+      "bytes": 1129265,
+      "width": 2172,
+      "height": 1350
+    },
+    {
+      "originalSha256": "48a1ea9ab9b1a2726bd073e3883286cc8dafa82e1db9eefa83b090a2bf10fb33",
+      "inputSha256": "6f17e9962d5e4c59bddbb0480a5c835749486e7e7e52e302b194076c3d85fabc",
+      "decodedRgbaSha256": "9e22900e0e2a40256ae75792ac46a744e6b0d28ace1ab8fa02168df3f03360e0",
+      "decodedPixelsUnchanged": true,
+      "bytes": 683649,
+      "width": 1080,
+      "height": 720
+    },
+    {
+      "originalSha256": "0811c676dda5f2e50b7c4f56c4cfa52c98e647a6afe65d3093e96e1ba3019fa6",
+      "inputSha256": "864831780b3348523ff216e29c639ab1667a008af82c87d32b9a82dfbbdfaae3",
+      "decodedRgbaSha256": "612e51bddb00925c5691a22e1369196274a2dc56a522cbaae65c6260baa4101a",
+      "decodedPixelsUnchanged": true,
+      "bytes": 671415,
+      "width": 1280,
+      "height": 600
+    },
+    {
+      "originalSha256": "237598d66c35a209d4f6843ad4ca57fb16852ffbdd9c208569ea726c14fdebd9",
+      "inputSha256": "14b149527d64e338b62ec49751619cb7b80e136a1795ad175bec3ba5deda2f84",
+      "decodedRgbaSha256": "a7ab330259e899a324015dbc44d7b109a71875cabb259dbbd9f503b5743d7ccf",
+      "decodedPixelsUnchanged": true,
+      "bytes": 805064,
+      "width": 1280,
+      "height": 698
+    },
+    {
+      "originalSha256": "9b6082f91eedaf20969460befa58ca336fbf39cf5234d8aaa662119f1d394329",
+      "inputSha256": "368334874089e147cd5595c93351c84d12faa1425bc5e9ef7fc34a58fdcf770d",
+      "decodedRgbaSha256": "36b5bdaded30f00f1db29ab08e7a2ad111efde322fe4bcda37e139e7a626d09a",
+      "decodedPixelsUnchanged": true,
+      "bytes": 1397447,
+      "width": 1080,
+      "height": 720
+    }
+  ],
+  "totalItems": 13,
+  "completedItems": 13,
+  "queueWaitSeconds": 0.187,
+  "computeWallSeconds": 13.554,
+  "pipelineManifest": {
+    "ocrConfig": {
+      "model": "PP-OCRv5-mobile",
+      "device": "cpu",
+      "mkldnn": false,
+      "configId": "ocr-c6b8101cb2cfb7e4acf136c60595ecdb29de837898a33624512d8defb3bed15e",
+      "unwarping": false,
+      "cpuThreads": 2,
+      "modelFiles": {
+        "PP-OCRv5_mobile_det_infer/inference.yml": "98069072e1b6b37d727fd9d9f11725faa46d6ea0de012f2ed26caea011c37699",
+        "PP-OCRv5_mobile_rec_infer/inference.yml": "5dfeb2777f6d0db8177d8128a8acfcf6e6276dc4ac73ea3bf0dc06d6a5e85d8e",
+        "PP-OCRv5_mobile_det_infer/inference.json": "05feef1acb00aa4cd7362b15f7f501fc4f99d7b1fa73c1c871e0c7b1504b0f5c",
+        "PP-OCRv5_mobile_rec_infer/inference.json": "24587345250c7332d0fc6f9a44e794d078cdaeb64c302fef906f325619de2569",
+        "PP-OCRv5_mobile_det_infer/inference.pdiparams": "afa1820cb16c1fd0dad589d0f8b389139061c1ef6d68019685fd07be997dda5b",
+        "PP-OCRv5_mobile_rec_infer/inference.pdiparams": "2460da90875937c94db97eba74ae3d9e5d4c4c57c42f1f41531c09a26bcc771a"
+      },
+      "schemaVersion": "ocr-v1",
+      "featureSpaceId": "ocr-02f6d19b9d2c1b6238ca059eda3687bfdb30688eb84b807b97b710a0412a3d85",
+      "detectionLimitSide": 960,
+      "detectionLimitType": "max",
+      "textlineOrientation": false,
+      "recognitionBatchSize": 1,
+      "lowConfidenceThreshold": 0.8,
+      "orientationClassification": false,
+      "recognitionScoreThreshold": 0.0
+    },
+    "textConfig": {
+      "chunk": {
+        "tokens": 48,
+        "overlap": 12
+      },
+      "method": "V1-A-20261022",
+      "params": {
+        "min_chars": 64,
+        "min_coverage": 0.25,
+        "literal_minimum": 32
+      },
+      "configId": "text-393f674ef0ce299ee2f2cc0c99a84a056a1df9dba9c6a2b3c93e4e785602f02a",
+      "candidateK": 10,
+      "templateGram": 16,
+      "weightSha256": "95171253f783750a17859981624da33af7d619ebc7e3eac9a25f5530c0deba51",
+      "bertPrecision": "bfloat16-autocast",
+      "schemaVersion": "text-v1",
+      "semanticAlpha": 0,
+      "templateRatio": 0.8,
+      "featureSpaceId": "text-7da285ed72fd987a2f70651402183c316ce275b11cce22828e813201f41a19a6",
+      "selectionSha256": "4e2b1aa1670d0d4912904324abd96b9e8f4a1aa18013e55df3864e65e12300d9",
+      "tokenizerSha256": "55c5edcfb8936895e019b2d8f97dcb547734f25b29f95009155f4c8c15649aae",
+      "bertPairMaxTokens": 128,
+      "literalSearchMinimum": 20,
+      "templateDocumentRatio": 0.1,
+      "semanticWindowsPerSource": 2
+    },
+    "imageConfig": {
+      "model": "facebook/dinov2-small",
+      "feature": "L2-normalized-CLS",
+      "configId": "image-1ca97aa01f6fe2d5bea1455ea2f9da04e1e78f9c39facd4c3782c1acfba014e4",
+      "revision": "ed25f3a31f01632728cabb09d1542f84ab7b0056",
+      "precision": "FP32",
+      "processor": "slow-PIL",
+      "threshold": 0.8157106637954712,
+      "dimensions": 384,
+      "weightSha256": "ae1e99fcefd534ed978cdeb8326f08030c96e28b7a81ffcbc98a857c84d14be1",
+      "schemaVersion": "image-v1",
+      "featureSpaceId": "dino-a4cb3d5daf117cab19c9296a30c576b332f942554876526decbc164d33c014e3",
+      "processorSha256": "14e780d86fa1861f8751f868d7f45425b5feb55c38ca26f152ca5097ab30f828"
+    },
+    "libraryGenerationId": "5",
+    "libraryManifestSha256": "36bd3f4b3a563bf3ae4219bc28c8bfabe12be4e43b3ee69223487cc886082259"
+  },
+  "ocrItems": [
+    {
+      "itemId": "82",
+      "attemptId": "89",
+      "status": "COMPLETED",
+      "ocrStatus": "COMPLETED",
+      "recognitionCacheHit": false,
+      "qualityFlags": [
+        "COVERAGE_UNVERIFIED"
+      ],
+      "elapsedSeconds": 1.959
+    },
+    {
+      "itemId": "84",
+      "attemptId": "90",
+      "status": "COMPLETED",
+      "ocrStatus": "COMPLETED",
+      "recognitionCacheHit": false,
+      "qualityFlags": [
+        "COVERAGE_UNVERIFIED",
+        "LOW_CONFIDENCE"
+      ],
+      "elapsedSeconds": 1.994
+    },
+    {
+      "itemId": "86",
+      "attemptId": "91",
+      "status": "COMPLETED",
+      "ocrStatus": "COMPLETED",
+      "recognitionCacheHit": false,
+      "qualityFlags": [
+        "COVERAGE_UNVERIFIED",
+        "LOW_CONFIDENCE"
+      ],
+      "elapsedSeconds": 1.826
+    },
+    {
+      "itemId": "88",
+      "attemptId": "92",
+      "status": "COMPLETED",
+      "ocrStatus": "COMPLETED",
+      "recognitionCacheHit": false,
+      "qualityFlags": [
+        "COVERAGE_UNVERIFIED",
+        "LOW_CONFIDENCE"
+      ],
+      "elapsedSeconds": 2.222
+    },
+    {
+      "itemId": "90",
+      "attemptId": "93",
+      "status": "COMPLETED",
+      "ocrStatus": "COMPLETED",
+      "recognitionCacheHit": false,
+      "qualityFlags": [
+        "COVERAGE_UNVERIFIED",
+        "LOW_CONFIDENCE"
+      ],
+      "elapsedSeconds": 3.487
+    },
+    {
+      "itemId": "92",
+      "attemptId": "94",
+      "status": "COMPLETED",
+      "ocrStatus": "COMPLETED",
+      "recognitionCacheHit": false,
+      "qualityFlags": [
+        "COVERAGE_UNVERIFIED",
+        "LOW_CONFIDENCE"
+      ],
+      "elapsedSeconds": 1.251
+    }
+  ],
+  "resources": {
+    "samples": 20,
+    "observationSeconds": 16.81199999999808,
+    "minimumSystemAvailableBytes": 2082717696,
+    "peakProjectRssSumBytes": 2014965760,
+    "peakProjectCpuPercentOneCoreBasis": 216.39999999999998,
+    "peakTotalGpuUsedMiB": 1056,
+    "notes": [
+      "RSS sum may double-count shared pages; system available memory is separately observed.",
+      "GPU value is total device memory, not solely this application. CPU percentages can exceed 100 on multiple cores.",
+      "Sampled observations, not a guaranteed minimum RAM requirement or production throughput estimate."
+    ]
+  },
+  "limitations": [
+    "Lossless RGBA re-encoding changes file hash to avoid previous OCR cache; decoded pixels verified identical, originals unchanged.",
+    "Single local observation, no model training, no OCR accuracy or production throughput estimate."
+  ]
+}

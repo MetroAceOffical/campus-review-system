@@ -12,6 +12,7 @@ it('blocks submission during uploads, retains failed edits, and retries an ambig
   const draft = { manuscriptId: '1', organizationId: '1', status: 'DRAFT', revision: '0', title: '原稿', schemaVersion: '1', content: { type: 'doc', content: [] }, sources: [], savedAt: '2026-10-23T01:00:00Z' }
   const submissions: RequestInit[] = []
   api.mockImplementation(async (path: string, options?: RequestInit) => {
+    if(path==='/api/settings/limits')return {titleCodePoints:200,bodyCodePoints:10000,images:6,imageBytes:10485760,imagePixels:20000000,imageSide:8000,urlCharacters:2000}
     if (options?.method === 'PUT') throw new Error('保存网络失败')
     if (path.endsWith('/submissions') && options?.method === 'POST') { submissions.push(options); throw new Error('请求结果暂不确定，请重试') }
     return draft

@@ -46,9 +46,9 @@ public class DocumentCodec {
     }
     public static int points(String value) {return value.codePointCount(0,value.length());}
     private static boolean validId(String value) {return value!=null && value.matches("[A-Za-z0-9_-]{1,64}");}
-    public static void checkUrl(String value,boolean optional) {
+    public void checkUrl(String value,boolean optional) {
         if(value==null || value.isBlank()) {if(!optional)invalid("引用内容请填写来源链接");return;}
-        if(value.length()>2000) invalid("来源链接过长");
+        if(value.length()>settings.limit("urlCharacters")) invalid("来源链接过长");
         try {var uri=URI.create(value);if(!Set.of("http","https").contains(uri.getScheme()) || uri.getHost()==null || uri.getUserInfo()!=null)invalid("链接仅支持有效的http或https地址");}
         catch(IllegalArgumentException e) {invalid("来源链接无效");}
     }
