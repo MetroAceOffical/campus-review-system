@@ -6,7 +6,7 @@ import { session, logout } from '../session'
 import { applyTheme, readTheme } from '../theme'
 const route = useRoute(), router = useRouter(), theme = reactive(readTheme())
 const links = computed(() => [
-  ...(session.user?.role === 'MEMBER' ? [{ to: '/manuscripts', label: '组织稿件' }] : []),
+  ...(session.user?.role === 'MEMBER' ? [{ to: '/manuscripts', label: '组织稿件' }, { to: '/manuscripts/new', label: '新建稿件' }] : []),
   ...(session.user?.role === 'REVIEWER' ? [{ to: '/reviews', label: '审核工作台' }] : []),
   ...(session.user?.role === 'ADMIN' ? [{ to: '/experiments', label: '模型实验' }, { to: '/references', label: '参考作品' }] : []),
   { to: '/publications', label: '已发布' },

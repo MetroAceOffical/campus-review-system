@@ -1,7 +1,7 @@
 param([Parameter(Mandatory=$true)][string]$Task, [switch]$RealModels)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$tests = @{ M01 = 'MigrationIT'; M02 = 'AuthAccessIT'; ALL = '*IT,*Test' }
+$tests = @{ M01 = 'MigrationIT'; M02 = 'AuthAccessIT'; M03 = 'DocumentCodecTest,FileAccessIT,DraftIT'; ALL = '*IT,*Test' }
 if (-not $tests.ContainsKey($Task)) { Write-Error "Task $Task has no implemented verification entry"; exit 2 }
 $configPath = Join-Path $root 'app/config/local.json'
 if (-not (Test-Path $configPath)) { $configPath = Join-Path $root 'app/config/local.example.json' }
@@ -24,7 +24,7 @@ try {
     $result = $LASTEXITCODE
 } finally { Pop-Location; Remove-Item Env:CAMPUS_TEST_DB_PASSWORD -ErrorAction SilentlyContinue }
 if ($result -ne 0) { exit $result }
-if ($Task -in @('M02','ALL')) {
+if ($Task -in @('M02','M03','ALL')) {
     Push-Location (Join-Path $root 'app/frontend')
     try {
         & (Join-Path (Split-Path $config.node -Parent) 'npm.cmd') test
@@ -32,5 +32,9 @@ if ($Task -in @('M02','ALL')) {
         & (Join-Path (Split-Path $config.node -Parent) 'npm.cmd') run build
         $result = $LASTEXITCODE
     } finally { Pop-Location }
+}
+if ($Task -in @('M01','M03','ALL')) {
+    & (Join-Path $root $config.python) -B -m unittest discover -s (Join-Path $PSScriptRoot 'tests')
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 exit $result

@@ -1,0 +1,32 @@
+{
+  "stage": "M03",
+  "transport": "real browser plus HTTP",
+  "manuscriptId": "1",
+  "revision": "1",
+  "images": [
+    {
+      "fileId": "4",
+      "nodeId": "255feaa2-bb5c-4311-b297-dd1b76442723",
+      "origin": "ORIGINAL",
+      "caption": "第二图图注",
+      "sourceUrl": ""
+    },
+    {
+      "fileId": "2",
+      "nodeId": "42f8e1ef-17a3-46bd-90ab-087e1052e40e",
+      "origin": "CITED",
+      "caption": "第一图图注",
+      "sourceUrl": "https://example.org/m03-image-one"
+    }
+  ],
+  "bodySources": [
+    {
+      "url": "https://example.org/m03-body",
+      "sourceId": "53d4d0ea-8741-46fd-9a62-839550054e12"
+    }
+  ],
+  "unicodePreserved": true,
+  "staleRevisionRejected": true,
+  "contentSha256": "1e7d206be13169bef1181977822ad20e214283bad62330be8d484b72112167e2",
+  "fixtureScope": "clearly labelled synthetic editor check; not a published/reference work"
+}

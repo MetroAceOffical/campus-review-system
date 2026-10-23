@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import AppLayout from './layouts/AppLayout.vue'
 import LoginView from './views/LoginView.vue'
+import EditorView from './views/EditorView.vue'
 import { home, loadSession, session } from './session'
 
 export const router = createRouter({
@@ -9,6 +10,8 @@ export const router = createRouter({
     { path: '/login', component: LoginView },
     { path: '/', component: AppLayout, children: [
       { path: 'manuscripts', component: { render: () => null }, meta: { title: '组织稿件', role: 'MEMBER' } },
+      { path: 'manuscripts/new', name: 'new-manuscript', component: EditorView, meta: { title: '编辑稿件', role: 'MEMBER' } },
+      { path: 'manuscripts/:id/edit', component: EditorView, meta: { title: '编辑稿件', role: 'MEMBER' } },
       { path: 'reviews', component: { render: () => null }, meta: { title: '审核工作台', role: 'REVIEWER' } },
       { path: 'experiments', component: { render: () => null }, meta: { title: '模型实验', role: 'ADMIN' } },
       { path: 'references', component: { render: () => null }, meta: { title: '参考作品', role: 'ADMIN' } },
