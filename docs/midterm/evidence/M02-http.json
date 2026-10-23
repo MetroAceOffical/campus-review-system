@@ -1,0 +1,42 @@
+{
+  "stage": "M02",
+  "transport": "actual HTTP on project Java:8080",
+  "results": [
+    {
+      "account": "member1",
+      "role": "MEMBER",
+      "login": "PASS",
+      "sessionRotation": "PASS",
+      "cookiePolicy": "PASS",
+      "csrf": "PASS",
+      "logout": "PASS"
+    },
+    {
+      "account": "member2",
+      "role": "MEMBER",
+      "login": "PASS",
+      "sessionRotation": "PASS",
+      "cookiePolicy": "PASS",
+      "csrf": "PASS",
+      "logout": "PASS"
+    },
+    {
+      "account": "reviewer",
+      "role": "REVIEWER",
+      "login": "PASS",
+      "sessionRotation": "PASS",
+      "cookiePolicy": "PASS",
+      "csrf": "PASS",
+      "logout": "PASS"
+    },
+    {
+      "account": "admin",
+      "role": "ADMIN",
+      "login": "PASS",
+      "sessionRotation": "PASS",
+      "cookiePolicy": "PASS",
+      "csrf": "PASS",
+      "logout": "PASS"
+    }
+  ]
+}

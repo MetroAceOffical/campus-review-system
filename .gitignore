@@ -7,3 +7,4 @@ __pycache__/
 .superpowers/
 /validation/
 *.log
+app/backend/src/main/resources/static/

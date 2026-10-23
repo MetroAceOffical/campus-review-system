@@ -1,0 +1,28 @@
+server:
+  address: 127.0.0.1
+  port: ${CAMPUS_JAVA_PORT:8080}
+  servlet:
+    session:
+      timeout: 2h
+      cookie:
+        http-only: true
+        same-site: lax
+spring:
+  datasource:
+    url: ${CAMPUS_DB_URL:jdbc:mysql://127.0.0.1:3308/campus_review_midterm?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true}
+    username: ${CAMPUS_DB_USER:campus_app}
+    password: ${CAMPUS_DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 4
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+  jackson:
+    time-zone: UTC
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+logging:
+  level:
+    org.springframework.security: WARN
