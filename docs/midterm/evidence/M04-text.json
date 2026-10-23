@@ -1,0 +1,19 @@
+{
+  "matchingSourceFound": true,
+  "selfExcluded": true,
+  "candidateCountAfterExclusion": 10,
+  "semanticAlpha": 0,
+  "sourceCount": 194,
+  "queryWindows": 35,
+  "rankingMatchesFrozen": true,
+  "maxSemanticDeltaFromFrozen": 0.0,
+  "inputSha256": "96020d550a22dd3cc50abc354a1c38a60b54d2c681242426aefba4184b824c65",
+  "modelHashes": {
+    "bert": "95171253f783750a17859981624da33af7d619ebc7e3eac9a25f5530c0deba51",
+    "dino": "ae1e99fcefd534ed978cdeb8326f08030c96e28b7a81ffcbc98a857c84d14be1"
+  },
+  "configId": "text-393f674ef0ce299ee2f2cc0c99a84a056a1df9dba9c6a2b3c93e4e785602f02a",
+  "elapsedSecondsIncludingLoad": 0.9180390999972587,
+  "localEvidenceSha256": "206d2afc983409df9723ba4c8d848c877b3a0da83ff00fca0f0475f7101c4b88",
+  "scope": "isolated current inference probe; not a live database submission or an accuracy evaluation"
+}

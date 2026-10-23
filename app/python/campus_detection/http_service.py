@@ -1,0 +1,100 @@
+"""Loopback-only authenticated adapter. Calculation functions also serve offline callers."""
+import argparse
+import hmac
+from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
+import json
+import os
+from pathlib import Path
+import re
+import threading
+import uuid
+from campus_shared.contracts import ContractError,file_sha256,validate_result
+from campus_detection.models import ROOT,load_models
+from campus_detection.text import detect_text
+from campus_detection.image import detect_image
+
+
+class Runtime:
+    def __init__(self,index_root,token):
+        self.index_root=Path(index_root).resolve()
+        if not self.index_root.is_relative_to(ROOT/'runtime'):raise ValueError('Index root must stay inside project runtime')
+        self.token=token;self.run_id=str(uuid.uuid4());self.models=None;self.load_error=None
+        self.compute=threading.Lock();self.active_attempt=None;self.libraries={}
+    def load(self):
+        try:self.models=load_models()
+        except Exception as error:self.load_error=getattr(error,'code',type(error).__name__)
+    def health(self):
+        return {'ready':self.models is not None,'runId':self.run_id,'busy':self.compute.locked(),
+                'activeAttemptId':self.active_attempt,'errorCode':self.load_error,
+                'configs':None if self.models is None else {name:self.models[name] for name in ('textConfig','imageConfig')}}
+    def library(self,request):
+        generation=request.get('libraryGenerationId')
+        if not isinstance(generation,str) or not re.fullmatch(r'[1-9][0-9]*',generation):raise ContractError('INVALID_LIBRARY_ID','Invalid library generation')
+        directory=self.index_root/generation
+        manifest=directory/'manifest.json';ready=directory/'READY'
+        if not ready.is_file() or not manifest.is_file():raise ContractError('INDEX_UNAVAILABLE','Library is missing or not READY')
+        checksum=file_sha256(manifest)
+        if ready.read_text().strip()!=checksum:raise ContractError('INDEX_CORRUPT','Library checksum does not match READY marker')
+        if request.get('libraryManifestSha256',checksum)!=checksum:raise ContractError('LIBRARY_MISMATCH','Requested manifest hash differs')
+        if generation in self.libraries:
+            cached=self.libraries[generation]
+            if cached['_manifestSha256']!=checksum:raise ContractError('INDEX_MUTATED','An immutable generation was modified')
+            return cached
+        value=json.loads(manifest.read_text(encoding='utf-8'))
+        if str(value.get('generationId'))!=generation:raise ContractError('LIBRARY_MISMATCH','Manifest generation does not match request')
+        value['_manifestSha256']=checksum;self.libraries[generation]=value
+        return value
+
+
+def make_server(runtime,port=18081):
+    class Handler(BaseHTTPRequestHandler):
+        protocol_version='HTTP/1.1'
+        def log_message(self,*args):pass
+        def reply(self,status,body):
+            payload=json.dumps(body,ensure_ascii=False,allow_nan=False).encode()
+            self.send_response(status);self.send_header('Content-Type','application/json; charset=utf-8')
+            self.send_header('Content-Length',str(len(payload)));self.send_header('Cache-Control','no-store');self.end_headers();self.wfile.write(payload)
+        def authorized(self):
+            if not hmac.compare_digest(self.headers.get('X-Internal-Token',''),runtime.token):
+                self.reply(401,{'status':'FAILED','errorCode':'INTERNAL_AUTH_REQUIRED'});return False
+            return True
+        def do_GET(self):
+            if not self.authorized():return
+            if self.path!='/health':self.reply(404,{'errorCode':'ENDPOINT_NOT_FOUND'});return
+            self.reply(200,runtime.health())
+        def do_POST(self):
+            if not self.authorized():return
+            if self.path not in ('/detect/text','/detect/image'):
+                self.reply(404,{'errorCode':'ENDPOINT_NOT_FOUND'});return
+            if runtime.models is None:self.reply(503,{'status':'FAILED','errorCode':'MODELS_NOT_READY'});return
+            if not runtime.compute.acquire(blocking=False):self.reply(409,{'status':'FAILED','errorCode':'PROCESS_BUSY','runId':runtime.run_id});return
+            try:
+                length=int(self.headers.get('Content-Length','0'))
+                if length<=0 or length>4*1024*1024:raise ContractError('INVALID_REQUEST_SIZE','Invalid request size')
+                request=json.loads(self.rfile.read(length));runtime.active_attempt=request.get('attemptId')
+                library=runtime.library(request)
+                function=detect_text if self.path=='/detect/text' else detect_image
+                result=function(request,library,runtime.models);validate_result(result,request)
+                result['processRunId']=runtime.run_id
+                self.reply(200,result)
+            except (ContractError,ValueError,KeyError,FileNotFoundError) as error:
+                self.reply(400,{'status':'FAILED','errorCode':getattr(error,'code','INVALID_REQUEST'),'message':str(error)[:200],'runId':runtime.run_id})
+            except Exception:
+                self.reply(500,{'status':'FAILED','errorCode':'DETECTION_ERROR','message':'Calculation failed; immutable input and attempt were not changed','runId':runtime.run_id})
+            finally:runtime.active_attempt=None;runtime.compute.release()
+    return ThreadingHTTPServer(('127.0.0.1',port),Handler)
+
+
+def main():
+    parser=argparse.ArgumentParser();parser.add_argument('--port',type=int,default=18081)
+    parser.add_argument('--index-root',type=Path,default=ROOT/'runtime/indexes')
+    args=parser.parse_args()
+    token_path=ROOT/'runtime/private-config/internal-token'
+    if not token_path.is_file():raise RuntimeError('Run project initialization to create its private internal token')
+    runtime=Runtime(args.index_root,token_path.read_text().strip())
+    server=make_server(runtime,args.port)
+    threading.Thread(target=runtime.load,daemon=True).start()
+    print(json.dumps({'event':'listening','port':server.server_port,'runId':runtime.run_id,'ready':False}),flush=True)
+    server.serve_forever()
+
+if __name__=='__main__':main()

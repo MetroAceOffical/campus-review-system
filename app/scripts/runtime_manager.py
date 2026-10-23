@@ -128,6 +128,8 @@ def ensure_accounts(runtime):
     if not target.exists():
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(json.dumps({name: secrets.token_urlsafe(18) for name in ['member1', 'member2', 'reviewer', 'admin']}), encoding='utf-8')
+    token=runtime/'private-config/internal-token'
+    if not token.exists():token.write_text(secrets.token_hex(32),encoding='utf-8')
 
 
 def mysql_stop(config, runtime):

@@ -1,7 +1,7 @@
 param([Parameter(Mandatory=$true)][string]$Task, [switch]$RealModels)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$tests = @{ M01 = 'MigrationIT'; M02 = 'AuthAccessIT'; M03 = 'DocumentCodecTest,FileAccessIT,DraftIT'; ALL = '*IT,*Test' }
+$tests = @{ M01 = 'MigrationIT'; M02 = 'AuthAccessIT'; M03 = 'DocumentCodecTest,FileAccessIT,DraftIT'; M04 = 'PYTHON'; ALL = '*IT,*Test' }
 if (-not $tests.ContainsKey($Task)) { Write-Error "Task $Task has no implemented verification entry"; exit 2 }
 $configPath = Join-Path $root 'app/config/local.json'
 if (-not (Test-Path $configPath)) { $configPath = Join-Path $root 'app/config/local.example.json' }
@@ -9,6 +9,15 @@ $config = Get-Content -Raw -LiteralPath $configPath | ConvertFrom-Json
 $env:CAMPUS_ROOT = $root.Replace('\','/')
 $env:JAVA_HOME = Split-Path (Split-Path $config.java -Parent) -Parent
 $runtime = Join-Path $root $config.runtimeRoot
+if ($Task -eq 'M04') {
+    $env:PYTHONPATH = Join-Path $root 'app/python'
+    $env:PYTHONDONTWRITEBYTECODE = '1'
+    $env:HF_HUB_OFFLINE = '1'
+    $env:TRANSFORMERS_OFFLINE = '1'
+    $env:CAMPUS_REAL_MODELS = if ($RealModels) { '1' } else { '0' }
+    & (Join-Path $root $config.python) -B -m unittest discover -s (Join-Path $root 'app/python/tests')
+    exit $LASTEXITCODE
+}
 $env:CAMPUS_MIGRATIONS = Join-Path $root 'app/backend/src/main/resources/db/migrations'
 $env:CAMPUS_ACCOUNTS_FILE = Join-Path $runtime 'private-config/accounts.json'
 $credentialPath = Join-Path $runtime 'private-config/database.json'
@@ -35,6 +44,15 @@ if ($Task -in @('M02','M03','ALL')) {
 }
 if ($Task -in @('M01','M03','ALL')) {
     & (Join-Path $root $config.python) -B -m unittest discover -s (Join-Path $PSScriptRoot 'tests')
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+}
+if ($Task -eq 'ALL') {
+    $env:PYTHONPATH = Join-Path $root 'app/python'
+    $env:PYTHONDONTWRITEBYTECODE = '1'
+    $env:HF_HUB_OFFLINE = '1'
+    $env:TRANSFORMERS_OFFLINE = '1'
+    $env:CAMPUS_REAL_MODELS = if ($RealModels) { '1' } else { '0' }
+    & (Join-Path $root $config.python) -B -m unittest discover -s (Join-Path $root 'app/python/tests')
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 exit $result

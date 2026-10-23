@@ -1,0 +1,15 @@
+{
+  "actualEncoding": true,
+  "configCompatible": true,
+  "similarity": 0.9999999403953552,
+  "referenceVectorOrigin": "frozen features.npz development_reference[0]",
+  "inputSha256": "6b84c88a0e7c4e423af61c74bbe17e472e344ab3c51d50d7e8f4cc1290e843cf",
+  "configId": "image-1ca97aa01f6fe2d5bea1455ea2f9da04e1e78f9c39facd4c3782c1acfba014e4",
+  "modelHashes": {
+    "bert": "95171253f783750a17859981624da33af7d619ebc7e3eac9a25f5530c0deba51",
+    "dino": "ae1e99fcefd534ed978cdeb8326f08030c96e28b7a81ffcbc98a857c84d14be1"
+  },
+  "elapsedSeconds": 0.35632600000099046,
+  "localEvidenceSha256": "be777e8ff1ccf7a759e3de1793564ff510c65d4aea5e78a32e20c81e48f1638e",
+  "scope": "isolated current inference probe; not a live database submission or an accuracy evaluation"
+}
