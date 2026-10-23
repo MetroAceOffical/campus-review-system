@@ -80,6 +80,7 @@ public class JobWorker {
                         var recognized=references.recognize(request,pipeline.path("ocrConfig"),ocr);
                         var combined=(ObjectNode)recognized.deepCopy();
                         if(!recognized.path("combinedText").asText().isBlank()){
+                            combined.put("textSearchStatus","RUNNING");attempts.checkpointIfCurrent(attempt,combined);
                             request.put("text",recognized.path("combinedText").asText()).put("configId",pipeline.path("textConfig").path("configId").asText());
                             var text=client.call(false,"/detect/text",request,"ocrAndText");combined.set("textEvidence",text.path("evidence"));combined.put("textSearchStatus","COMPLETED");
                         }

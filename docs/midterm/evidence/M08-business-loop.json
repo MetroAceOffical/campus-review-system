@@ -1,0 +1,13 @@
+{
+  "stage": "M08",
+  "transport": "real authenticated HTTP -> Java -> main Python + OCR -> MySQL",
+  "fixtureScope": "explicitly labelled local business acceptance records; no accuracy claim",
+  "firstSubmissionId": "1",
+  "firstBatchStatus": "COMPLETED",
+  "publishedSnapshotVerified": true,
+  "publishedReferenceEnabled": true,
+  "laterSubmissionId": "2",
+  "newQueryMatchesPublishedWork": true,
+  "memberReportDenied": true,
+  "reportSha256": "db0d9b30173fa2141162e855913957a84295db4baf7c41a8eaa2f3f6af3cdd23"
+}

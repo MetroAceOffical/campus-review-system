@@ -46,4 +46,11 @@ class LateResultIT {
         assertEquals("QUEUED",db.queryForObject("SELECT status FROM detection_item WHERE id=?",String.class,f[2]));
         assertEquals(1,db.queryForObject("SELECT COUNT(*) FROM background_job WHERE kind='RETRY_ITEM' AND item_id=?",Integer.class,f[2]));
     }
+    @Test void failedTextSearchRetainsSuccessfulOcrCheckpoint()throws Exception{
+        var f=fixture();String attempt=attempts.start(f[2],json.createObjectNode());
+        assertTrue(attempts.checkpointIfCurrent(attempt,json.createObjectNode().put("ocrStatus","COMPLETED").put("combinedText","已识别文字").put("textSearchStatus","RUNNING")));
+        attempts.failIfCurrent(attempt,"CONTROLLED_TEXT_FAILURE","fixture");
+        var retained=json.readTree(db.queryForObject("SELECT result_json FROM detection_attempt WHERE id=?",String.class,attempt));
+        assertEquals("已识别文字",retained.path("combinedText").asText());assertEquals("FAILED",retained.path("textSearchStatus").asText());
+    }
 }
