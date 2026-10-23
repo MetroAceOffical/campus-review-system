@@ -1,0 +1,14 @@
+{
+  "java": "D:/Dev/Runtime/JDK/jdk-21.0.11/bin/java.exe",
+  "maven": "D:/Dev/Runtime/Maven/apache-maven-3.9.6/bin/mvn.cmd",
+  "node": "D:/Dev/Runtime/Node.js/node.exe",
+  "python": "validation/text/env/python.exe",
+  "ocrPython": "validation/remaining/vision/env-ocr/python.exe",
+  "mysqlBin": "C:/Program Files/MySQL/MySQL Server 8.0/bin",
+  "runtimeRoot": "runtime",
+  "ports": {"mysql": 3308, "java": 8080, "detector": 18081, "ocr": 18082, "frontend": 5173},
+  "database": "campus_review_midterm",
+  "testDatabase": "campus_review_midterm_test",
+  "limits": {"titleCodePoints": 200, "bodyCodePoints": 10000, "images": 6, "imageBytes": 10485760, "imagePixels": 20000000, "imageSide": 8000, "urlCharacters": 2000},
+  "timeoutsSeconds": {"business": 15, "upload": 60, "text": 120, "image": 60, "ocrAndText": 180, "library": 300, "modelStartup": 180}
+}

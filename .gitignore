@@ -1,0 +1,9 @@
+runtime/
+app/config/local.json
+app/backend/target/
+app/frontend/node_modules/
+app/frontend/dist/
+__pycache__/
+.superpowers/
+/validation/
+*.log

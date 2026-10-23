@@ -1,0 +1,13 @@
+{
+  "stage": "M01",
+  "date": "2026-10-23",
+  "timezone": "Asia/Shanghai",
+  "migrationTests": 2,
+  "runtimeSafetyTests": 1,
+  "frozenFileCount": 580,
+  "frozenInventorySha256": "49d8ca12c56f2967e1d007f2fb4d3b9322ba9565a5c2efc807684f4694df13dd",
+  "verificationLogSha256": "c7d46743912ecb24650948f1d2ff76b2e05fdd1bf6a0b37169c5de94a238d27a",
+  "database": "campus_review_midterm_test",
+  "mysqlPort": 3308,
+  "mysqlVersion": "8.0.46"
+}
