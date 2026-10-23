@@ -8,7 +8,9 @@ import { normalizeNodeIdentities, replaceImage } from '../editor/document'
 import { request } from '../api/http'
 import type { DocumentInput, DocumentNode, UploadedFile } from '../types/document'
 const props = defineProps<{ modelValue: DocumentInput; disabled?: boolean }>()
-const emit = defineEmits<{ 'update:modelValue': [value: DocumentInput]; uploading: [busy: boolean] }>()
+const emit = defineEmits<{ 'update:modelValue': [value: DocumentInput]; uploading: [busy: boolean]; uploadError: [failed: boolean] }>()
+const failedUpload = ref(false)
+function clearUploadError() { failedUpload.value = false; emit('uploadError', false) }
 const fileInput = ref<HTMLInputElement>(), busy = ref(false), replacing = ref<string | null>(null)
 const editor = useEditor({
   extensions: [StarterKit.configure({ heading: { levels: [2, 3] }, code: false, codeBlock: false, horizontalRule: false, strike: false, underline: false, link: { openOnClick: false, protocols: ['http', 'https'], defaultProtocol: 'https' } }), CampusImage, StableNodeIdentities],
@@ -33,12 +35,12 @@ async function upload(event: Event) {
   busy.value = true; emit('uploading', true)
   try {
     const body = new FormData(); body.append('file', file)
-    const result = await request<UploadedFile>('/api/files', { method: 'POST', body })
+    const result = await request<UploadedFile>('/api/files', { method: 'POST', body }); clearUploadError()
     if (replacing.value) {
       editor.value.commands.setContent(replaceImage(editor.value.getJSON() as DocumentNode, replacing.value, result.fileId))
       ElMessage.info('图片已替换，请重新确认来源')
     } else insertUploadedImage(editor.value, result.fileId)
-  } catch (error) { ElMessage.error(error instanceof Error ? error.message : '上传失败，请重试') }
+  } catch (error) { failedUpload.value = true; emit('uploadError', true); ElMessage.error(error instanceof Error ? error.message : '上传失败，请重试') }
   finally { busy.value = false; emit('uploading', false); input.value = ''; replacing.value = null }
 }
 function imageReplace(event: Event) { const detail = (event as CustomEvent).detail; if (editor.value?.isEditable && detail.editor === editor.value) chooseImage(detail.nodeId) }
@@ -47,6 +49,7 @@ onMounted(() => window.addEventListener('campus-replace-image', imageReplace))
 onBeforeUnmount(() => window.removeEventListener('campus-replace-image', imageReplace))
 </script>
 <template>
+  <el-alert v-if="failedUpload" title="本次图片上传失败，尚未加入正文。请重新上传，或明确忽略本次上传后再送审。" type="error" :closable="false"><el-button size="small" @click="clearUploadError">忽略本次失败上传</el-button></el-alert>
   <section class="editor-frame"><div v-if="editor && !disabled" class="editor-toolbar">
     <el-button size="small" :class="{ active: editor.isActive('bold') }" @click="editor.chain().focus().toggleBold().run()">加粗</el-button><el-button size="small" @click="editor.chain().focus().toggleItalic().run()">斜体</el-button><el-button size="small" @click="editor.chain().focus().setParagraph().run()">正文</el-button><el-button size="small" @click="editor.chain().focus().toggleHeading({ level: 2 }).run()">二级标题</el-button><el-button size="small" @click="editor.chain().focus().toggleHeading({ level: 3 }).run()">三级标题</el-button><el-button size="small" @click="editor.chain().focus().toggleBulletList().run()">无序列表</el-button><el-button size="small" @click="editor.chain().focus().toggleOrderedList().run()">有序列表</el-button><el-button size="small" @click="editor.chain().focus().toggleBlockquote().run()">引用块</el-button><el-button size="small" @click="setLink">链接</el-button><el-button size="small" :disabled="!editor.can().undo()" @click="editor.chain().focus().undo().run()">撤销</el-button><el-button size="small" :disabled="!editor.can().redo()" @click="editor.chain().focus().redo().run()">重做</el-button><el-button size="small" :loading="busy" @click="chooseImage()">上传图片</el-button>
   </div><input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" hidden @change="upload"><EditorContent :editor="editor" /></section>

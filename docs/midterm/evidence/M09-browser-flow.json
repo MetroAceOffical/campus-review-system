@@ -1,0 +1,22 @@
+{
+  "stage": "M09",
+  "manuscriptId": "4",
+  "versions": [
+    "3",
+    "4"
+  ],
+  "sixImagesEachVersion": true,
+  "stableNodeOrder": true,
+  "priorCaptionAndSourcesPreserved": true,
+  "currentUnsavedEditsSubmitted": true,
+  "bothBatches13ItemsCompleted": true,
+  "memberFormalReportDenied": true,
+  "browserObserved": [
+    "upload disables submission",
+    "service interruption retains six unsaved images",
+    "401 re-login preserves editor",
+    "return-modify-resubmit",
+    "history version switch"
+  ],
+  "scope": "explicitly labelled acceptance fixture; return action used backend API before M10 reviewer page"
+}

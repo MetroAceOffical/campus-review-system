@@ -9,7 +9,8 @@ export const router = createRouter({
   routes: [
     { path: '/login', component: LoginView },
     { path: '/', component: AppLayout, children: [
-      { path: 'manuscripts', component: { render: () => null }, meta: { title: '组织稿件', role: 'MEMBER' } },
+      { path: 'manuscripts', component: () => import('./views/ManuscriptListView.vue'), meta: { title: '组织稿件', role: 'MEMBER' } },
+      { path: 'manuscripts/:id/history', component: () => import('./views/SubmissionHistoryView.vue'), meta: { title: '版本与处理状态', role: 'MEMBER' } },
       { path: 'manuscripts/new', name: 'new-manuscript', component: EditorView, meta: { title: '编辑稿件', role: 'MEMBER' } },
       { path: 'manuscripts/:id/edit', component: EditorView, meta: { title: '编辑稿件', role: 'MEMBER' } },
       { path: 'reviews', component: { render: () => null }, meta: { title: '审核工作台', role: 'REVIEWER' } },

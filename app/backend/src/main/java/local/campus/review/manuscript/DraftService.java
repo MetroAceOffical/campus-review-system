@@ -61,6 +61,12 @@ public class DraftService {
         event(user,id,manuscript.get("organization_id").toString(),"DRAFT_SAVED",Map.of("saveKind","MANUAL","revision",Long.toString(expectedRevision+1)));
         return get(user,id);
     }
+    @Transactional public Map<String,Object> delete(CurrentUser user,String id){
+        var manuscript=requireDraft(user,id,true);
+        if(!"DRAFT".equals(manuscript.get("status")))throw new ApiException(409,"INVALID_STATE","只有草稿允许删除");
+        db.update("UPDATE manuscript SET deleted_at=UTC_TIMESTAMP(3),updated_at=UTC_TIMESTAMP(3) WHERE id=?",id);
+        event(user,id,manuscript.get("organization_id").toString(),"DRAFT_DELETED",Map.of());return Map.of("deleted",true);
+    }
     private void event(CurrentUser user,String manuscriptId,String organizationId,String operation,Map<String,Object> fields) {
         var details=new LinkedHashMap<String,Object>(fields);details.put("schemaVersion","1");details.put("actorName",user.displayName());
         details.put("organizationName",db.queryForObject("SELECT name FROM organization WHERE id=?",String.class,organizationId));
