@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 import re
+import time
 from collections import Counter
 from pathlib import Path
 
@@ -48,6 +49,18 @@ def sha(path):
     with path.open('rb') as stream:return hashlib.file_digest(stream,'sha256').hexdigest()
 
 
+def wait_for_export(generation,output,wait=False):
+    deadline=time.monotonic()+48*3600
+    while True:
+        try:state=json.loads((generation/'status.json').read_text(encoding='utf-8'))
+        except (FileNotFoundError,json.JSONDecodeError):state={}
+        if state.get('state')=='TRAIN_CONSTRUCTION_FINISHED':return state
+        if state.get('state')=='GENERATION_FAILED' or not wait or time.monotonic()>deadline:raise RuntimeError('Generation not completed successfully; no partial export can become training data')
+        output.mkdir(parents=True,exist_ok=True)
+        (output/'status.json').write_text(json.dumps({'state':'WAITING_GENERATION_EXPORT','generationState':state.get('state'),'neuralTrainingStarted':False}),encoding='utf-8')
+        time.sleep(15)
+
+
 def main():
     from transformers import AutoTokenizer
     parser=argparse.ArgumentParser()
@@ -55,10 +68,11 @@ def main():
     parser.add_argument('--negatives',type=Path,required=True)
     parser.add_argument('--partitions',type=Path,default=ROOT/'runtime/datasets/campus-partitions-20261026-v1')
     parser.add_argument('--output',type=Path,required=True)
+    parser.add_argument('--wait-for-generation',action='store_true')
     args=parser.parse_args()
+    if not args.output.resolve().is_relative_to((ROOT/'runtime/datasets').resolve()):raise ValueError('Use project dataset output')
     if (args.output/'READY').exists():raise RuntimeError('Prepared version already frozen')
-    state=json.loads((args.generation/'status.json').read_text(encoding='utf-8'))
-    if state['state']!='TRAIN_CONSTRUCTION_FINISHED':raise RuntimeError('Wait for completed generation export; never read the live partial database')
+    wait_for_export(args.generation,args.output,wait=args.wait_for_generation)
     partition_hashes=verify_ready(args.partitions);negative_hashes=verify_ready(args.negatives)
     config=json.loads((args.generation/'config.json').read_text(encoding='utf-8'))
     if config['sourceSplit']!='train' or config['partitionTrainSha256']!=partition_hashes['train.jsonl']:raise ValueError('Generation partition identity differs')
@@ -117,6 +131,7 @@ def main():
               'scope':'Distinct window pairs, not independent articles/events. Non-overlapping query slices retain the full corresponding source segment. Generated semantics and rule negatives remain fallible; no detector scores create truth.'}
     (args.output/'manifest.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')
     (args.output/'READY').write_text(json.dumps({name:sha(args.output/name) for name in ['pairs.jsonl','manifest.json']},indent=2),encoding='utf-8')
+    (args.output/'status.json').write_text(json.dumps({'state':manifest['state'],'pairCount':total,'formalScaleAndBalanceReady':scale_ready,'neuralTrainingStarted':False},indent=2),encoding='utf-8')
     print(json.dumps(manifest),flush=True)
 
 

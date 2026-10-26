@@ -1,0 +1,23 @@
+{
+  "state": "CONTROLLED_IMAGE_PROTOCOL_READY_NATURAL_NEGATIVES_PENDING",
+  "originals": 300,
+  "controlledQueries": 2100,
+  "automaticImageFamilies": 295,
+  "sourcePixelDuplicatesExcluded": 0,
+  "availableUniquePixelOriginals": 490,
+  "originalSplitCounts": {
+    "final": 148,
+    "development": 152
+  },
+  "querySplitCounts": {
+    "final": 1036,
+    "development": 1064
+  },
+  "familySplitDisjoint": true,
+  "realHardNegativeTruthCount": 0,
+  "evaluationStarted": false,
+  "qualityAccepted": false,
+  "productActivated": false,
+  "scope": "300 different decoded original images; 2100 correlated transforms are not 2100 originals/events. Automatic families are not human-confirmed independent events.",
+  "datasetReadySha256": "eaad5184b83f8aacf928080a5cc301ae120e612c4b3ebcf57aaffced24bdf21e"
+}

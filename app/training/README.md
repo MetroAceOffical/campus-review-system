@@ -65,8 +65,20 @@ v1/v2的原配置、源代码、失败输出与转换记录不覆盖；新目录
 
 仅运行离线模块回归：
 
+最新57项回归覆盖数据/LoRA/索引与图片工程，不代表正式模型成绩。`app/python/campus_detection/retrieval.py`和`alignment.py`为待接入的v3底层，当前没有改变旧路由；真实模型编码、邻接上下文、校准和业务接入仍需另行实现/核验。索引必须绑定权重/tokenizer/池化/精度/算法并在新目录写READY，不得将旧库直接冒称新特征空间。真实BGE/M3 tokenizer的50篇原文预算/偏移复查通过。
+
 ```powershell
 & runtime/environments/final-training/Scripts/python.exe -B -m unittest discover -s app/training/tests
 ```
 
 测试涉及临时本机HTTP服务器，沙箱拒绝回环网络时须使用已授权的本机执行权限；不得为通过测试关闭业务权限。Web完整回归仍用 `app/scripts/check.ps1 -Task ALL` 的独立测试库，默认真实模型skip须单列。训练与生成串行占GPU，不能将GPU作业塞进Web队列，也不能为新增训练删除未来扩展预留。各作业原件与断点独立于聊天保存，电脑重启后须核对状态和完整checkpoint再续跑；不要同时启动第二个同名作业。
+
+## 图片采集、协议及开发探针
+
+`collect_images.py`复用已冻结四区文章的图片链接，只采公开学校域名，robots、有界响应、事件限额和断点记录；已得490个不同像素候选。`prepare_image_protocol.py`按原图像素/近图pHash和文章事件合簇，预测前冻结300原图、295自动家族及2,100受控查询。自动家族不是人工事件金标；自然难负例没有因此被自动赋0。raw图片、查询及原URL仅在runtime，不能上传GitHub。
+
+`evaluate_image_geometry.py`只在CPU上运行开发区已知来源几何核验，默认不提供最终区执行选项；目前1,064例接受969，95空间支持不足，未做DINO联合或自然负例误报率。该探针实际记录失败/不足分母、各变换、自动家族bootstrap及延迟。`--resume`仅允许同数据/代码/政策身份续跑，不重标失败。
+
+图片核心位于`app/python/campus_detection/image_geometry.py`，SIFT配合L2和双向比率、RANSAC及内点凸包覆盖；实现依据[OpenCV匹配](https://docs.opencv.org/4.x/dc/dc3/tutorial_py_matcher.html)和[单应性](https://docs.opencv.org/4.x/d1/de0/tutorial_py_feature_homography.html)。pHash只提供近图候选，不能单凭低纹理近哈希宣称复用。区域坐标恢复EXIF方向后的原图像素中心；覆盖是空间支持，不是复制像素百分比。当前没有替换image-v1，OpenCV只使用用户已批准隔离环境，未修改生产依赖。
+
+`prepare_correspondence.py ... --wait-for-generation`已经作为独立CPU作业排队：最多等待48小时完整生成导出，失败上游立即停止；就绪后自动组装和核对规模/类别，仍不会自动激活或用不足数量启动M3。不要重复启动同名输出的组装作业。当前状态见runtime/datasets/campus-correspondence-training-v1/status.json。

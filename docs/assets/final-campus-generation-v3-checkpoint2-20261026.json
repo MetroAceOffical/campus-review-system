@@ -1,0 +1,19 @@
+{
+  "state": "GENERATING_TRAIN_MATERIAL",
+  "segmentCounts": {
+    "ACCEPTED": 525,
+    "PENDING": 5078,
+    "QUARANTINED": 113
+  },
+  "selectedOriginals": 1200,
+  "elapsedSeconds": 2661.4370000000017,
+  "device": "cuda",
+  "promptVersion": "3",
+  "reusedSegments": 314,
+  "estimatedRemainingSeconds": 41712.27495679015,
+  "semanticCorrectnessCertified": false,
+  "modelLoadSeconds": 7.03099999999904,
+  "hostRssBytes": 665612288,
+  "cudaPeakAllocatedBytes": 6288752128,
+  "snapshotScope": "In-progress generation checkpoint2; not whole construction completion or M3 training."
+}

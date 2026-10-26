@@ -1,0 +1,83 @@
+{
+  "state": "DEVELOPMENT_KNOWN_SOURCE_GEOMETRY_PROBE_COMPLETE",
+  "queries": 1064,
+  "automaticImageFamilies": 148,
+  "knownSourceAcceptance": 0.9107142857142857,
+  "correctScopeFraction": 0.9107142857142857,
+  "failedQueries": 0,
+  "familyBootstrap95": [
+    0.8729949874686717,
+    0.9473684210526315
+  ],
+  "latencyMs": {
+    "median": 312.604900000224,
+    "p95": 855.6511700020563
+  },
+  "byTransformation": {
+    "crop": {
+      "queries": 152,
+      "acceptedKnownSource": 136,
+      "correctScope": 136
+    },
+    "jpeg": {
+      "queries": 152,
+      "acceptedKnownSource": 137,
+      "correctScope": 137
+    },
+    "original": {
+      "queries": 152,
+      "acceptedKnownSource": 152,
+      "correctScope": 152
+    },
+    "resize": {
+      "queries": 152,
+      "acceptedKnownSource": 129,
+      "correctScope": 129
+    },
+    "text_overlay": {
+      "queries": 152,
+      "acceptedKnownSource": 137,
+      "correctScope": 137
+    },
+    "tint": {
+      "queries": 152,
+      "acceptedKnownSource": 138,
+      "correctScope": 138
+    },
+    "watermark": {
+      "queries": 152,
+      "acceptedKnownSource": 140,
+      "correctScope": 140
+    }
+  },
+  "realHardNegativeTruthCount": 0,
+  "DinoRetrievalEvaluated": false,
+  "finalQueriesEvaluated": 0,
+  "qualityAccepted": false,
+  "productActivated": false,
+  "scope": "Known-source pair verification only; not end-to-end source retrieval, natural negative accuracy or final acceptance. Failed/insufficient queries stay in denominators. Bootstrap resamples automatic image families.",
+  "runConfiguration": {
+    "task": "DEVELOPMENT_KNOWN_SOURCE_GEOMETRY_PROBE",
+    "split": "development",
+    "datasetReadySha256": "eaad5184b83f8aacf928080a5cc301ae120e612c4b3ebcf57aaffced24bdf21e",
+    "queriesManifestSha256": "553489590ec60a73520f4ea03d4f9a5d65f1b8bac3465b6305047a66d6c91df7",
+    "referenceManifestSha256": "c2f8b2230e8a755f3ae16c6b0811ace4f32e6f342cabb86f7cd9580b40572756",
+    "geometryCodeSha256": "d017769ca22729be18f3a0d2b949f3f5826ef2012ef190425387de3622b911cf",
+    "policy": {
+      "longEdge": 1280,
+      "features": 5000,
+      "ratioTest": 0.75,
+      "minimumMatches": 12,
+      "minimumInliers": 10,
+      "minimumInlierRatio": 0.45,
+      "ransacPixels": 3.0,
+      "wholeCoverage": 0.6,
+      "localMinimumCoverage": 0.04,
+      "phashCandidateDistance": 6
+    },
+    "opencvVersion": "4.11.0",
+    "queryCount": 1064,
+    "neuralModelsLoaded": false
+  },
+  "predictionsSha256": "ffc2d8884a6e3a3f341e6a589becba4902011f4b0ce50bc4fd36e55cd84e4404"
+}

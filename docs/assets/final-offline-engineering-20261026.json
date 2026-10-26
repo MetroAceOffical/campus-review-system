@@ -1,0 +1,7 @@
+{
+  "offlineTests": 57,
+  "testLogSha256": "740a5a3869559f14cfbd46ca538415753d7868612aa7b5b681e8cf175c714b79",
+  "protectedMatched": 42,
+  "historicalFrozenMatched": 580,
+  "scope": "Engineering checks; no campus quality acceptance or product activation."
+}

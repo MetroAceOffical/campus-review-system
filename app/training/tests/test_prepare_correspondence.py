@@ -52,5 +52,15 @@ class PrepareCorrespondenceTests(unittest.TestCase):
         self.assertEqual(rows[0]['transformationKind'],'COPY_CONTROL')
         self.assertEqual(rows[-1]['transformationKind'],'PARAPHRASE')
 
+    def test_waiting_preparation_cannot_read_running_or_failed_generation_exports(self):
+        import tempfile,json
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);source=root/'generation';source.mkdir();output=root/'prepared'
+            for state in ['GENERATING_TRAIN_MATERIAL','GENERATION_FAILED']:
+                (source/'status.json').write_text(json.dumps({'state':state}))
+                with self.assertRaises(RuntimeError):prepare.wait_for_export(source,output,wait=False)
+            (source/'status.json').write_text(json.dumps({'state':'TRAIN_CONSTRUCTION_FINISHED'}))
+            self.assertEqual(prepare.wait_for_export(source,output,wait=False)['state'],'TRAIN_CONSTRUCTION_FINISHED')
+
 
 if __name__=='__main__':unittest.main()

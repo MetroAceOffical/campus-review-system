@@ -1,0 +1,169 @@
+{
+  "state": "ACQUISITION_FINISHED_NOT_CLEANED_OR_EVALUATED",
+  "downloadedDifferentPixelCandidates": 490,
+  "automaticArticleEventGroups": 295,
+  "totalBytes": 243085344,
+  "hosts": [
+    {
+      "host": "economy.njau.edu.cn",
+      "uniquePixelCandidates": 9,
+      "requestsThisRun": 9,
+      "error": null
+    },
+    {
+      "host": "icucn.cucn.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 25,
+      "error": null
+    },
+    {
+      "host": "news.dlut.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 25,
+      "error": null
+    },
+    {
+      "host": "news.fudan.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 25,
+      "error": null
+    },
+    {
+      "host": "news.cqu.edu.cn",
+      "uniquePixelCandidates": 0,
+      "requestsThisRun": 50,
+      "error": null
+    },
+    {
+      "host": "news.hit.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 27,
+      "error": null
+    },
+    {
+      "host": "news.hust.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 27,
+      "error": null
+    },
+    {
+      "host": "news.jiangnan.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 24,
+      "error": null
+    },
+    {
+      "host": "news.njau.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 27,
+      "error": null
+    },
+    {
+      "host": "news.njupt.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 25,
+      "error": null
+    },
+    {
+      "host": "news.nuist.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 24,
+      "error": null
+    },
+    {
+      "host": "news.nuaa.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 32,
+      "error": null
+    },
+    {
+      "host": "news.pku.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 27,
+      "error": null
+    },
+    {
+      "host": "news.nwpu.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 24,
+      "error": null
+    },
+    {
+      "host": "news.seu.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 24,
+      "error": null
+    },
+    {
+      "host": "news.tju.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 28,
+      "error": null
+    },
+    {
+      "host": "webplus.njust.edu.cn",
+      "error": "ValueError: REDIRECT_NOT_FETCHED:https://ids.njust.edu.cn:443/authserver/login?service=http%3A%2F%2Fwebplus.njust.edu.cn%2Frobots.txt",
+      "uniquePixelCandidates": 0
+    },
+    {
+      "host": "news.whu.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 24,
+      "error": null
+    },
+    {
+      "host": "webplus.seu.edu.cn",
+      "error": "SSLError: HTTPSConnectionPool(host='webplus.seu.edu.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1016)')))",
+      "uniquePixelCandidates": 0
+    },
+    {
+      "host": "news.xmu.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 26,
+      "error": null
+    },
+    {
+      "host": "news.uestc.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 24,
+      "error": null
+    },
+    {
+      "host": "wzq.njust.edu.cn",
+      "error": "HTTPError: 483 Client Error:  for url: http://wzq.njust.edu.cn/robots.txt",
+      "uniquePixelCandidates": 0
+    },
+    {
+      "host": "yyxy.njau.edu.cn",
+      "uniquePixelCandidates": 1,
+      "requestsThisRun": 3,
+      "error": null
+    },
+    {
+      "host": "zs.njust.edu.cn",
+      "error": "ValueError: REDIRECT_NOT_FETCHED:https://error.njust.edu.cn/errorpage/errorTips404.html",
+      "uniquePixelCandidates": 0
+    },
+    {
+      "host": "www.nju.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 27,
+      "error": null
+    },
+    {
+      "host": "www.ujs.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 24,
+      "error": null
+    },
+    {
+      "host": "www.tsinghua.edu.cn",
+      "uniquePixelCandidates": 24,
+      "requestsThisRun": 39,
+      "error": null
+    }
+  ],
+  "evaluationStarted": false,
+  "humanVerifiedNaturalNegativeCount": 0,
+  "scope": "Public raw images remain local; acquisition is not cleaning, training or quality acceptance."
+}

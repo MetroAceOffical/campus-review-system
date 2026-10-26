@@ -1,0 +1,16 @@
+{
+  "bge": {
+    "originals": 50,
+    "blocks": 633,
+    "overBudgetCount": 0,
+    "wrongOffsets": 0
+  },
+  "m3": {
+    "originals": 50,
+    "blocks": 433,
+    "overBudgetCount": 0,
+    "wrongOffsets": 0
+  },
+  "seconds": 2.8280000000013388,
+  "scope": "Real tokenizer and codepoint/budget check only, not model training, indexing or campus accuracy."
+}
