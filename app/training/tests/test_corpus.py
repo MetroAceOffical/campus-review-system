@@ -5,12 +5,22 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from corpus import extract_article, cluster_splits, eligible_correspondence
+from corpus import extract_article, cluster_splits, eligible_correspondence, near_source_edges
 from prepare_training_data import parse_header
 from collect_corpus import crawl_link, open_crawl_db
 
 
 class CorpusTests(unittest.TestCase):
+    def test_near_repost_merges_but_shared_footer_does_not_merge_unrelated_articles(self):
+        body = ''.join(f'第{i}场校园活动介绍了独立的研究项目与志愿成果。' for i in range(30))
+        footer = '校园新闻编辑部版权所有欢迎提供新闻线索。'
+        documents = {'a':body+footer,'b':body.replace('研究项目','研究课题')+footer,
+                     'c':'青年教师深入乡村开展法律援助与社会调研。'*30+footer}
+        edges = {frozenset(pair) for pair in near_source_edges(documents)}
+        self.assertIn(frozenset(('a','b')),edges)
+        self.assertNotIn(frozenset(('a','c')),edges)
+        self.assertNotIn(frozenset(('b','c')),edges)
+
     def test_a_progress_reader_does_not_block_crawl_commits(self):
         with tempfile.TemporaryDirectory() as folder:
             writer = open_crawl_db(Path(folder)/'crawl.sqlite')
@@ -54,6 +64,11 @@ class CorpusTests(unittest.TestCase):
         self.assertIsNotNone(result)
         self.assertEqual(result['text'],'一项活动的公开正文。')
         self.assertEqual(result['publisher'],'学校官方号')
+
+    def test_visible_publication_date_wins_over_url_and_sidebar_dates(self):
+        html = '<h1>校园新闻</h1><div class="detail_box"><div class="time">2026年10月24日 新闻网 浏览次数15</div></div><div class="wp_articlecontent"><p>正文内容。</p></div><div class="news_time">2025.01.01</div>'
+        row = extract_article(html,'https://school.edu.cn/2026/1023/article.htm')
+        self.assertEqual(row['publishedAt'],'2026-10-24')
 
     def test_duplicate_text_and_transitive_event_links_cannot_cross_splits(self):
         docs = {'a':'同一个正文', 'b':'同一个正文', 'c':'另一篇', 'd':'其他事件'}

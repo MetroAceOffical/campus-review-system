@@ -1,0 +1,8 @@
+[
+  {"school":"中南大学","url":"https://news.csu.edu.cn/","target":300},
+  {"school":"重庆大学","url":"https://news.cqu.edu.cn/","target":300},
+  {"school":"电子科技大学","url":"https://news.uestc.edu.cn/","target":300},
+  {"school":"西安电子科技大学","url":"https://news.xidian.edu.cn/","target":300},
+  {"school":"西北工业大学","url":"https://news.nwpu.edu.cn/","target":300},
+  {"school":"江南大学","url":"https://news.jiangnan.edu.cn/","target":300}
+]

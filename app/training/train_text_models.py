@@ -178,6 +178,10 @@ def main():
                           'loss':total_loss,'gradientNorm':update_norm,'parameterSliceChanged':updated,
                           'elapsedSeconds':time.monotonic()-started,'cudaPeakBytes':torch.cuda.max_memory_allocated(),
                           'actualQueries':len(batch),'explicitPassagesPerQuery':5,'learningRate':scheduler.get_last_lr()[0]}
+                if global_step >= 50:
+                    record['remainingOptimizerSteps'] = steps_per_epoch*2-global_step
+                    record['estimatedRemainingSeconds'] = record['elapsedSeconds']/max(1,global_step)*record['remainingOptimizerSteps']
+                    record['estimateScope'] = 'Observed run throughput, includes validation/checkpoints so far; not a completion guarantee.'
                 log.write(json.dumps(record)+'\n');log.flush()
                 (args.output/'status.json').write_text(json.dumps({'state':'TRAINING','latest':record},indent=2),encoding='utf-8')
                 if global_step % 500 == 0 and offset+32 < len(order):
