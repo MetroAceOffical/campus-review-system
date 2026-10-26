@@ -1,0 +1,60 @@
+{
+  "state": "OCR_RECOVERY_EVALUATION_COMPLETE",
+  "queries": 150,
+  "knownTextQueries": 100,
+  "syntheticOriginalFamilies": 25,
+  "realRuntimeQueries": 50,
+  "realTranscriptionsAvailable": 0,
+  "realCER": null,
+  "failedQueries": 50,
+  "realRuntimeCompleted": 0,
+  "realEmptyAdaptive": 50,
+  "fallbackUsedQueries": 46,
+  "partialProcessingQueries": 50,
+  "results": {
+    "baseline": {
+      "knownQueries": 100,
+      "truthCharacters": 35260,
+      "microCER": 0.0021837776517300055,
+      "macroCER": 0.0021120826709062003,
+      "coveredTruthLines": 1800,
+      "truthLines": 1800,
+      "latencyMs": {
+        "median": 4716.204699998343,
+        "p95": 6048.75780500206
+      }
+    },
+    "adaptive": {
+      "knownQueries": 100,
+      "truthCharacters": 35260,
+      "microCER": 0.0018150879183210437,
+      "macroCER": 0.0017607313195548491,
+      "coveredTruthLines": 1800,
+      "truthLines": 1800,
+      "latencyMs": {
+        "median": 5384.262949999538,
+        "p95": 12069.057590000555
+      }
+    }
+  },
+  "adaptiveMinusBaselineCERFamilyBootstrap95": [
+    -0.0007606473039231314,
+    -5.6585730846102734e-05
+  ],
+  "qualityAccepted": false,
+  "productActivated": false,
+  "scope": "Known synthetic text CER and separate untranscribed real runtime coverage. Failures/empty outputs stay in known-text denominators. Does not measure reuse detection, real CER or production SLA.",
+  "split": "development",
+  "baselineConfigId": "ocr-c6b8101cb2cfb7e4acf136c60595ecdb29de837898a33624512d8defb3bed15e",
+  "adaptiveConfigId": "ocr-f7936a55e3bd06f138d62ac1d9c45c0151409dc9d433d38f91b5d9a094388d42",
+  "adaptiveFeatureSpaceId": null,
+  "algorithmSha256": "e669aaa534d63df47c0b52116ef4ac799eadf7e19ef34f1d444edcc8095af368",
+  "software": {
+    "opencv": "4.10.0",
+    "Pillow": "13.0.0",
+    "numpy": "1.26.4"
+  },
+  "predictionsSha256": "1f53c1038f18e4d50feb86c156719b14e69ae70d4996a301387dbd073d4ba8c8",
+  "datasetReadySha256": "2ded25fedc1c0a9f08593026fd94cd867e1db54f85de662ebf6df299e401418f",
+  "historicalFailure": "50 real images rejected by .img filename filter; superseded by content-decoding v2, original failures retained."
+}

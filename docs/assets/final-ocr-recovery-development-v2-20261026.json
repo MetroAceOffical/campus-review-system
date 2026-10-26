@@ -1,0 +1,59 @@
+{
+  "state": "OCR_RECOVERY_EVALUATION_COMPLETE",
+  "queries": 150,
+  "knownTextQueries": 100,
+  "syntheticOriginalFamilies": 25,
+  "realRuntimeQueries": 50,
+  "realTranscriptionsAvailable": 0,
+  "realCER": null,
+  "failedQueries": 0,
+  "realRuntimeCompleted": 50,
+  "realEmptyAdaptive": 6,
+  "fallbackUsedQueries": 83,
+  "partialProcessingQueries": 1,
+  "results": {
+    "baseline": {
+      "knownQueries": 100,
+      "truthCharacters": 35260,
+      "microCER": 0.0021837776517300055,
+      "macroCER": 0.0021120826709062003,
+      "coveredTruthLines": 1800,
+      "truthLines": 1800,
+      "latencyMs": {
+        "median": 4853.104050000184,
+        "p95": 6192.990409999035
+      }
+    },
+    "adaptive": {
+      "knownQueries": 100,
+      "truthCharacters": 35260,
+      "microCER": 0.0018150879183210437,
+      "macroCER": 0.0017607313195548491,
+      "coveredTruthLines": 1800,
+      "truthLines": 1800,
+      "latencyMs": {
+        "median": 5796.279200001663,
+        "p95": 12686.722129999722
+      }
+    }
+  },
+  "adaptiveMinusBaselineCERFamilyBootstrap95": [
+    -0.0007606473039231314,
+    -5.6585730846102734e-05
+  ],
+  "qualityAccepted": false,
+  "productActivated": false,
+  "scope": "Known synthetic text CER and separate untranscribed real runtime coverage. Failures/empty outputs stay in known-text denominators. Does not measure reuse detection, real CER or production SLA.",
+  "split": "development",
+  "baselineConfigId": "ocr-c6b8101cb2cfb7e4acf136c60595ecdb29de837898a33624512d8defb3bed15e",
+  "adaptiveConfigId": "ocr-05113047fe692d9951eb943f1e3a9adb971947768cc68bbff96a40931e7e6d8a",
+  "adaptiveFeatureSpaceId": "ocr-a4e03b3898b6f320c454c019d08594278dda09430a11407c3221758154bd3ce6",
+  "algorithmSha256": "40caf859f3e399012e0f0b92d437a1fbb0b1ed207229ddbd729cd56d8b7d9a7f",
+  "software": {
+    "opencv": "4.10.0",
+    "Pillow": "13.0.0",
+    "numpy": "1.26.4"
+  },
+  "predictionsSha256": "6470ca75d54cab9c092f7f4c71c2252d92577d5c104dad00435930796ff3f7e1",
+  "datasetReadySha256": "2ded25fedc1c0a9f08593026fd94cd867e1db54f85de662ebf6df299e401418f"
+}

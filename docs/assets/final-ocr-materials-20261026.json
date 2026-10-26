@@ -1,0 +1,18 @@
+{
+  "state": "OCR_MATERIALS_FROZEN_NOT_EVALUATED",
+  "samples": 250,
+  "knownTextSyntheticQueries": 200,
+  "syntheticOriginalFamilies": 50,
+  "realRuntimeImages": 50,
+  "realTranscriptionsAvailable": 0,
+  "splitCounts": {
+    "final": 100,
+    "development": 100,
+    "runtime_only": 50
+  },
+  "modelInferenceStarted": false,
+  "qualityAccepted": false,
+  "productActivated": false,
+  "scope": "200 correlated transforms of 50 synthetic notices, not 200 real posters. Real campus images have no known transcription and cannot enter CER denominators.",
+  "datasetReadySha256": "2ded25fedc1c0a9f08593026fd94cd867e1db54f85de662ebf6df299e401418f"
+}

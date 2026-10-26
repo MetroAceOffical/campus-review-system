@@ -1,0 +1,37 @@
+{
+  "state": "CACHED_EXACT_CONTENT_RELATIONS_AUDITED_NOT_FULL_NATURAL_EVALUATION",
+  "statistics": {
+    "alternateRecordsChecked": 443
+  },
+  "exclusions": {
+    "SAME_PUBLICATION_IDENTITY": 324,
+    "REPEATED_ALT_PUBLICATION_RECORD": 27
+  },
+  "relationCount": 92,
+  "splitRelationCounts": {
+    "dev": 11,
+    "train": 56,
+    "final": 20,
+    "calibration": 5
+  },
+  "splitParentCounts": {
+    "train": 52,
+    "calibration": 5,
+    "dev": 10,
+    "final": 18
+  },
+  "splitAutomaticEventCounts": {
+    "train": 50,
+    "calibration": 5,
+    "dev": 9,
+    "final": 17
+  },
+  "productEligibleQueries": 92,
+  "cleanManifestSha256": "8b69476bb2d4b222f6ee339c0e5dd98c6c03ec9fdccf50825d46c4b6d30be32e",
+  "partitionManifestSha256": "abf014573bc3651acf0745302e8095da6a3597ec1bdf5dd2b2eb6221959917c3",
+  "rawAltPagesHashVerified": true,
+  "usedDetectorScoresForTruth": false,
+  "naturalParaphrasesAccepted": 0,
+  "humanGold": false,
+  "scope": "Natural cached normalized-exact content only. Same URL, known article/column aliases and identical HTML do not inflate relations. Different publication records are not independent events or evidence of actual copying/permission. Final natural target200 remains a separate unmet target if below200."
+}

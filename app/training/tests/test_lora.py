@@ -11,6 +11,23 @@ from train_correspondence import attach_adapter, correspondence_loss, validate_r
 
 
 class LoraTests(unittest.TestCase):
+    def test_bfloat16_frozen_backbone_keeps_trainable_adapter_and_classifier_in_float32(self):
+        torch.manual_seed(34);torch.set_num_threads(2)
+        config=XLMRobertaConfig(vocab_size=64,hidden_size=32,num_hidden_layers=1,num_attention_heads=4,intermediate_size=64,num_labels=1,max_position_embeddings=64)
+        model=attach_adapter(XLMRobertaForSequenceClassification(config).to(dtype=torch.bfloat16))
+        self.assertTrue(all(parameter.dtype==torch.float32 for parameter in model.parameters() if parameter.requires_grad))
+        self.assertTrue(any(parameter.dtype==torch.bfloat16 and not parameter.requires_grad for parameter in model.parameters()))
+        classifier=next(parameter for name,parameter in model.named_parameters() if parameter.requires_grad and name.endswith('out_proj.weight'))
+        before=classifier.detach().clone();optimizer=torch.optim.AdamW((parameter for parameter in model.parameters() if parameter.requires_grad),lr=5e-5)
+        # This CPU cannot run oneDNN BF16 backbone backward. Check the actual
+        # trainable FP32 classifier here; the full FP32 adapter/reload test is
+        # separate, and CUDA BF16 is verified in the formal training job.
+        hidden=torch.randn(2,config.hidden_size,dtype=torch.float32)
+        classifier_module=model.base_model.model.classifier.modules_to_save['default']
+        loss=correspondence_loss(classifier_module.out_proj(hidden),torch.tensor([1.,0.]))
+        loss.backward();optimizer.step()
+        self.assertFalse(torch.equal(before,classifier))
+
     def test_formal_training_rejects_tiny_or_repeated_reverse_pairs(self):
         base={'taskType':'CONTENT_CORRESPONDENCE','labelOrigin':'controlled_construction','labelConfidence':'known','split':'train','sourceIds':['a'],'sourceOffsets':{'start':0,'end':6}}
         positive={**base,'query':'甲方事实','source':'保留甲方事实','target':1}

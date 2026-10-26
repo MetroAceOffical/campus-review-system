@@ -1,0 +1,59 @@
+{
+  "state": "OCR_RECOVERY_EVALUATION_COMPLETE",
+  "queries": 100,
+  "knownTextQueries": 100,
+  "syntheticOriginalFamilies": 25,
+  "realRuntimeQueries": 0,
+  "realTranscriptionsAvailable": 0,
+  "realCER": null,
+  "failedQueries": 0,
+  "realRuntimeCompleted": 0,
+  "realEmptyAdaptive": 0,
+  "fallbackUsedQueries": 35,
+  "partialProcessingQueries": 0,
+  "results": {
+    "baseline": {
+      "knownQueries": 100,
+      "truthCharacters": 35416,
+      "microCER": 0.0034165348994804608,
+      "macroCER": 0.003461222196072028,
+      "coveredTruthLines": 1800,
+      "truthLines": 1800,
+      "latencyMs": {
+        "median": 5773.656649998884,
+        "p95": 6242.5692299999355
+      }
+    },
+    "adaptive": {
+      "knownQueries": 100,
+      "truthCharacters": 35416,
+      "microCER": 0.002992997515247346,
+      "macroCER": 0.003009663831238383,
+      "coveredTruthLines": 1800,
+      "truthLines": 1800,
+      "latencyMs": {
+        "median": 6092.273700000078,
+        "p95": 11856.499184999848
+      }
+    }
+  },
+  "adaptiveMinusBaselineCERFamilyBootstrap95": [
+    -0.0009577707844177631,
+    0.0
+  ],
+  "qualityAccepted": false,
+  "productActivated": false,
+  "scope": "Known synthetic text CER and separate untranscribed real runtime coverage. Failures/empty outputs stay in known-text denominators. Does not measure reuse detection, real CER or production SLA.",
+  "split": "final",
+  "baselineConfigId": "ocr-c6b8101cb2cfb7e4acf136c60595ecdb29de837898a33624512d8defb3bed15e",
+  "adaptiveConfigId": "ocr-05113047fe692d9951eb943f1e3a9adb971947768cc68bbff96a40931e7e6d8a",
+  "adaptiveFeatureSpaceId": "ocr-a4e03b3898b6f320c454c019d08594278dda09430a11407c3221758154bd3ce6",
+  "algorithmSha256": "40caf859f3e399012e0f0b92d437a1fbb0b1ed207229ddbd729cd56d8b7d9a7f",
+  "software": {
+    "opencv": "4.10.0",
+    "Pillow": "13.0.0",
+    "numpy": "1.26.4"
+  },
+  "predictionsSha256": "48ea1ff24cec21a2f5c19fc70147a7ba8752e3470654a16a995ba05856b4f492",
+  "datasetReadySha256": "2ded25fedc1c0a9f08593026fd94cd867e1db54f85de662ebf6df299e401418f"
+}

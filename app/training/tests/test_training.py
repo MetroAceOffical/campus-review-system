@@ -1,5 +1,7 @@
 import sys
 import unittest
+from tokenizers import Tokenizer,models,pre_tokenizers
+from transformers import PreTrainedTokenizerFast
 from pathlib import Path
 import torch
 
@@ -8,6 +10,26 @@ from train_text_models import retrieval_loss, explicit_groups
 
 
 class TrainingTests(unittest.TestCase):
+    def test_campus_tokenization_keeps_the_full_source_and_rejects_over_budget(self):
+        import train_text_models as training
+        backend=Tokenizer(models.WordLevel({'[UNK]':0,'[PAD]':1},unk_token='[UNK]'));backend.pre_tokenizer=pre_tokenizers.Whitespace()
+        tokenizer=PreTrainedTokenizerFast(tokenizer_object=backend,unk_token='[UNK]',pad_token='[PAD]')
+        text=' '.join(['word']*300)
+        self.assertEqual(training.tokenize_retrieval(tokenizer,[text],512,strict=True)['input_ids'].shape[1],300)
+        self.assertEqual(training.tokenize_retrieval(tokenizer,[text],256,strict=False)['input_ids'].shape[1],256)
+        with self.assertRaises(ValueError):training.tokenize_retrieval(tokenizer,[' '.join(['word']*513)],512,strict=True)
+
+    def test_default_auxiliary_configuration_is_unchanged_and_campus_labels_are_explicit(self):
+        import train_text_models as training
+        old={'taskType':'RETRIEVAL_RELEVANCE','maxTokensPerSide':256,'microbatch':2,'stage':'public_event_story_auxiliary_only'}
+        self.assertEqual(training.configure_stage(old,{},campus=False),old)
+        manifest={'taskType':'CONTENT_CORRESPONDENCE','formalScaleAndBalanceReady':True,'trainGroups':1000}
+        configured=training.configure_stage(old,manifest,campus=True,max_tokens=512,microbatch=1)
+        self.assertEqual(configured['taskType'],'CONTENT_CORRESPONDENCE')
+        self.assertTrue(configured['strictTokenBudget'])
+        self.assertEqual(configured['microbatch'],1)
+        with self.assertRaises(ValueError):training.configure_stage(old,{**manifest,'taskType':'RETRIEVAL_RELEVANCE'},campus=True,max_tokens=512,microbatch=1)
+
     def test_directed_retrieval_never_turns_a_passage_into_the_query(self):
         pairs = [('q','p',1)]+[('q',key,0) for key in ['a','b','c','d']]+[(key,'p',0) for key in ['x1','x2','x3','x4']]
         groups = explicit_groups(pairs,symmetric=False)

@@ -1,0 +1,7 @@
+{
+  "knownSyntheticCompared": 100,
+  "baselineTextsEqual": 100,
+  "adaptiveTextsEqual": 100,
+  "firstRunRealFailures": 50,
+  "fixedRunRealFailures": 0
+}

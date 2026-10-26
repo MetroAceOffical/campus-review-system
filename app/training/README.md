@@ -84,3 +84,28 @@ v1/v2的原配置、源代码、失败输出与转换记录不覆盖；新目录
 图片核心位于`app/python/campus_detection/image_geometry.py`，SIFT配合L2和双向比率、RANSAC及内点凸包覆盖；实现依据[OpenCV匹配](https://docs.opencv.org/4.x/dc/dc3/tutorial_py_matcher.html)和[单应性](https://docs.opencv.org/4.x/d1/de0/tutorial_py_feature_homography.html)。pHash只提供近图候选，不能单凭低纹理近哈希宣称复用。区域坐标恢复EXIF方向后的原图像素中心；覆盖是空间支持，不是复制像素百分比。当前没有替换image-v1，OpenCV只使用用户已批准隔离环境，未修改生产依赖。
 
 `prepare_correspondence.py ... --wait-for-generation`已经作为独立CPU作业排队：最多等待48小时完整生成导出，失败上游立即停止；就绪后自动组装和核对规模/类别，仍不会自动激活或用不足数量启动M3。不要重复启动同名输出的组装作业。当前状态见runtime/datasets/campus-correspondence-training-v1/status.json。
+
+## OCR材料、恢复及评价
+
+`prepare_ocr_materials.py`已冻结200已知文本合成查询（50原稿家族，开发/最终各100）和50张仅运行覆盖的真实图；真图无转录，不进入CER。字体为现有Windows微软雅黑，字体SHA/布局/变换/GT行框在本地协议；素材和原URL不进GitHub。合成主要单栏，不能冒称复杂真实海报代表性已充分。
+
+`evaluate_ocr_recovery.py`使用**已有OCR Python**，不是训练venv；没有安装新依赖。新增fallback.py保留960对照，按质量条件1600及1024/128重叠分块，最多9块并明示PARTIAL。内容解码避免.img后缀拒绝，恢复坐标处于同一解码/EXIF原图框架；像素/特征/算法/处理策略身份独立。默认ocr-v1尚未替换。
+
+已完成开发v2（100合成+50真图）和最终v1（100合成），命令仅供恢复参考，**完成作业不要重复执行**：
+
+```powershell
+& validation/remaining/vision/env-ocr/Scripts/python.exe -B app/training/evaluate_ocr_recovery.py --split development --include-real-runtime --output runtime/experiments/final-training-20261026/ocr-recovery-development-v2
+& validation/remaining/vision/env-ocr/Scripts/python.exe -B app/training/evaluate_ocr_recovery.py --split final --development-run runtime/experiments/final-training-20261026/ocr-recovery-development-v2 --output runtime/experiments/final-training-20261026/ocr-recovery-final-v1
+```
+
+开发合成CER0.21838%→0.18151%，最终0.34165%→0.29930%，最终差区间上界0，恢复P95更高；50真图完成但6空/1PARTIAL，真实CER仍不可算。首轮开发v1的.img导致50真图失败，旧run及代码保留，不能写成已成功。当前只完成离线评价，未做OCR新服务业务接入。
+
+## 自然关系与校园检索适配
+
+`audit_natural_relations.py`复用已有缓存，不再请求用户重核同文。过滤URL/栏目别名、相同HTML和重复发布记录后，以原页SHA及规范化全文完全相同确认92条不同发布记录关系，按原split保存；最终仅20条，200目标未达。数据不意味着独立事件、作者先后、实际复制或版权许可，也不是自然改写准确率。
+
+`prepare_campus_retrieval.py`等待正式对应分片，按实际查询重新核查每个负来源的内容差异，不直接继承父原文负标。四负来源与文本均不同，每侧512完整输入，最少1,000不同查询组、来源限8组、改写至少50%；实际准备量尚未知，不据入口称完成。BGE新作业参数为`--campus-correspondence --directed-retrieval --max-tokens 512 --microbatch 1`、有效32、两轮，从已完成T2权重衔接；默认旧辅助256/micro2配置不变。正式M3仍需至少20,000对应对。校园神经训练链目前尚未启动，下一步须核对完整材料再衔接，不能重复启动同名目录。
+
+最新离线76项回归通过；旧版check ALL也已通过（真实模型项按默认跳过）。明日演示按用户选择重启后原入口启动，不添加演示模式或切换新模型；重启结束后台计算，保存结果/完整检查点保留。
+
+M3正式作业额外固定：冻结主干BF16、LoRA/分类头参数FP32、前向BF16 autocast，防止低学习率在BF16分类头上难以形成参数变化；逐步分别记录adapterWeightChanged与classifierWeightChanged。续训和最终重载使用相同适配器精度。本机oneDNN不支持BF16主干CPU backward，CPU测试只检查dtype及FP32头低学习率更新，完整FP32 LoRA/头更新与重载另测通过；未改环境，CUDA混合精度仍待正式作业。最新完整离线77项通过，真实M3尚未训练。

@@ -51,6 +51,27 @@ def check_files(folder, entries):
                 raise ValueError('Immutable input changed: '+name)
 
 
+def tokenize_retrieval(tokenizer,texts,max_tokens=256,strict=False):
+    if strict:
+        result=tokenizer(texts,padding=True,truncation=False,return_tensors='pt',verbose=False)
+        if result['input_ids'].shape[1]>max_tokens:raise ValueError('Campus source/query exceeds strict token budget; do not silently truncate')
+        return result
+    return tokenizer(texts,padding=True,truncation=True,max_length=max_tokens,return_tensors='pt')
+
+
+def configure_stage(config,manifest,campus=False,max_tokens=256,microbatch=2):
+    config=dict(config)
+    if not campus:
+        if max_tokens!=256 or microbatch!=2:raise ValueError('Nondefault input profiles require explicit campus stage; preserve auxiliary resume identities')
+        return config
+    if manifest.get('taskType')!='CONTENT_CORRESPONDENCE' or not manifest.get('formalScaleAndBalanceReady') or manifest.get('trainGroups',0)<1000:raise ValueError('Campus retrieval requires a supported, sufficiently sized correspondence shard')
+    if max_tokens!=512 or microbatch not in (1,2):raise ValueError('Campus full-source profile requires joint-safe 512 sides and microbatch1/2')
+    config.update(taskType='CONTENT_CORRESPONDENCE',stage='campus_correspondence_retrieval',lossObjective='DIRECTED_CONTRASTIVE_RETRIEVAL',
+                  maxTokensPerSide=max_tokens,microbatch=microbatch,strictTokenBudget=True,
+                  warning='Campus window correspondence adaptation only. Rule negatives remain fallible. Not M3 training, calibration or quality acceptance.')
+    return config
+
+
 def main():
     from transformers import AutoModel, AutoTokenizer, get_linear_schedule_with_warmup
     parser = argparse.ArgumentParser()
@@ -60,10 +81,14 @@ def main():
     parser.add_argument('--resume',type=Path)
     parser.add_argument('--initial-weights',type=Path)
     parser.add_argument('--directed-retrieval',action='store_true')
+    parser.add_argument('--campus-correspondence',action='store_true')
+    parser.add_argument('--max-tokens',type=int,choices=[256,512],default=256)
+    parser.add_argument('--microbatch',type=int,choices=[1,2],default=2)
     args = parser.parse_args()
     if not torch.cuda.is_available() or not torch.cuda.is_bf16_supported():
         raise RuntimeError('Configured CUDA BF16 training is unavailable; do not silently change environments')
     check_files(args.data,json.loads((args.data/'READY').read_text(encoding='utf-8')))
+    dataset_manifest=json.loads((args.data/'manifest.json').read_text(encoding='utf-8'))
     acquisition = json.loads((args.model/'acquisition.json').read_text(encoding='utf-8'))
     if acquisition['status'] != 'download_verified_not_trained':
         raise ValueError('Base model acquisition incomplete')
@@ -76,8 +101,11 @@ def main():
     torch.set_num_threads(4)
     db = sqlite3.connect(args.data/'auxiliary.sqlite')
     documents = dict(db.execute('SELECT id,text FROM documents'))
-    train = explicit_groups(list(db.execute("SELECT left_id,right_id,target FROM pairs WHERE split='aux_train'")),symmetric=not args.directed_retrieval)
-    validation = explicit_groups(list(db.execute("SELECT left_id,right_id,target FROM pairs WHERE split='aux_validation'")),symmetric=not args.directed_retrieval)
+    directed=args.directed_retrieval or args.campus_correspondence
+    train_split='train' if args.campus_correspondence else 'aux_train'
+    train = explicit_groups(list(db.execute('SELECT left_id,right_id,target FROM pairs WHERE split=?',(train_split,))),symmetric=not directed)
+    validation = [] if args.campus_correspondence else explicit_groups(list(db.execute("SELECT left_id,right_id,target FROM pairs WHERE split='aux_validation'")),symmetric=not directed)
+    if args.campus_correspondence and (db.execute("SELECT count(*) FROM pairs WHERE split!='train'").fetchone()[0] or len(train)!=dataset_manifest['trainGroups']):raise ValueError('Non-training material or invalid explicit campus group count')
     db.close()
     if not train:
         raise ValueError('No queries have four distinct explicit labelled negatives')
@@ -86,8 +114,12 @@ def main():
               'trainGroups':len(train),'validationGroups':len(validation),'baseRevision':acquisition['revision'],
               'datasetManifestSha256':hashlib.sha256((args.data/'manifest.json').read_bytes()).hexdigest(),
               'warning':'Known event/story relevance, not campus correspondence training; auxiliary uses leading 256-token windows. Not a product quality result.'}
+    config=configure_stage(config,dataset_manifest,args.campus_correspondence,args.max_tokens,args.microbatch)
+    if args.campus_correspondence:
+        with (ROOT/'runtime/datasets/campus-partitions-20261026-v1/train.jsonl').open('rb') as stream:
+            if hashlib.file_digest(stream,'sha256').hexdigest()!=dataset_manifest['sourceTrainSha256']:raise ValueError('Frozen campus training source identity changed')
     config_sha = hashlib.sha256(json.dumps(config,sort_keys=True).encode()).hexdigest()
-    if args.directed_retrieval:
+    if directed:
         config['directionPolicy'] = 'fixed_query_passage_roles'
         config_sha = hashlib.sha256(json.dumps(config,sort_keys=True).encode()).hexdigest()
     if args.initial_weights:
@@ -97,6 +129,9 @@ def main():
     (args.output/'run.json').write_text(json.dumps(config,indent=2),encoding='utf-8')
     (args.output/'train-groups.json').write_text(json.dumps(train,indent=2),encoding='utf-8')
     tokenizer = AutoTokenizer.from_pretrained(args.model,local_files_only=True,trust_remote_code=False)
+    if args.campus_correspondence:
+        for key,text in documents.items():
+            if len(tokenizer(text,truncation=False,add_special_tokens=True,verbose=False)['input_ids'])>config['maxTokensPerSide']:raise ValueError('Prepared campus input exceeds full-source token budget')
     model = AutoModel.from_pretrained(args.resume/'model' if args.resume else args.initial_weights or args.model,local_files_only=True,trust_remote_code=False)
     model.gradient_checkpointing_enable()
     model.to('cuda')
@@ -117,7 +152,7 @@ def main():
             return
 
     def encode(texts):
-        tokens = tokenizer(texts,padding=True,truncation=True,max_length=256,return_tensors='pt').to('cuda')
+        tokens = tokenize_retrieval(tokenizer,texts,config['maxTokensPerSide'],strict=args.campus_correspondence).to('cuda')
         return model(**tokens).last_hidden_state[:,0]
 
     @torch.no_grad()
@@ -160,8 +195,8 @@ def main():
                 optimizer.zero_grad(set_to_none=True)
                 old = update_witness.detach().flatten()[:64].clone()
                 total_loss = 0
-                for micro in range(0,len(batch),2):
-                    selected = batch[micro:micro+2]
+                for micro in range(0,len(batch),config['microbatch']):
+                    selected = batch[micro:micro+config['microbatch']]
                     queries = [documents[g['queryId']] for g in selected]
                     passages = [documents[key] for g in selected for key in [g['positiveId']]+g['negativeIds']]
                     with torch.autocast('cuda',dtype=torch.bfloat16):
@@ -201,12 +236,13 @@ def main():
         before = encode([probe]).float().cpu()
     reloaded = AutoModel.from_pretrained(saved/'model',local_files_only=True,trust_remote_code=False).to('cuda').eval()
     with torch.no_grad(),torch.autocast('cuda',dtype=torch.bfloat16):
-        inputs = tokenizer([probe],padding=True,truncation=True,max_length=256,return_tensors='pt').to('cuda')
+        inputs = tokenize_retrieval(tokenizer,[probe],config['maxTokensPerSide'],strict=args.campus_correspondence).to('cuda')
         after = reloaded(**inputs).last_hidden_state[:,0].float().cpu()
     if not torch.allclose(before,after,atol=1e-5,rtol=1e-5):
         raise RuntimeError('Serialized checkpoint reload changed inference')
     result = {'state':'AUXILIARY_TRAINING_COMPLETE','steps':global_step,'epochs':2,'checkpoint':saved.name,'reloadVerified':True,
               'elapsedSeconds':time.monotonic()-started,'campusAdaptationComplete':False,'productActivated':False,'qualityAccepted':False}
+    if args.campus_correspondence:result.update(state='CAMPUS_RETRIEVAL_TRAINING_COMPLETE',retrieverCampusAdaptationComplete=True,M3TrainingComplete=False)
     (args.output/'status.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
     print(json.dumps(result),flush=True)
 
