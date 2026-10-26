@@ -35,7 +35,7 @@ def main():
     subprocess.run([sys.executable,'-u','-B',str(ROOT/'app/training/train_text_models.py'),
                     '--model',str(ROOT/'runtime/models/final/bge-base-zh-v1.5/f03589ceff5aac7111bd60cfc7d497ca17ecac65'),
                     '--initial-weights',str(previous/previous_state['checkpoint']/'model'),
-                    '--data',str(data),'--output',str(RUN)],cwd=ROOT,check=True)
+                    '--data',str(data),'--output',str(RUN),'--directed-retrieval'],cwd=ROOT,check=True)
     (RUN/'stage-status.json').write_text(json.dumps({'state':'AUXILIARY_CURRICULUM_FINISHED','campusAdaptationComplete':False,'productActivated':False,'qualityAccepted':False}),encoding='utf-8')
 
 

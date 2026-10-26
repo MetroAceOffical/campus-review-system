@@ -24,18 +24,19 @@ def retrieval_loss(query, passages, temperature=.05):
     return F.cross_entropy(scores,torch.zeros(len(query),device=query.device,dtype=torch.long))
 
 
-def explicit_groups(pairs):
+def explicit_groups(pairs,symmetric=True):
     negatives = defaultdict(set)
     positives = set()
     for left,right,target in pairs:
         if target:
-            positives.add(tuple(sorted((left,right))))
+            positives.add(tuple(sorted((left,right))) if symmetric else (left,right))
         else:
             negatives[left].add(right)
-            negatives[right].add(left)
+            if symmetric:
+                negatives[right].add(left)
     groups = []
     for left,right in sorted(positives):
-        if len(negatives[left]-{right}) < 4:
+        if symmetric and len(negatives[left]-{right}) < 4:
             left,right = right,left
         available = sorted(negatives[left]-{right})
         if len(available) >= 4:
@@ -58,6 +59,7 @@ def main():
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--resume',type=Path)
     parser.add_argument('--initial-weights',type=Path)
+    parser.add_argument('--directed-retrieval',action='store_true')
     args = parser.parse_args()
     if not torch.cuda.is_available() or not torch.cuda.is_bf16_supported():
         raise RuntimeError('Configured CUDA BF16 training is unavailable; do not silently change environments')
@@ -74,8 +76,8 @@ def main():
     torch.set_num_threads(4)
     db = sqlite3.connect(args.data/'auxiliary.sqlite')
     documents = dict(db.execute('SELECT id,text FROM documents'))
-    train = explicit_groups(list(db.execute("SELECT left_id,right_id,target FROM pairs WHERE split='aux_train'")))
-    validation = explicit_groups(list(db.execute("SELECT left_id,right_id,target FROM pairs WHERE split='aux_validation'")))
+    train = explicit_groups(list(db.execute("SELECT left_id,right_id,target FROM pairs WHERE split='aux_train'")),symmetric=not args.directed_retrieval)
+    validation = explicit_groups(list(db.execute("SELECT left_id,right_id,target FROM pairs WHERE split='aux_validation'")),symmetric=not args.directed_retrieval)
     db.close()
     if not train:
         raise ValueError('No queries have four distinct explicit labelled negatives')
@@ -85,6 +87,9 @@ def main():
               'datasetManifestSha256':hashlib.sha256((args.data/'manifest.json').read_bytes()).hexdigest(),
               'warning':'Known event/story relevance, not campus correspondence training; auxiliary uses leading 256-token windows. Not a product quality result.'}
     config_sha = hashlib.sha256(json.dumps(config,sort_keys=True).encode()).hexdigest()
+    if args.directed_retrieval:
+        config['directionPolicy'] = 'fixed_query_passage_roles'
+        config_sha = hashlib.sha256(json.dumps(config,sort_keys=True).encode()).hexdigest()
     if args.initial_weights:
         with (args.initial_weights/'model.safetensors').open('rb') as stream:
             config['initialCheckpointSha256'] = hashlib.file_digest(stream,'sha256').hexdigest()

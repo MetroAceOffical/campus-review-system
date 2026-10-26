@@ -8,6 +8,11 @@ from train_text_models import retrieval_loss, explicit_groups
 
 
 class TrainingTests(unittest.TestCase):
+    def test_directed_retrieval_never_turns_a_passage_into_the_query(self):
+        pairs = [('q','p',1)]+[('q',key,0) for key in ['a','b','c','d']]+[(key,'p',0) for key in ['x1','x2','x3','x4']]
+        groups = explicit_groups(pairs,symmetric=False)
+        self.assertEqual(groups,[{'queryId':'q','positiveId':'p','negativeIds':['a','b','c','d']}])
+
     def test_each_of_four_explicit_negatives_receives_gradient(self):
         query = torch.tensor([[1.,.4]],requires_grad=True)
         passages = torch.tensor([[[.8,.2],[.5,.1],[.7,.6],[.2,.9],[.3,.1]]],requires_grad=True)

@@ -1,0 +1,43 @@
+{
+  "stage": "main_auxiliary_retrieval_training",
+  "state": "TRAINING",
+  "observed": {
+    "step": 1056,
+    "epoch": 1,
+    "nextCursor": 33792,
+    "loss": 0.8771438598632812,
+    "gradientNorm": 8.500107765197754,
+    "parameterSliceChanged": true,
+    "elapsedSeconds": 1805.7030000000013,
+    "cudaPeakBytes": 2089697792,
+    "actualQueries": 32,
+    "explicitPassagesPerQuery": 5,
+    "learningRate": 1.4091218515997278e-05,
+    "remainingOptimizerSteps": 2070,
+    "estimatedRemainingSeconds": 3539.588267045457,
+    "estimateScope": "Observed run throughput, includes validation/checkpoints so far; not a completion guarantee."
+  },
+  "uniqueQueries": 50000,
+  "uniquePairs": 250000,
+  "positivePairs": 50000,
+  "negativePairs": 200000,
+  "uniquePassages": 244351,
+  "dataManifestSha256": "19644ee9c8bed633030483d39f7bc2265df33dec564d064e47955a60bd865909",
+  "checkpointDirectories": [
+    "checkpoint-000500",
+    "checkpoint-001000"
+  ],
+  "qualityAccepted": false,
+  "campusAdaptationComplete": false,
+  "productActivated": false,
+  "metadataClarification": "The generic run stage/warning string still says event/story; actual immutable data manifest and t2q/t2p IDs identify T2Ranking relevance training. No event/story relation was used as content-correspondence BCE.",
+  "trainingCodeSnapshotSha256": "ae77bb606e29f2f4c3ab87478d542a8b14b2e433b4628b223f58a5a3fd04dd67",
+  "sourceCommitBeforeDirectionMode": "a83a1b895bedaaf09326c4ab3cbca29c101f0200",
+  "directionAudit": {
+    "groups": 50000,
+    "distinctAnchors": 50000,
+    "passageSideAnchors": 10,
+    "futureDirectedModeAdded": true,
+    "currentRunConfigurationUnchanged": true
+  }
+}
