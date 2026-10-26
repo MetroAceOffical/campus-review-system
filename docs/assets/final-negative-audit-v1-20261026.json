@@ -1,0 +1,17 @@
+{
+  "state": "RULE_SUPPORTED_NEGATIVES_NOT_HUMAN_GOLD",
+  "statistics": {
+    "candidatesChecked": 46747,
+    "supportedUniquePairs": 281
+  },
+  "rejectionReasons": {
+    "differentExplicitNamedSubjects": 27113,
+    "differentSubstantiveProcesses": 45025,
+    "differentPublicationPeriod": 31807,
+    "noLongNarrativeCopy": 4073
+  },
+  "independentQuerySourceParents": 191,
+  "sourceTrainSha256": "6ad51635d1a3cb30bd550a98d6aae2df2a84e3cd39d68807875690eed1302c9d",
+  "usedDetectorScoresForTruth": false,
+  "scope": "Rule-supported training labels only. Do not use as final human-gold accuracy denominator. Counts may be far below the planned training scale; do not pad unsupported labels."
+}

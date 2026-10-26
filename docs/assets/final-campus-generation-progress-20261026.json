@@ -1,0 +1,23 @@
+{
+  "stage": "campus_training_material_construction",
+  "observed": {
+    "state": "GENERATING_TRAIN_MATERIAL",
+    "segmentCounts": {
+      "ACCEPTED": 83,
+      "PENDING": 5587,
+      "QUARANTINED": 46
+    },
+    "selectedOriginals": 1200,
+    "elapsedSeconds": 1266.6090000000004,
+    "device": "cuda",
+    "estimatedRemainingSeconds": 54856.93397674421,
+    "semanticCorrectnessCertified": false,
+    "modelLoadSeconds": 7.25,
+    "hostRssBytes": 1845334016,
+    "cudaPeakAllocatedBytes": 6237037056
+  },
+  "wholeRewritesComplete": false,
+  "neuralCampusAdaptationComplete": false,
+  "M3TrainingStarted": false,
+  "qualityAccepted": false
+}

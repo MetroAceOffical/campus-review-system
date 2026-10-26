@@ -1,0 +1,8 @@
+{
+  "officialQueryIds": 50000,
+  "normalizedDistinctQueryTexts": 50000,
+  "pairRows": 250000,
+  "normalizedDistinctUndirectedTextPairs": 250000,
+  "repeatedNormalizedPairs": 0,
+  "normalizedPairLabelConflicts": 0
+}

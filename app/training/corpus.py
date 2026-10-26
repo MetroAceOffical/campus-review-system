@@ -1,10 +1,18 @@
 """Offline corpus contracts. This module never loads a detector or changes business data."""
 import hashlib
+import json
 import re
 import unicodedata
 from collections import Counter,defaultdict
 from datetime import date
 from urllib.parse import urljoin
+
+
+def read_jsonl(path):
+    with path.open(encoding='utf-8') as stream:
+        for line in stream:
+            if line.strip():
+                yield json.loads(line)
 
 
 def normalized(text):
@@ -78,7 +86,11 @@ def cluster_splits(documents, positive_edges, seed=20261026):
 
 
 def eligible_correspondence(row):
-    return row.get('taskType') == 'CONTENT_CORRESPONDENCE' and row.get('labelConfidence') == 'known' and row.get('labelOrigin') in {'human_verified','controlled_construction','traceable_correspondence'}
+    if row.get('taskType') != 'CONTENT_CORRESPONDENCE':return False
+    if row.get('target')==0 and row.get('labelOrigin')=='rule_inferred_noncorrespondence':
+        basis=row.get('negativeBasis') or {}
+        return row.get('labelConfidence')=='supported_rule' and basis.get('supported') is True and len(basis.get('factSpans',[]))>=2 and bool(basis.get('checks')) and all(basis['checks'].values())
+    return row.get('labelConfidence') == 'known' and row.get('labelOrigin') in {'human_verified','controlled_construction','traceable_correspondence'}
 
 
 def near_source_edges(documents):

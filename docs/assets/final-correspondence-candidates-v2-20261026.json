@@ -1,0 +1,15 @@
+{
+  "state": "ALIGNED_CANDIDATES_NOT_LABELLED_TRAINING_PAIRS",
+  "windowCount": 15620,
+  "candidateCount": 431188,
+  "sourceParentsWithCandidates": 3021,
+  "sourceTrainSha256": "6ad51635d1a3cb30bd550a98d6aae2df2a84e3cd39d68807875690eed1302c9d",
+  "windowTokens": 240,
+  "overlapTokens": 48,
+  "jointBudget": 512,
+  "labelsCreated": 0,
+  "maxDistinctSourcesPerWindow": 30,
+  "sameEventExcludedBeforeRanking": true,
+  "scope": "Offline mining budget is independent of inference Top3. No model score or lexical rank is interpreted as noncorrespondence. Content-difference evidence and label provenance are still required.",
+  "snapshotScope": "Actual completed offline stage; not neural training or product quality acceptance."
+}

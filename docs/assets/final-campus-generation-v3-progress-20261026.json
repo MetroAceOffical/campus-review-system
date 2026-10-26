@@ -1,0 +1,20 @@
+{
+  "state": "GENERATING_TRAIN_MATERIAL",
+  "segmentCounts": {
+    "ACCEPTED": 318,
+    "PENDING": 5391,
+    "QUARANTINED": 7
+  },
+  "selectedOriginals": 1200,
+  "elapsedSeconds": 114.125,
+  "device": "cuda",
+  "promptVersion": "3",
+  "reusedSegments": 314,
+  "estimatedRemainingSeconds": 55931.625,
+  "semanticCorrectnessCertified": false,
+  "modelLoadSeconds": 7.03099999999904,
+  "hostRssBytes": 1999683584,
+  "cudaPeakAllocatedBytes": 6282112512,
+  "snapshotScope": "In-progress training-material generation. Not completed generation, M3 training or product activation.",
+  "codeSnapshotSha256": "11aebf8c33247540ddfae670d92ebcb67537b1f4ee1876557308754fedcc29f8"
+}

@@ -1,0 +1,26 @@
+{
+  "stage": "T2Ranking_auxiliary_retrieval_complete",
+  "status": {
+    "state": "AUXILIARY_TRAINING_COMPLETE",
+    "steps": 3126,
+    "epochs": 2,
+    "checkpoint": "checkpoint-003126",
+    "reloadVerified": true,
+    "elapsedSeconds": 5351.890000000001,
+    "campusAdaptationComplete": false,
+    "productActivated": false,
+    "qualityAccepted": false
+  },
+  "optimizerSteps": 3126,
+  "uniquePairCount": 250000,
+  "uniqueOfficialQueries": 50000,
+  "queryExposuresAcrossEpochs": 100000,
+  "explicitPairExposuresAcrossEpochs": 500000,
+  "parameterUpdateWitnessSteps": 3125,
+  "maxCudaAllocatedBytes": 2089697792,
+  "finalCheckpointHashesVerified": 7,
+  "classicalCampusQualityAccepted": false,
+  "campusAdaptationComplete": false,
+  "directionPolicyNote": "10/50000 groups used passage-side anchors in this preserved legacy auxiliary run; later directed policy is a separate configuration.",
+  "evaluationScope": "No campus recall/false-positive conclusion. Official T2 train shard only, no auxiliary validation curve fabricated."
+}

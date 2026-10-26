@@ -1,0 +1,35 @@
+{
+  "summary": {
+    "state": "SOURCE_PARTITIONS_FROZEN_BEFORE_CONSTRUCTION",
+    "seed": 20261026,
+    "sourceCount": 5043,
+    "sourcesBySplit": {
+      "train": 3021,
+      "calibration": 339,
+      "dev": 522,
+      "final": 1161
+    },
+    "eventGroupsBySplit": {
+      "train": 2954,
+      "calibration": 332,
+      "dev": 515,
+      "final": 1100
+    },
+    "homeCampusBySplit": {
+      "train": 217,
+      "dev": 69,
+      "final": 238,
+      "calibration": 27
+    },
+    "publicTrainingOverlappingSources": 19,
+    "additionalTitleDateEdges": 140,
+    "sourceSnapshotSha256": "25e38cb720da995872b2dc3500ccce4cbe61f491ed8703df1d6a862fcdecf25b",
+    "eventLabelOrigin": "conservative_automatic_grouping_not_human_gold",
+    "queryConstructionComplete": false,
+    "finalProtocolExecuted": false,
+    "decontaminationScope": "All selected T2 query/passage bodies and actually used news auxiliary bodies. Sampled campus 64-character sentinels at stride8; complete training scan. Guaranteed detection of >=71 contiguous normalized characters, shorter spans/semantic-only common provenance remain a limitation.",
+    "splitPolicy": "General 63/7/10/20%, home-campus families 40.5/4.5/15/40%; any overlapping event forced train. Calibration is disjoint from neural training."
+  },
+  "eventGroupsDisjointAcrossAllFourSplits": true,
+  "hashesVerified": 5
+}

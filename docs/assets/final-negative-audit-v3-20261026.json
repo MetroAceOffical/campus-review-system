@@ -1,0 +1,17 @@
+{
+  "ruleVersion": "3",
+  "state": "RULE_SUPPORTED_NEGATIVES_NOT_HUMAN_GOLD",
+  "statistics": {
+    "candidatesChecked": 46747,
+    "supportedUniquePairs": 747
+  },
+  "rejectionReasons": {
+    "supportedContentDifference": 45978,
+    "noLongNarrativeCopy": 4073
+  },
+  "independentQuerySourceParents": 443,
+  "sourceTrainSha256": "6ad51635d1a3cb30bd550a98d6aae2df2a84e3cd39d68807875690eed1302c9d",
+  "usedDetectorScoresForTruth": false,
+  "scope": "Rule-supported training labels only. Do not use as final human-gold accuracy denominator. Counts may be far below the planned training scale; do not pad unsupported labels.",
+  "snapshotScope": "Actual completed offline stage; not neural training or product quality acceptance."
+}
