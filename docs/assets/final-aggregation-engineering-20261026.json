@@ -1,0 +1,11 @@
+{
+  "offlineTests": 62,
+  "testLogSha256": "e5f9fc023527eb927d2107d99bcbae4a0caee95b3f45afc7b984f39fce098c17",
+  "aggregationCodeSha256": "89f06cc7e705fef0668fe4aa4addc5ddb0c8a517e3dd496fd9abff9ca8ecff3a",
+  "protectedMatched": 42,
+  "historicalFrozenMatched": 580,
+  "actualCampusCalibrationFitted": false,
+  "actualM3TrainingStarted": false,
+  "productActivated": false,
+  "scope": "6-row logistic regression engineering fixture only. Formal calibration requires frozen event and feature identities and sufficient class/event scale."
+}
