@@ -1,0 +1,29 @@
+import sys
+import unittest
+from pathlib import Path
+import torch
+
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+from train_text_models import retrieval_loss, explicit_groups
+
+
+class TrainingTests(unittest.TestCase):
+    def test_each_of_four_explicit_negatives_receives_gradient(self):
+        query = torch.tensor([[1.,.4]],requires_grad=True)
+        passages = torch.tensor([[[.8,.2],[.5,.1],[.7,.6],[.2,.9],[.3,.1]]],requires_grad=True)
+        loss = retrieval_loss(query,passages)
+        loss.backward()
+        self.assertTrue(torch.isfinite(loss))
+        for index in range(1,5):
+            self.assertGreater(passages.grad[0,index].abs().sum().item(),0)
+
+    def test_groups_never_invent_or_duplicate_missing_explicit_negatives(self):
+        pairs = [('q','p',1),('q','a',0),('q','b',0),('q','c',0)]
+        self.assertEqual(explicit_groups(pairs),[])
+        groups = explicit_groups(pairs+[('q','d',0),('q','d',0)])
+        self.assertEqual(len(groups),1)
+        self.assertEqual(set(groups[0]['negativeIds']),{'a','b','c','d'})
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -1,0 +1,5 @@
+# Existing Torch/Transformers inherited read-only from the approved production runtime.
+peft==0.17.1
+accelerate==1.10.1
+beautifulsoup4==4.14.2
+opencv-python-headless==4.11.0.86

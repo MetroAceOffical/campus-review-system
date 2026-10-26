@@ -24,7 +24,7 @@ def prepare_text_index(library,models):
     return {'documents':by_id,'windows':windows,'indices':indices,'vectorizer':vectorizer,'matrix':matrix,'templates':templates,'featureSpaceId':config['featureSpaceId']}
 
 def detect_text(request,library,models):
-    start=time.perf_counter();config=models['textConfig'];validate_request(request,config,library)
+    start=time.perf_counter();config=models.get('textConfigs',{}).get(request.get('configId'),models['textConfig']);validate_request(request,config,library)
     output=result_header(request,config)
     text=request.get('text')
     if not isinstance(text,str) or len(text)>10000:raise ContractError('INVALID_TEXT','Text must contain at most 10000 Unicode code points')
@@ -67,7 +67,7 @@ def detect_text(request,library,models):
             query_piece=text[match['q_start']:match['q_end']];source_piece=source['text'][match['s_start']:match['s_end']]
             if query_piece!=source_piece:raise ContractError('EVIDENCE_OFFSET_MISMATCH','Evidence does not match immutable input')
             item['matches'].append({'queryStart':match['q_start'],'queryEnd':match['q_end'],'sourceStart':match['s_start'],'sourceEnd':match['s_end'],'queryText':query_piece,'sourceText':source_piece})
-        for _,qi,j in sorted(semantic_candidates,reverse=True)[:2]:
+        for _,qi,j in ([] if config.get('schemaVersion')=='text-v2' else sorted(semantic_candidates,reverse=True)[:2]):
             query=query_windows[qi];reference=index['windows'][j]
             if len(models['tokenizer'](query['text'],reference['text'],add_special_tokens=True)['input_ids'])>128:raise ContractError('BERT_WINDOW_TOO_LONG','Frozen BERT pair budget exceeded')
             pairs.append({'sentence1':query['text'],'sentence2':reference['text'],'label':0});pair_keys.append((item,query,reference))
@@ -77,5 +77,9 @@ def detect_text(request,library,models):
     for (item,query,reference),score in zip(pair_keys,semantic_scores):
         item['semanticWindows'].append({'queryStart':query['start'],'queryEnd':query['end'],'sourceStart':reference['start'],'sourceEnd':reference['end'],'queryText':query['text'],'sourceText':reference['text'],'score':float(score)})
     output.update(evidence=evidence,qualityFlags=['PARTIAL_SEMANTIC_COVERAGE'],queryWindowCount=len(query_windows),candidateCount=len(candidates),semanticAlpha=0,elapsedMs=(time.perf_counter()-start)*1000)
+    if config.get('schemaVersion')=='text-v2':
+        from campus_detection.semantic import add_semantic_evidence
+        add_semantic_evidence(output,index,text,models,config)
+        output['elapsedMs']=(time.perf_counter()-start)*1000
     if len(text)<config['params']['min_chars']:output['qualityFlags'].append('INSUFFICIENT_TEXT')
     return output

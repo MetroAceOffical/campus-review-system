@@ -1,0 +1,66 @@
+{
+  "stage": "final_auxiliary_shard_1",
+  "status": {
+    "state": "AUXILIARY_TRAINING_COMPLETE",
+    "steps": 178,
+    "epochs": 2,
+    "checkpoint": "checkpoint-000178",
+    "reloadVerified": true,
+    "elapsedSeconds": 327.67199999999957,
+    "campusAdaptationComplete": false,
+    "productActivated": false,
+    "qualityAccepted": false
+  },
+  "config": {
+    "taskType": "RETRIEVAL_RELEVANCE",
+    "stage": "public_event_story_auxiliary_only",
+    "seed": 20261026,
+    "epochs": 2,
+    "maxTokensPerSide": 256,
+    "microbatch": 2,
+    "effectiveQueries": 32,
+    "explicitNegatives": 4,
+    "learningRate": 2e-05,
+    "weightDecay": 0.01,
+    "warmupRatio": 0.06,
+    "trainGroups": 2836,
+    "validationGroups": 10,
+    "baseRevision": "f03589ceff5aac7111bd60cfc7d497ca17ecac65",
+    "datasetManifestSha256": "36190bb29d4722386a586b2ad468443481c3abb5b93ffa69339aa0e4deda8b72",
+    "warning": "Known event/story relevance, not campus correspondence training; auxiliary uses leading 256-token windows. Not a product quality result."
+  },
+  "baselineValidationLoss": 0.5848976135253906,
+  "epochs": [
+    {
+      "event": "epoch_end",
+      "epoch": 1,
+      "step": 89,
+      "validationLoss": 0.3214874267578125,
+      "checkpoint": "checkpoint-000089"
+    },
+    {
+      "event": "epoch_end",
+      "epoch": 2,
+      "step": 178,
+      "validationLoss": 0.3175937652587891,
+      "checkpoint": "checkpoint-000178"
+    }
+  ],
+  "stepRecords": 178,
+  "parameterUpdatesObserved": 177,
+  "checkpointHashesVerified": 7,
+  "codeSha256": "d8bfd7da2addadfabc020828dfd422e563f3b12f560f1e2114661146cd1e7616",
+  "auxiliaryEvaluation": {
+    "base": {
+      "count": 10,
+      "meanLoss": 0.5848976135253906,
+      "fiveCandidateAccuracyAt1": 0.8
+    },
+    "auxiliary_trained": {
+      "count": 10,
+      "meanLoss": 0.3175937652587891,
+      "fiveCandidateAccuracyAt1": 0.9
+    }
+  },
+  "scope": "Only auxiliary event/story training. Not campus quality acceptance, full-library recall, LoRA completion or product activation."
+}

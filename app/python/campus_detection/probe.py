@@ -25,6 +25,8 @@ def save(name,result,summary):
 
 def run_text_probe():
     started=time.perf_counter();models=load_models()
+    # This historical regression deliberately checks the original method, not v2 quality.
+    models=dict(models,textConfig=models['legacyTextConfig'])
     cases=jsonl(ROOT/'validation/remaining/text/cases.jsonl')
     case=next(row for row in cases if row['split']=='development' and row['kind']=='copy')
     documents=probe_documents(case['source_id'])

@@ -16,7 +16,7 @@ def frozen_text_helpers():
     module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
     return module
 
-def configurations():
+def configurations(*, legacy=False):
     selection=read(ROOT/'validation/remaining/text/selection.json')
     lock=read(ROOT/'validation/text/round2/selection-lock.json')
     if selection['chunk']!={'tokens':48,'overlap':12} or selection['alpha']!=0:
@@ -28,6 +28,17 @@ def configurations():
           'templateGram':16,'templateRatio':0.8,'templateDocumentRatio':0.1,'bertPairMaxTokens':128,'bertPrecision':'bfloat16-autocast'}
     text['featureSpaceId']='text-'+digest_json(text)
     text['configId']='text-'+digest_json(text)
+    if not legacy:
+        text = {**text, 'schemaVersion':'text-v2', 'method':'sentence-aligned-20261024',
+                'baseConfigId':text['configId'],
+                'semanticDecision':'separate-evidence-hint; literal acceptance and ranking unchanged',
+                'semanticAlgorithmSha256':file_sha256(ROOT/'app/python/campus_detection/semantic.py'),
+                'semanticPolicy':{'scoreThreshold':.5,'lexicalFloor':.25,'minimumPairs':2,
+                                  'minimumCharacters':64,'maxSources':3,'maxQueryUnits':48,
+                                  'maxPairs':288,'alignmentMinimum':.08,'candidatesPerUnit':2,'unitTokens':60}}
+        # Existing TF-IDF vectors are unchanged; only the inference policy gets a new ID.
+        text.pop('configId')
+        text['configId']='text-'+digest_json(text)
     image={'schemaVersion':'image-v1','model':'facebook/dinov2-small','revision':'ed25f3a31f01632728cabb09d1542f84ab7b0056',
            'weightSha256':'ae1e99fcefd534ed978cdeb8326f08030c96e28b7a81ffcbc98a857c84d14be1',
            'processorSha256':file_sha256(ROOT/'validation/remaining/image/models/dinov2-small/preprocessor_config.json'),
@@ -45,6 +56,7 @@ def load_models():
     from transformers import AutoImageProcessor,AutoModel
     torch.set_num_threads(4)
     text,image=configurations()
+    old_text,_=configurations(legacy=True)
     # Only the read-only frozen loader/predictor are imported. No experiment runner is executed.
     sys.path.insert(0,str(ROOT/'validation/text'))
     import round2
@@ -58,6 +70,7 @@ def load_models():
         if not pairs:return []
         scores,_=round2.predict_rows('bert',bert,pairs,tokenizer=tokenizer,batch=8)
         return scores.tolist()
-    return {'textConfig':text,'imageConfig':image,'tokenizer':tokenizer,'bert':bert,'predictBert':predict,
+    return {'textConfig':text,'legacyTextConfig':old_text,'textConfigs':{text['configId']:text,old_text['configId']:old_text},
+            'imageConfig':image,'tokenizer':tokenizer,'bert':bert,'predictBert':predict,
             'dino':dino,'processor':processor,'allowedRoots':[ROOT/'runtime',ROOT/'validation'],
             'loadedWeights':{'bert':text['weightSha256'],'dino':image['weightSha256']}}

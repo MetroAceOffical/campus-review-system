@@ -1,0 +1,13 @@
+[
+  {"school":"南京传媒学院招生办","url":"https://zsb.cucn.edu.cn/","target":600},
+  {"school":"山东大学","url":"https://news.sdu.edu.cn/","target":350},
+  {"school":"武汉大学","url":"https://news.whu.edu.cn/","target":350},
+  {"school":"华中科技大学","url":"https://news.hust.edu.cn/","target":350},
+  {"school":"南开大学","url":"https://news.nankai.edu.cn/","target":350},
+  {"school":"天津大学","url":"https://news.tju.edu.cn/","target":350},
+  {"school":"厦门大学","url":"https://news.xmu.edu.cn/","target":350},
+  {"school":"华东师范大学","url":"https://news.ecnu.edu.cn/","target":350},
+  {"school":"华南师范大学","url":"https://news.scnu.edu.cn/","target":350},
+  {"school":"哈尔滨工业大学","url":"https://news.hit.edu.cn/","target":350},
+  {"school":"大连理工大学","url":"https://news.dlut.edu.cn/","target":350}
+]
