@@ -1,0 +1,28 @@
+{
+  "state": "VERIFIED_REAL_NEWS_CLASSROOM_DATA",
+  "published": 4,
+  "pending": 3,
+  "draft": 1,
+  "liveManuscripts": 8,
+  "realArticles": 6,
+  "archiveTablesVerified": 20,
+  "oldManuscriptsArchived": 33,
+  "manualRealReferencesPreserved": 196,
+  "returnedFirstVersionUnchanged": true,
+  "approvedSecondVersionPublished": true,
+  "newPublicationActuallyRetrieved": true,
+  "newPublicationReferenceId": "209",
+  "newQueryEvidenceIds": [
+    "171:text:c1f077601e6efa5b0776"
+  ],
+  "reprintTextHit": true,
+  "reprintImageSourceHits": 2,
+  "fileReadsVerified": 9,
+  "jobs": "COMPLETED\t224",
+  "scope": "Real functional classroom preparation; not accuracy evaluation or new model training. Setup decisions were scripted via reviewer API, with reasons labelled as classroom preparation. Campus open-day draft reserved for user live demonstration.",
+  "activeLibraryGenerationId": "17",
+  "activeReferenceWorks": 200,
+  "activeLibraryContainsOnly196RealManualAnd4RealPublishedWorks": true,
+  "displayBodiesMatchCachedSourceOnce": 8,
+  "offlineTrainingProcessesAtFinalCheck": 0
+}
