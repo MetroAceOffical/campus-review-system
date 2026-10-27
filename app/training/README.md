@@ -109,3 +109,15 @@ v1/v2的原配置、源代码、失败输出与转换记录不覆盖；新目录
 最新离线76项回归通过；旧版check ALL也已通过（真实模型项按默认跳过）。明日演示按用户选择重启后原入口启动，不添加演示模式或切换新模型；重启结束后台计算，保存结果/完整检查点保留。
 
 M3正式作业额外固定：冻结主干BF16、LoRA/分类头参数FP32、前向BF16 autocast，防止低学习率在BF16分类头上难以形成参数变化；逐步分别记录adapterWeightChanged与classifierWeightChanged。续训和最终重载使用相同适配器精度。本机oneDNN不支持BF16主干CPU backward，CPU测试只检查dtype及FP32头低学习率更新，完整FP32 LoRA/头更新与重载另测通过；未改环境，CUDA混合精度仍待正式作业。最新完整离线77项通过，真实M3尚未训练。
+
+## 10月27日接入基础补充
+
+重启后已核对原进程退出及源码身份，按上文原命令恢复提示词v3生成和CPU组装等待；没有开机自动训练或新的神经训练控制器。准备材料达到formalScaleAndBalanceReady前不能启动校园正式微调；不要把旧status的GENERATING当作进程仍活着。
+
+alignment.py现在可由source_contexts按`(sourceRevisionId, sourceKey)`提供原文字段及该字段的索引块，加入前后邻接块后按联合512拆窗，保存retrievedSourceRange。evaluate_pairs调用已绑定模型的scorePair，只从成功调用计算checkedRegions；失败、无候选、空输入及延后配对保持不完整状态。训练区25原作/75区域/76配对的真实分词预算与原文位置验证通过，最大511token，没有正式模型预测成绩。
+
+`export_correspondence.py`是训练结束后的CPU导出入口，需要明确`--run --data --model --base-manifest --output`；output必须为runtime/models/final下新版本。要求正式至少20,000条、2epoch、完成状态及最终重载通过，检查完整checkpoint/数据/父模型哈希；先按训练BF16加载冻结主干再提升FP32，合并adapter及分类头并对比同输入、保存、普通Transformers重载，最后新目录READY。当前没有完成的正式M3，不能提前执行或称已导出。
+
+`campus_detection/task_model.py`只读加载上述export，调用者必须指定expected_export_id；复核manifest/全部文件、模型类型、联合512和明确CPU FP32/CUDA BF16策略。生产加载路径不import PEFT，未安装生产新依赖。导出CPU等价和小型模型工程测试不能代替正式CUDA精度、v3服务路由及质量回归；本轮默认v2保持。
+
+最新完整离线85项通过，含实际小模型更新/合并/序列化/加载器前向及篡改拒绝、模型失败/预算/空输入覆盖记录。正式神经训练、校准和新业务接入仍待材料及真实结果。

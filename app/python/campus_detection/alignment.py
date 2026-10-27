@@ -1,5 +1,8 @@
 """Traceable text-v3 candidate scheduling. Scheduling is not neural evaluation."""
 from collections import deque
+import hashlib
+import json
+import math
 import numpy as np
 from campus_detection.retrieval import token_blocks
 
@@ -25,7 +28,22 @@ def split_pair(query,source,tokenizer,max_joint=512):
     return rows
 
 
-def schedule_pairs(query_blocks,hits_by_query,tokenizer,max_pairs=2048,sources_per_query=3,max_joint=512):
+def neighbor_context(hit,context,adjacent_blocks=1):
+    """Extend an indexed hit within its exact immutable source field."""
+    text=context['text'];blocks=sorted(context['blocks'],key=lambda row:(row['start'],row['end']))
+    if not isinstance(adjacent_blocks,int) or isinstance(adjacent_blocks,bool) or adjacent_blocks<0:raise ValueError('Invalid neighbor budget')
+    positions=[]
+    for index,block in enumerate(blocks):
+        if not 0<=block['start']<block['end']<=len(text) or block['text']!=text[block['start']:block['end']]:raise ValueError('Neighbor block does not reconstruct original field')
+        if block['start']==hit['start'] and block['end']==hit['end']:positions.append(index)
+    if len(positions)!=1 or hit['text']!=text[hit['start']:hit['end']]:raise ValueError('Retrieved hit differs from frozen source blocks')
+    position=positions[0];selected=blocks[max(0,position-adjacent_blocks):position+adjacent_blocks+1]
+    start=min(row['start'] for row in selected);end=max(row['end'] for row in selected)
+    return {**hit,'start':start,'end':end,'text':text[start:end],
+            'retrievedSourceRange':{'start':hit['start'],'end':hit['end']}}
+
+
+def schedule_pairs(query_blocks,hits_by_query,tokenizer,max_pairs=2048,sources_per_query=3,max_joint=512,source_contexts=None):
     if len(query_blocks)!=len(hits_by_query) or max_pairs<1 or sources_per_query<1:raise ValueError('Invalid alignment input or budget')
     queues=[];total=0;empty_regions=[]
     for query_index,(query,hits) in enumerate(zip(query_blocks,hits_by_query)):
@@ -39,10 +57,16 @@ def schedule_pairs(query_blocks,hits_by_query,tokenizer,max_pairs=2048,sources_p
         # Interleave sources so one source's expanded long windows cannot monopolize a region.
         source_queues=[]
         for hit in chosen:
+            retrieved={'start':hit['start'],'end':hit['end']}
+            if source_contexts is not None:
+                identity=(str(hit['sourceRevisionId']),hit.get('sourceKey','BODY'))
+                if identity not in source_contexts:raise ValueError('Missing immutable source revision/field context')
+                hit=neighbor_context(hit,source_contexts[identity])
             values=split_pair(query,hit,tokenizer,max_joint)
             source_queues.append(deque({**row,'queryBlockIndex':query_index,'sourceRevisionId':str(hit['sourceRevisionId']),
                                         'sourceWorkId':str(hit['sourceWorkId']),'sourceKey':hit.get('sourceKey','BODY'),
-                                        'retrievalScore':float(hit['score']),'scoreType':'NOT_YET_RERANKED'} for row in values))
+                                        'retrievalScore':float(hit['score']),'retrievedSourceRange':retrieved,
+                                        'scoreType':'NOT_YET_RERANKED'} for row in values))
         while any(source_queues):
             for queue in source_queues:
                 if queue:candidates.append(queue.popleft())
@@ -64,3 +88,43 @@ def schedule_pairs(query_blocks,hits_by_query,tokenizer,max_pairs=2048,sources_p
             'deferredCandidatePairs':total-len(selected),'pairBudget':max_pairs,'jointTokenBudget':max_joint,
             'coveragePlan':'PARTIAL' if total>len(selected) or empty_regions else 'COMPLETE','neuralInferencePerformed':False,
             'scope':'Planned pairs only. Checked regions and evaluated pair counts must come from actual successful model calls. No lexical score floor creates or rejects correspondence truth.'}
+
+
+def evaluate_pairs(plan,score_pair,model_config_id):
+    """Run the supplied task-model callback; retain failures outside evidence.
+
+    The callback returns a sigmoid content-correspondence score. Its caller must
+    load the verified model/adapter and bind model_config_id; a cosine retrieval
+    score is not a substitute. This function does not claim quality acceptance.
+    """
+    if not isinstance(model_config_id,str) or not model_config_id.strip():raise ValueError('Missing task-model configuration identity')
+    if plan['coveragePlan'] not in {'COMPLETE','PARTIAL'} or plan['scheduledPairCount']!=len(plan['pairs']):raise ValueError('Invalid alignment plan')
+    evaluated=[];failures=[]
+    for index,pair in enumerate(plan['pairs']):
+        try:
+            score=score_pair(dict(pair))
+            if isinstance(score,(bool,np.bool_)):raise ValueError('Boolean is not a task-model score')
+            score=float(score)
+            if not math.isfinite(score) or not 0<=score<=1:raise ValueError('Invalid task-model score')
+        except Exception as error:
+            failures.append({'pairIndex':index,'queryStart':pair['queryStart'],'queryEnd':pair['queryEnd'],
+                             'sourceRevisionId':pair['sourceRevisionId'],'sourceKey':pair['sourceKey'],
+                             'sourceStart':pair['sourceStart'],'sourceEnd':pair['sourceEnd'],'errorType':type(error).__name__})
+            continue
+        identity={key:pair[key] for key in ['queryStart','queryEnd','sourceRevisionId','sourceKey','sourceStart','sourceEnd','queryText','sourceText']}
+        identity['modelConfigId']=model_config_id
+        evidence_id='alignment-'+hashlib.sha256(json.dumps(identity,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()).hexdigest()
+        evaluated.append({**pair,'score':score,'scoreType':'CONTENT_CORRESPONDENCE_SCORE',
+                          'modelConfigId':model_config_id,'evidenceId':evidence_id})
+    regions=[]
+    for start,end in sorted({(row['queryStart'],row['queryEnd']) for row in evaluated}):
+        if regions and start<=regions[-1]['end']:regions[-1]['end']=max(end,regions[-1]['end'])
+        else:regions.append({'start':start,'end':end})
+    status='FAILED' if failures and not evaluated else 'PARTIAL' if not evaluated or failures or plan['coveragePlan']=='PARTIAL' else 'COMPLETE'
+    return {'pairs':evaluated,'failures':failures,'checkedRegions':regions,'evaluatedPairCount':len(evaluated),
+            'failedPairCount':len(failures),'scheduledPairCount':len(plan['pairs']),
+            'candidatePairsBeforeBudget':plan['candidatePairsBeforeBudget'],'deferredCandidatePairs':plan['deferredCandidatePairs'],
+            'emptyCandidateRegions':plan['emptyCandidateRegions'],'pairBudget':plan['pairBudget'],
+            'jointTokenBudget':plan['jointTokenBudget'],'coverageStatus':status,'modelConfigId':model_config_id,
+            'noReuseClaim':False,'qualityAccepted':False,
+            'scope':'Checked regions are successful inference context-window unions, not reused characters or proof all sources were checked.'}

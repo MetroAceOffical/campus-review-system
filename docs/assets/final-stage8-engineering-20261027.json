@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "final-stage8-engineering-v1",
+  "observedAt": "2026-10-27T08:27:28.352806+08:00",
+  "offlineTests": 85,
+  "offlineTestsPassed": true,
+  "logSha256": "b58a6c69fec44f36fecacbed424c5ac1bb2d9be8babc129969cbbcdff373b9ba",
+  "protectedFilesVerified": 42,
+  "frozenAssetsVerified": 580,
+  "defaultProductProfileChanged": false,
+  "productionDependenciesInstalled": false,
+  "generationSegments": {
+    "ACCEPTED": 1482,
+    "PENDING": 3823,
+    "QUARANTINED": 411
+  },
+  "selectedTrainingParents": 1200,
+  "generationProcessRunning": true,
+  "preparationProcessRunning": true,
+  "preparationState": "WAITING_GENERATION_EXPORT",
+  "campusNeuralTrainingStarted": false,
+  "formalM3ExportCreated": false,
+  "modelExportScope": "Tiny XLM-R actual adapter/head update -> FP32 merge -> serialization -> ordinary Transformers reload -> read-only loader forward only. Not formal campus M3 or CUDA BF16 verification.",
+  "alignmentScope": "Neighbor context preserves original revision/field and ranges. Successful callback scores alone enter evidence; failures/deferred/empty remain incomplete.",
+  "modulesSha256": {
+    "app/python/campus_detection/alignment.py": "91bf67fdf59e8131cdff1c86ae6dadaa225496383aa496a94ae268cd6d46106e",
+    "app/python/campus_detection/task_model.py": "eac4c352d4bf389efecd13c4f9f9d3e49b85869085fbb5b65f43cfb09c766042",
+    "app/training/export_correspondence.py": "1fbc0876b6d610369c1065d6c426094b5019a82e43c798ef5a640c06a78b7ad1"
+  },
+  "productActivated": false,
+  "qualityAccepted": false
+}

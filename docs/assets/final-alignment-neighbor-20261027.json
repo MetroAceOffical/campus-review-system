@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "alignment-neighbor-proof-v1",
+  "documents": 25,
+  "queryRegions": 75,
+  "scheduledPairs": 76,
+  "maximumActualJointTokens": 511,
+  "pairsWithExpandedContext": 76,
+  "originalCodepointReconstructionVerified": true,
+  "lateQueryBoundariesPreserved": true,
+  "tokenizers": "Fixed local BGE and M3 revisions",
+  "neuralInferencePerformed": false,
+  "scope": "CPU tokenizer/range validation on train sources; known-location pairs, no learned retrieval or formal M3 inference.",
+  "algorithmSha256": "91bf67fdf59e8131cdff1c86ae6dadaa225496383aa496a94ae268cd6d46106e"
+}
