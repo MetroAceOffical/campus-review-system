@@ -1,0 +1,115 @@
+{
+  "state": "MEASURED_CURRENT_ONLINE_PIPELINE",
+  "protocolSha256": "0e458488b903bd9f4cbb30d1023fc32c0e7b15fb4143f8ef7e680eb04dd3dba3",
+  "materialsSha256": "7c57d437986d13d71833576beb4bd656d9eae626aa9886dcec735c619eb1dc8f",
+  "activeLibraryGenerationId": "17",
+  "count": 4,
+  "completed": 4,
+  "counts": {
+    "correctSourceCandidate": 4,
+    "literalHit": 0,
+    "semanticHint": 2,
+    "eitherHint": 2
+  },
+  "cases": [
+    {
+      "caseId": "R01",
+      "title": "【改写诊断01】在课堂实践中拓展专业能力与国际视野",
+      "manuscriptId": "53",
+      "submissionId": "38",
+      "batchId": "38",
+      "sourceWorkId": "206",
+      "status": "COMPLETED",
+      "bodyCandidates": 10,
+      "correctSourceCandidate": true,
+      "correctSourceRank": 1,
+      "literalHit": false,
+      "semanticHint": false,
+      "eitherHint": false,
+      "unjudgedExtraHints": [],
+      "sourceSemanticStatus": [
+        "EVALUATED"
+      ],
+      "correctSourceEvidenceIds": [
+        "172:text:9a568c536f0433f0fddd"
+      ],
+      "elapsedMs": 98.11810000064725,
+      "reviewUrl": "http://127.0.0.1:8080/#/reviews/38"
+    },
+    {
+      "caseId": "R02",
+      "title": "【改写诊断02】短视频微专业围绕实践与账号运营调整春季教学",
+      "manuscriptId": "54",
+      "submissionId": "39",
+      "batchId": "39",
+      "sourceWorkId": "207",
+      "status": "COMPLETED",
+      "bodyCandidates": 9,
+      "correctSourceCandidate": true,
+      "correctSourceRank": 1,
+      "literalHit": false,
+      "semanticHint": true,
+      "eitherHint": true,
+      "unjudgedExtraHints": [],
+      "sourceSemanticStatus": [
+        "EVALUATED"
+      ],
+      "correctSourceEvidenceIds": [
+        "173:text:dd9721a75e16131504fa"
+      ],
+      "elapsedMs": 192.15910000093572,
+      "reviewUrl": "http://127.0.0.1:8080/#/reviews/39"
+    },
+    {
+      "caseId": "R03",
+      "title": "【改写诊断03】从传媒本科学习到电影电视研究：王彦祺的留学经历",
+      "manuscriptId": "55",
+      "submissionId": "40",
+      "batchId": "40",
+      "sourceWorkId": "208",
+      "status": "COMPLETED",
+      "bodyCandidates": 9,
+      "correctSourceCandidate": true,
+      "correctSourceRank": 1,
+      "literalHit": false,
+      "semanticHint": true,
+      "eitherHint": true,
+      "unjudgedExtraHints": [],
+      "sourceSemanticStatus": [
+        "EVALUATED"
+      ],
+      "correctSourceEvidenceIds": [
+        "174:text:619b9a439be2b79fbc05"
+      ],
+      "elapsedMs": 175.922399999763,
+      "reviewUrl": "http://127.0.0.1:8080/#/reviews/40"
+    },
+    {
+      "caseId": "R04",
+      "title": "【改写诊断04】从校园观察到海报展览：视觉研究工作坊回顾",
+      "manuscriptId": "56",
+      "submissionId": "41",
+      "batchId": "41",
+      "sourceWorkId": "209",
+      "status": "COMPLETED",
+      "bodyCandidates": 10,
+      "correctSourceCandidate": true,
+      "correctSourceRank": 1,
+      "literalHit": false,
+      "semanticHint": false,
+      "eitherHint": false,
+      "unjudgedExtraHints": [],
+      "sourceSemanticStatus": [
+        "EVALUATED"
+      ],
+      "correctSourceEvidenceIds": [
+        "175:text:c1f077601e6efa5b0776"
+      ],
+      "elapsedMs": 166.85419999885198,
+      "reviewUrl": "http://127.0.0.1:8080/#/reviews/41"
+    }
+  ],
+  "interpretation": "Four constructed positives, no independent negative set. Cannot estimate population recall, precision or FPR; no claim of semantic accuracy or formal final evaluation.",
+  "modelOrThresholdChanged": false,
+  "reviewDecisionsMade": false
+}
