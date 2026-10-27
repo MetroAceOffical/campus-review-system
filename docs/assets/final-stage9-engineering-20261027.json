@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "final-stage9-engineering-v1",
+  "observedAt": "2026-10-27T08:56:44.001549+08:00",
+  "offlineTests": 97,
+  "offlineTestsPassed": true,
+  "testLogSha256": "895d15520806472f7cd524897f4af763c33d2641c7d867ecbf0fd79a424c0430",
+  "protectedFilesVerified": 42,
+  "frozenAssetsVerified": 580,
+  "defaultProfileChanged": false,
+  "newEnvironmentInstalled": false,
+  "generationSegments": {
+    "ACCEPTED": 1637,
+    "PENDING": 3599,
+    "QUARANTINED": 480
+  },
+  "generationProcessRunning": true,
+  "preparationProcessRunning": true,
+  "finiteTrainingControllerRunning": true,
+  "controllerState": "WAITING_FORMAL_MATERIAL",
+  "campusNeuralTrainingStarted": false,
+  "trainingDependencyScripts": 8,
+  "sourceSnapshotsVerified": true,
+  "BGEProof": "Eight exact indexed-block controls only; 61 blocks encoded by completed auxiliary BGE CPU model, not campus recall.",
+  "pipelineScope": "Opt-in mixed-source retrieval, distinct-source alignment, actual callback accounting, template subtraction and calibration contract; not active business routing.",
+  "controllerScope": "Finite 48-hour wait; formal scale/class checks, serial GPU guards, no tiny fallback, no environment installation or product activation.",
+  "modulesSha256": {
+    "app/python/campus_detection/retrieval.py": "cb864948dc116d4a5ee2b67a767a151d9a93ac7cda18949eeb140a229f5241aa",
+    "app/python/campus_detection/retrieval_model.py": "383e0fbff1dea6f747c6bcdae65271d871854cf4be3337e8ee564e5608a0b35f",
+    "app/python/campus_detection/aggregation.py": "5239397ee08906433caaac7350c80320932be5dea079798ca75b2f37b374f7ed",
+    "app/python/campus_detection/v3_pipeline.py": "53cd17623d63a4060673c7638d3c54836c3d94ac9423a8642fe192b032905b96",
+    "app/training/run_campus_stage.py": "9f0b9d56e6eca86087ebe1d484917faee6cab2a144826c0ebd8ff500c0117dbf"
+  },
+  "productActivated": false,
+  "qualityAccepted": false
+}

@@ -130,14 +130,22 @@ def fit_calibrator(rows,feature_config,partition_sha256,forbidden_events=(),cali
             'labelOrigins':sorted({row['labelOrigin'] for row in rows}),'scoreType':'CALIBRATED_DECISION_SCORE_NOT_COPY_PERCENTAGE','productActivated':False}
 
 
+def validate_calibrator(calibrator,feature_config,thresholds,require_formal_scale=True):
+    if calibrator.get('featureNames')!=FEATURE_NAMES or calibrator.get('featureConfigSha256')!=_feature_identity(feature_config) or calibrator.get('aggregationAlgorithmSha256')!=ALGORITHM_SHA256:raise ValueError('Aggregation feature/model identities differ')
+    if require_formal_scale and not calibrator.get('formalCalibrationScaleMet'):raise ValueError('Tiny engineering calibrator cannot be used as a formal model')
+    if not isinstance(thresholds,dict) or set(thresholds)!={'whole','local'}:raise ValueError('Require both frozen operating thresholds')
+    for name in ['whole','local']:
+        model=calibrator.get('models',{}).get(name,{})
+        coefficients=np.asarray(model.get('coefficients',[]),dtype=float)
+        if coefficients.shape!=(len(FEATURE_NAMES),) or not np.isfinite(coefficients).all() or not math.isfinite(model.get('intercept',float('nan'))) or not 0<=thresholds[name]<=1:raise ValueError('Invalid calibration coefficients or operating point')
+
+
 def decide(features,calibrator,feature_config,thresholds,coverage_status='COMPLETE',require_formal_scale=True):
-    if calibrator['featureNames']!=FEATURE_NAMES or calibrator['featureConfigSha256']!=_feature_identity(feature_config) or calibrator.get('aggregationAlgorithmSha256')!=ALGORITHM_SHA256:raise ValueError('Aggregation feature/model identities differ')
-    if require_formal_scale and not calibrator['formalCalibrationScaleMet']:raise ValueError('Tiny engineering calibrator cannot be used as a formal model')
+    validate_calibrator(calibrator,feature_config,thresholds,require_formal_scale)
     if coverage_status not in {'COMPLETE','PARTIAL','FAILED'}:raise ValueError('Unknown processing coverage status')
     values=_feature_vector(features);scores={}
     for name in ['whole','local']:
         model=calibrator['models'][name];coefficients=np.asarray(model['coefficients'],dtype=float)
-        if coefficients.shape!=values.shape or not np.isfinite(coefficients).all() or not math.isfinite(model['intercept']) or not 0<=thresholds[name]<=1:raise ValueError('Invalid calibration coefficients or operating point')
         logit=float(values@coefficients+model['intercept']);scores[name]=1/(1+math.exp(-logit)) if logit>=0 else math.exp(logit)/(1+math.exp(logit))
     whole=scores['whole']>=thresholds['whole'];local=scores['local']>=thresholds['local'] or whole
     supported=features['informativeQueryCoverage']>0 and features['informativeSourceCoverage']>0

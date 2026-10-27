@@ -121,3 +121,21 @@ alignment.py现在可由source_contexts按`(sourceRevisionId, sourceKey)`提供�
 `campus_detection/task_model.py`只读加载上述export，调用者必须指定expected_export_id；复核manifest/全部文件、模型类型、联合512和明确CPU FP32/CUDA BF16策略。生产加载路径不import PEFT，未安装生产新依赖。导出CPU等价和小型模型工程测试不能代替正式CUDA精度、v3服务路由及质量回归；本轮默认v2保持。
 
 最新完整离线85项通过，含实际小模型更新/合并/序列化/加载器前向及篡改拒绝、模型失败/预算/空输入覆盖记录。正式神经训练、校准和新业务接入仍待材料及真实结果。
+
+## 召回编排与有限训练衔接（10月27日08:53更新）
+
+`retrieval_model.py`读取明确选择的检查点哈希，完整绑定BGE权重/config及tokenizer组件，实际CLS/L2编码、512输入保护与精度/设备身份；已有T2完成模型的CPU核验建立8校61块新索引并重载，8个原样块控制8/8来源Top1，不是校园Recall成绩。新索引算法身份变化需要新目录，旧字面索引不受影响。
+
+`v3_pipeline.py`衔接混合Top30来源池、每区不同来源Top3、邻接块、联合512调度、实际成功调用和模板扣除后的来源特征。它仍为独立入口，不改默认text.py/旧acceptedCandidate。必须分别绑定BGE和M3 tokenizer；没有正式校准器返回PENDING_CALIBRATION，有校准器则推理前验证配置/算法/正式规模和工作点。字面输入是来源排名，不自动从旧v2结果伪造Top30；真正业务路由和报告接入仍待实现。
+
+以下控制器已实际启动，**原进程活跃时不要重复运行**：
+
+```powershell
+& runtime/environments/final-training/Scripts/python.exe -u -B app/training/run_campus_stage.py --wait-for-material
+```
+
+run位于runtime/experiments/final-training-20261026/campus-training-stage-v1。最多等48小时完整正式材料；不少于20,000不同配对且类别各至少20%才允许进入训练，子训练器再次核对真实行/标签/预算。BGE适配需至少1,000不同查询组；不足时保留检索待补，M3可用其独立合格分片继续训练，不降低门槛。正常顺序为准备校园BGE分片→GPU空闲后BGE适配→M3→CPU合并导出，均不激活生产。
+
+控制器快照8个实际脚本依赖及已有包版本，持有项目独占文件锁；每次启动子任务前后复查，源码变化停止。已有完整run逐项核验并跳过；已有未完成run报明确恢复状态，需先显式按完整checkpoint续训，不能自动覆盖或将ALREADY_COMPLETED打印当成最终重载成功。重启会结束控制器和子任务，确认无旧进程后，只有相同pipeline.json/源码环境才能加`--continue-existing-stage --wait-for-material`续接；发生代码/环境变化用新stage目录并保留旧记录。准备分片的.partial/非READY残留也先保留检查。
+
+当前状态仅WAITING_FORMAL_MATERIAL、neuralTrainingStarted=false；尚无正式校园神经作业。18081检测服务在运行时控制器停止，不争用展示GPU，不自动停任何服务，也不安装依赖或设置开机启动。最新完整离线97项通过，实际进展见主文档和子作业日志。

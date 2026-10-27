@@ -108,10 +108,11 @@ def load_dense_index(output,identity,tokens=192,overlap=48):
     return {'manifest':manifest,'blocks':blocks,'vectors':vectors}
 
 
-def search_dense(index,query_vectors,top_k=10,scan_rows=2048,exclude_manuscript_id=None):
+def search_dense(index,query_vectors,top_k=10,scan_rows=2048,exclude_manuscript_id=None,allowed_source_revision_ids=None,distinct_sources=False):
     queries=np.asarray(query_vectors,dtype=np.float32)
     queries=_vectors(queries,len(queries))
     if top_k<1 or scan_rows<1:raise ValueError('Invalid dense search budget')
+    allowed=None if allowed_source_revision_ids is None else {str(value) for value in allowed_source_revision_ids}
     results=[[] for _ in queries];blocks=index['blocks'];vectors=index['vectors']
     for start in range(0,len(blocks),scan_rows):
         stop=min(start+scan_rows,len(blocks));scores=queries@vectors[start:stop].T
@@ -119,8 +120,16 @@ def search_dense(index,query_vectors,top_k=10,scan_rows=2048,exclude_manuscript_
             candidates=results[query_index][:]
             for relative,block in enumerate(blocks[start:stop]):
                 if exclude_manuscript_id is not None and block.get('manuscriptId') is not None and str(block['manuscriptId'])==str(exclude_manuscript_id):continue
+                if allowed is not None and str(block['sourceRevisionId']) not in allowed:continue
                 candidates.append({**block,'score':float(scores[query_index,relative]),'scoreType':'COSINE_DENSE_RETRIEVAL','featureSpaceId':index['manifest']['featureSpaceId']})
-            results[query_index]=sorted(candidates,key=lambda row:(-row['score'],row['sourceRevisionId'],row['sourceKey'],row['start'],row['blockId']))[:top_k]
+            ordered=sorted(candidates,key=lambda row:(-row['score'],row['sourceRevisionId'],row['sourceKey'],row['start'],row['blockId']))
+            if distinct_sources:
+                seen=set();unique=[]
+                for row in ordered:
+                    key=str(row['sourceRevisionId'])
+                    if key not in seen:unique.append(row);seen.add(key)
+                ordered=unique
+            results[query_index]=ordered[:top_k]
     return results
 
 

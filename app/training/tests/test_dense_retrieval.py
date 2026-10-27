@@ -72,5 +72,22 @@ class DenseRetrievalTests(unittest.TestCase):
         self.assertEqual(result,once)
         self.assertEqual({row['sourceRevisionId'] for row in result},{'literal','semantic','other'})
 
+    def test_source_pool_and_distinct_sources_apply_before_topk_across_scan_batches(self):
+        blocks=[];vectors=[]
+        for i,(revision,score) in enumerate([('self',1.),('a',.99),('a',.98),('b',.6),('c',.3)]):
+            blocks.append({'sourceRevisionId':revision,'sourceWorkId':revision,'sourceKey':'BODY',
+                           'manuscriptId':'own' if revision=='self' else revision,'start':i,'end':i+1,
+                           'text':'x','blockId':str(i)})
+            vector=np.zeros(768,dtype=np.float32);vector[0]=score;vector[1]=np.sqrt(1-score*score);vectors.append(vector)
+        index={'blocks':blocks,'vectors':np.asarray(vectors),'manifest':{'featureSpaceId':'test'}}
+        query=np.zeros((1,768),dtype=np.float32);query[0,0]=1.
+        rows=retrieval.search_dense(index,query,top_k=3,scan_rows=1,exclude_manuscript_id='own',
+                                    allowed_source_revision_ids={'a','b','c'},distinct_sources=True)[0]
+        self.assertEqual([row['sourceRevisionId'] for row in rows],['a','b','c'])
+        self.assertEqual(rows[0]['start'],1)
+        restricted=retrieval.search_dense(index,query,top_k=1,scan_rows=2,allowed_source_revision_ids={'c'})[0]
+        self.assertEqual(restricted[0]['sourceRevisionId'],'c')
+        self.assertEqual(retrieval.search_dense(index,query,allowed_source_revision_ids=set()),[[]])
+
 
 if __name__=='__main__':unittest.main()
