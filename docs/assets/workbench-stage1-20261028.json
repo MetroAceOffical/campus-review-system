@@ -1,0 +1,18 @@
+{
+  "sourceSha256": "6ad51635d1a3cb30bd550a98d6aae2df2a84e3cd39d68807875690eed1302c9d",
+  "inputRows": 3021,
+  "outputRows": 3021,
+  "quarantineRows": 0,
+  "duplicateRows": 0,
+  "originalPartitionFilesUnchanged": true,
+  "artifactHashesVerified": 6,
+  "purpose": "DATA_CLEANING_ONLY",
+  "modelTrainingStarted": false,
+  "date": "2026-10-28",
+  "newDatasetTests": 15,
+  "oldContractRegressionTests": 7,
+  "passedTests": 22,
+  "fullCorpusParsedRows": 5043,
+  "fullCorpusInvalidRows": 0,
+  "webIntegrated": false
+}
