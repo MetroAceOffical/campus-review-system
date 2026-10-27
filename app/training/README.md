@@ -139,3 +139,15 @@ run位于runtime/experiments/final-training-20261026/campus-training-stage-v1。
 控制器快照8个实际脚本依赖及已有包版本，持有项目独占文件锁；每次启动子任务前后复查，源码变化停止。已有完整run逐项核验并跳过；已有未完成run报明确恢复状态，需先显式按完整checkpoint续训，不能自动覆盖或将ALREADY_COMPLETED打印当成最终重载成功。重启会结束控制器和子任务，确认无旧进程后，只有相同pipeline.json/源码环境才能加`--continue-existing-stage --wait-for-material`续接；发生代码/环境变化用新stage目录并保留旧记录。准备分片的.partial/非READY残留也先保留检查。
 
 当前状态仅WAITING_FORMAL_MATERIAL、neuralTrainingStarted=false；尚无正式校园神经作业。18081检测服务在运行时控制器停止，不争用展示GPU，不自动停任何服务，也不安装依赖或设置开机启动。最新完整离线97项通过，实际进展见主文档和子作业日志。
+
+## 评价协议构造与评分（10月27日后续）
+
+`prepare_text_protocol.py`已实际运行并冻结runtime/datasets/text-evaluation-protocol-v1，含5043参考字段、1800构造槽（校准200/开发400/最终1200）及340已构造复制/句序控制。开发75/最终225不是完整400/1200。自然36条关系合并成33不同正文查询，最终20发布关系仅18不同查询；保留多条原页谱系。每事件最多两查询，最终计划主来源本校418/1200，60%未达。缺生成改写和全库正常真值的槽位继续pending，未加载神经模型。
+
+`text_evaluation.py`评分正确来源及有支持证据的检出，保持FAILED/缺失分母；版本、码点文本、来源字段必须正确，多来源事件连通组件bootstrap。只有完整参考范围的负例依据才能算全库正常稿误报率，未知关系/额外来源单列，不将缺口填0。只有真实完整决策分数且有正负两类才生成PR，失败延迟不造0ms。340已知正控制不能产生正常稿FPR。
+
+`evaluate_final.py`读取**已冻结真实预测目录**（run.json、predictions.jsonl、READY）评分，尚未接入模型批量推理/导出入口。正式执行要求当前split查询构造完整且开发400/最终1200；复制控制调试只允许显式`--diagnostic-controls --split dev`，不会成为正式指标。最终还要`--development-run`指向兼容的完整开发评分证据，并验证预测导出的工作点冻结/开发证据SHA。不要向真实目录写测试夹具或伪造预测来“跑通”指标。
+
+预测目录run须声明实际消融variant：frozen-v2、untrained-dense、trained-dense-unadapted-reranker、full-v3或semantic-disabled；绑定protocolReadySha256、splitQueriesSha256、referenceManifestSha256、methodConfigId、split、diagnosticControls。full-v3还要求真实两项校园训练完成和正式校准冻结，实际状态仍须由子run/权重核验支撑。每条预测绑定queryId/querySha256/methodConfigId/referenceManifestSha256，保留coverageStatus、candidateSources、sourceDecisions、pairs及原始elapsedMs；语义pairs支持阈值必须来自冻结featureConfig，不能拿余弦值当任务证据。
+
+本阶段实际只做了协议构造、6296映射完整性核验和正式评分拒绝检查，文字模型预测0、正式评价0。完整离线111项通过，合成测试预测仅在单元测试夹具中，不是项目模型结果。准备/构造脚本不在当前训练控制器8项依赖内，不会因新增评价代码打断已授权训练等待。

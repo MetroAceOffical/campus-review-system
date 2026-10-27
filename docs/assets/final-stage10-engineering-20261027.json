@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "final-stage10-engineering-v1",
+  "observedAt": "2026-10-27T09:32:20.167207+08:00",
+  "offlineTests": 111,
+  "offlineTestsPassed": true,
+  "testLogSha256": "d9e95d4d53f05c7bfca876edb4b65afdf38e8cc5695a97ec67e744482993fdd6",
+  "protectedFilesVerified": 42,
+  "frozenAssetsVerified": 580,
+  "defaultProductProfileChanged": false,
+  "newEnvironmentInstalled": false,
+  "trainingDependencyIdentityUnchanged": true,
+  "generationProcessRunning": true,
+  "preparationProcessRunning": true,
+  "finiteTrainingControllerRunning": true,
+  "generationSegments": {
+    "ACCEPTED": 1840,
+    "PENDING": 3317,
+    "QUARANTINED": 559
+  },
+  "controllerState": "WAITING_FORMAL_MATERIAL",
+  "campusNeuralTrainingStarted": false,
+  "textProtocol": {
+    "constructionSlots": 1800,
+    "constructedControlQueries": 340,
+    "pendingSlots": 1460,
+    "devConstructed": 75,
+    "finalConstructed": 225,
+    "fullQuerySetReady": false,
+    "sourceMappingsVerified": 6296,
+    "naturalFinalRelations": 20,
+    "naturalFinalUniqueQueries": 18,
+    "globallySupportedNormalQueries": 0,
+    "finalPlannedHomePrimaryQueries": 418,
+    "finalPlannedQueries": 1200
+  },
+  "actualTextModelPredictions": 0,
+  "formalEvaluationExecuted": false,
+  "incompleteFormalScoringRefusalVerified": true,
+  "modulesSha256": {
+    "app/training/prepare_text_protocol.py": "8a1e26807b8169c95c764f8b41fb1eec1f5953ad3ca0ce378323e881ff1f02b5",
+    "app/training/text_evaluation.py": "e0948c170e7f132c05a178dee60c45a18fe63f1ffb69042042fbc416275cc816",
+    "app/training/evaluate_final.py": "0ece60e2fe7fbb3956e2a2a62fd17bb20c5a005064e4023f5080ac06f36253c9"
+  },
+  "qualityAccepted": false,
+  "productActivated": false,
+  "scope": "Protocol construction, integrity and scoring-engine unit tests only. No real text predictions or final accuracy/FPR; unknown truth remains unscored."
+}

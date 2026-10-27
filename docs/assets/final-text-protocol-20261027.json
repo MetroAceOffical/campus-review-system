@@ -1,0 +1,90 @@
+{
+  "state": "QUERY_CONSTRUCTION_PLAN_AND_EXACT_CONTROLS_FROZEN",
+  "requestedQuerySlots": 1800,
+  "plannedSlots": 1800,
+  "constructedQueries": 340,
+  "pendingSlots": 1460,
+  "fullQuerySetReady": false,
+  "maximumPlannedQueriesPerEvent": 2,
+  "maximumAllowedQueriesPerEvent": 2,
+  "homeTargetFraction": 0.6,
+  "splitCounts": {
+    "calibration": {
+      "target": 200,
+      "constructed": 40,
+      "pending": 160,
+      "constructedByCategory": {
+        "copy_control": 20,
+        "whole_reordered": 20
+      },
+      "plannedHomePrimaryQueries": 54,
+      "constructedHomePrimaryQueries": 11,
+      "homeTargetMetForPlan": false,
+      "naturalUniqueQueries": 5,
+      "naturalRelations": 5,
+      "constructionStatuses": {
+        "CONSTRUCTED": 40,
+        "WAITING_HELDOUT_GENERATION": 120,
+        "NEEDS_SUPPORTED_NEGATIVE_SCOPE": 40
+      }
+    },
+    "dev": {
+      "target": 400,
+      "constructed": 75,
+      "pending": 325,
+      "constructedByCategory": {
+        "copy_control": 33,
+        "whole_reordered": 42
+      },
+      "plannedHomePrimaryQueries": 128,
+      "constructedHomePrimaryQueries": 22,
+      "homeTargetMetForPlan": false,
+      "naturalUniqueQueries": 10,
+      "naturalRelations": 11,
+      "constructionStatuses": {
+        "CONSTRUCTED": 75,
+        "WAITING_HELDOUT_GENERATION": 225,
+        "NEEDS_SUPPORTED_NEGATIVE_SCOPE": 100
+      }
+    },
+    "final": {
+      "target": 1200,
+      "constructed": 225,
+      "pending": 975,
+      "constructedByCategory": {
+        "copy_control": 100,
+        "whole_reordered": 125
+      },
+      "plannedHomePrimaryQueries": 418,
+      "constructedHomePrimaryQueries": 83,
+      "homeTargetMetForPlan": false,
+      "naturalUniqueQueries": 18,
+      "naturalRelations": 20,
+      "constructionStatuses": {
+        "CONSTRUCTED": 225,
+        "WAITING_HELDOUT_GENERATION": 675,
+        "NEEDS_SUPPORTED_NEGATIVE_SCOPE": 300
+      }
+    }
+  },
+  "statistics": {
+    "naturalRelationsReused": 36
+  },
+  "generatedParaphraseQueries": 0,
+  "globallySupportedNormalQueries": 0,
+  "modelPredictionsProduced": 0,
+  "humanGold": false,
+  "referenceFields": 5043,
+  "finalProtocolExecuted": false,
+  "qualityAccepted": false,
+  "schemaVersion": "text-protocol-integrity-proof-v1",
+  "frozenFilesVerified": 4,
+  "uniqueQueryTextsVerified": true,
+  "sourceSplitAndCodepointMappingsVerified": true,
+  "sourceMappings": 6296,
+  "formalScoringRefusalVerified": true,
+  "noFormalEvaluationOutputCreated": true,
+  "actualModelPredictions": 0,
+  "protocolManifestSha256": "fb1df183de88a8e7e643f7321d24300b51f4cd3969d498e3cf349794deeb07ac",
+  "scope": "Construction plan and exact controls only; no neural predictions, real false-positive rates or complete dev/final evaluation."
+}
