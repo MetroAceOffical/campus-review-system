@@ -1,0 +1,69 @@
+{
+  "recordedAt": "2026-10-28T21:58:33.180901+08:00",
+  "kind": "DOCUMENTATION_STATUS_AND_NEXT_PHASE",
+  "pawsX": {
+    "train": 49129,
+    "validation": 1984,
+    "test": 1975,
+    "models": [
+      "lr",
+      "svm",
+      "rf",
+      "cnn",
+      "bilstm",
+      "bert"
+    ],
+    "protocolSha256": "391f1e9df3d50a64a868a5352233ec306d70bca0a0dcd3b99f13ff12be855e66"
+  },
+  "retrievalTraining": [
+    {
+      "dataset": "ArticlePairMatching",
+      "groups": 2836,
+      "pairPositions": 14180,
+      "uniqueIdPairs": 7380,
+      "epochs": 2,
+      "run": "runtime/experiments/final-training-20261026/retriever-aux-v1",
+      "statusSha256": "d2819c5707736b4d09acf0649c751f23d0ab30ce236fa26f720011e857f4c544",
+      "groupsSha256": "8f330c5bf3b7e494275955ad1ca0a12cfb7993076fb7c92d62c488031ac58420"
+    },
+    {
+      "dataset": "T2Ranking",
+      "groups": 50000,
+      "pairPositions": 250000,
+      "uniqueIdPairs": 250000,
+      "epochs": 2,
+      "run": "runtime/experiments/final-training-20261026/retriever-t2-v1",
+      "statusSha256": "3e6f38a52c18f7c56dcf1756c64fb94a24b7bd5ed9cf62a1e6dfb87ef565ceb2",
+      "groupsSha256": "ffc4f586eb9d438530d9ec010c57e4fcf873b9f7e9d5d557443fc9fc6fcde061"
+    }
+  ],
+  "totalMainTrainingPairPositions": 313309,
+  "counting": "Task dataset positions; PAWS reused across models counted once; epochs/search/repeated Web split training not added; not cross-dataset unique articles or independent pair count; small engineering fixtures excluded.",
+  "campus": {
+    "cleanArticles": 6281,
+    "plannedOriginals": 3684,
+    "plannedSegments": 16773,
+    "generationState": "PAUSED_BY_USER",
+    "counts": {
+      "ACCEPTED": 2651,
+      "PENDING": 13509,
+      "QUARANTINED": 613
+    },
+    "campusBgeAndM3TrainingComplete": false
+  },
+  "developmentEvaluation": {
+    "grammarQueries": 500,
+    "imageTextQueries": 150,
+    "imageQueries": 1064,
+    "newGrammarOrClipWeightsTrained": false,
+    "stage22Sha256": "a1de86697bb92a1622a2c21eed163d48d71ede049c37499ec5c40e2023542c48"
+  },
+  "currentPriority": [
+    "Keep generation paused; do not expand data or epochs",
+    "Improve existing detection from errors with fixed development comparisons",
+    "Improve frontend evidence display and manuscript workflow",
+    "Record actual results and focused verification; preserve future formal training and independent evaluation"
+  ],
+  "newModelRunsStarted": false,
+  "applicationCodeChanged": false
+}
