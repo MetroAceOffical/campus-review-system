@@ -21,7 +21,7 @@ let selectionFrom = 0, selectionTo = 0, selectionDocument: unknown
 const lastSelectionText = ref(''), selectionStyle = ref({ left: '0px', top: '0px' })
 let disposed=false
 const editor = useEditor({
-  extensions: [StarterKit.configure({ heading: { levels: [2, 3] }, code: false, codeBlock: false, horizontalRule: false, strike: false, underline: false, link: { openOnClick: false, protocols: ['http', 'https'], defaultProtocol: 'https' } }), CampusImage, StableNodeIdentities, Citation],
+  extensions: [StarterKit.configure({ trailingNode: false, heading: { levels: [2, 3] }, code: false, codeBlock: false, horizontalRule: false, strike: false, underline: false, link: { openOnClick: false, protocols: ['http', 'https'], defaultProtocol: 'https' } }), CampusImage, StableNodeIdentities, Citation],
   content: normalizeNodeIdentities(props.modelValue.content), editable: !props.disabled,
   editorProps: {
     attributes: { 'aria-label': '稿件正文' },

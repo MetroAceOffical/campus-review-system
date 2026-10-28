@@ -36,10 +36,14 @@ public class InspectionService {
         if(kind==null || !KINDS.contains(kind))throw new ApiException(400,"VALIDATION_ERROR","请选择检查类型");
         var document=codec.validateAndExtract(input);
         if(document.plainText().isBlank() && document.images().isEmpty())throw new ApiException(400,"VALIDATION_ERROR","请先填写正文或添加配图");
-        var active=db.queryForList("SELECT id FROM document_check WHERE manuscript_id=? AND kind=? AND input_sha256=? AND status IN ('QUEUED','RUNNING','WAITING_SERVICE','WAITING_RESOURCE') ORDER BY created_at DESC LIMIT 1",manuscript,kind,document.contentHash());if(!active.isEmpty())return get(user,active.getFirst().get("id").toString());
+        JsonNode modelProfile=null;
+        if(Set.of("GRAMMAR_MODEL","IMAGE_TEXT").contains(kind)&&Files.isRegularFile(settings.documentConfiguration()))try{modelProfile=json.readTree(Files.readString(settings.documentConfiguration()));}catch(Exception error){throw new ApiException(503,"MODEL_PROFILE_UNAVAILABLE","文稿模型配置暂不可读取");}
+        String profileId=modelProfile==null?"":modelProfile.path("profileId").asText();
+        var active=db.queryForList("SELECT id FROM document_check WHERE manuscript_id=? AND kind=? AND input_sha256=? AND COALESCE(JSON_UNQUOTE(JSON_EXTRACT(payload_json,'$.modelProfile.profileId')),'')=? AND status IN ('QUEUED','RUNNING','WAITING_SERVICE','WAITING_RESOURCE') ORDER BY created_at DESC LIMIT 1",manuscript,kind,document.contentHash(),profileId);if(!active.isEmpty())return get(user,active.getFirst().get("id").toString());
         String id=UUID.randomUUID().toString();
         var payload=json.createObjectNode().put("checkId",id).put("kind",kind).put("inputHash",document.contentHash()).put("title",input.title()).put("plainText",document.plainText()).put("manuscriptId",manuscript).put("runtime",settings.runtime().toString());
-        if("IMAGE_TEXT".equals(kind))payload.set("ocrConfig",json.readTree(Files.readString(settings.ocrConfiguration())));
+        if(modelProfile!=null)payload.set("modelProfile",modelProfile);
+        if("IMAGE_TEXT".equals(kind))payload.set("ocrConfig",modelProfile!=null?modelProfile.path("ocrConfiguration"):json.readTree(Files.readString(settings.ocrConfiguration())));
         payload.set("document",json.valueToTree(document.document()));payload.set("positionMap",json.valueToTree(document.positionMap()));payload.set("citations",json.valueToTree(document.citations()));
         var blocks=new ArrayList<JsonNode>();collect(document.document().content(),blocks);var images=payload.putArray("images");
         for(var picture:document.images()){

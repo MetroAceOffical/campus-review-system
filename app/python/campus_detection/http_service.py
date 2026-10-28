@@ -100,7 +100,13 @@ def make_server(runtime,port=18081):
                 self.reply(404,{'errorCode':'ENDPOINT_NOT_FOUND'});return
             if runtime.models is None:self.reply(503,{'status':'FAILED','errorCode':'MODELS_NOT_READY'});return
             if not runtime.compute.acquire(blocking=False):self.reply(409,{'status':'FAILED','errorCode':'PROCESS_BUSY','runId':runtime.run_id});return
+            from contextlib import ExitStack
+            from campus_shared.document_compute import document_slot
+            slot=ExitStack()
             try:
+                try:slot.enter_context(document_slot(ROOT/'runtime'))
+                except BlockingIOError:
+                    self.reply(409,{'status':'FAILED','errorCode':'PROCESS_BUSY','runId':runtime.run_id});return
                 length=int(self.headers.get('Content-Length','0'))
                 if length<=0 or length>4*1024*1024:raise ContractError('INVALID_REQUEST_SIZE','Invalid request size')
                 request=json.loads(self.rfile.read(length));runtime.active_attempt=request.get('attemptId')
@@ -121,7 +127,7 @@ def make_server(runtime,port=18081):
                 self.reply(400,{'status':'FAILED','errorCode':getattr(error,'code','INVALID_REQUEST'),'message':str(error)[:200],'runId':runtime.run_id})
             except Exception:
                 self.reply(500,{'status':'FAILED','errorCode':'DETECTION_ERROR','message':'Calculation failed; immutable input and attempt were not changed','runId':runtime.run_id})
-            finally:runtime.active_attempt=None;runtime.compute.release()
+            finally:runtime.active_attempt=None;slot.close();runtime.compute.release()
     return ThreadingHTTPServer(('127.0.0.1',port),Handler)
 
 

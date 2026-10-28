@@ -18,6 +18,7 @@ public class RuntimeSettings {
     }
     public Path root(){return root;}
     public Path ocrConfiguration(){String name=switch(config.path("ocrProfile").asText("baseline")){case "baseline"->"frozen-ocr.json";case "adaptive"->"frozen-ocr-v2.json";default->throw new IllegalStateException("Unknown OCR profile");};return root.resolve("app/config/"+name);}
+    public Path documentConfiguration(){return root.resolve("app/config/frozen-document-models-v1.json");}
     public Path runtime(){return runtime;}
     public Path experiments(){return root.resolve(config.path("runtimeRoot").asText()).normalize().resolve("experiments");}
     public Path python(){return root.resolve(config.path("python").asText()).normalize();}

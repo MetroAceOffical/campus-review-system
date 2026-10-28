@@ -18,6 +18,12 @@ sys.path.insert(0,str(ROOT/'app/python'))
 from campus_shared.contracts import digest_json, controlled_file
 
 
+def resource_budget(kind,device):
+    if kind not in ('grammar-model','image-text'):return 0,0
+    if device=='cuda':return int(1.5*1024**3),int((6.5 if kind=='grammar-model' else 2)*1024**3)
+    return (10 if kind=='grammar-model' else 4)*1024**3,0
+
+
 def field_score(expected, actual):
     values={r['field']:r['status'] for r in actual}
     return dict(assessableFields=sum(v!='INSUFFICIENT' for v in expected.values()),
@@ -43,21 +49,27 @@ def aggregate(rows):
 
 def main():
     import psutil
-    os.environ.update(CUDA_VISIBLE_DEVICES='',HF_HUB_OFFLINE='1',TRANSFORMERS_OFFLINE='1',OMP_NUM_THREADS='2',MKL_NUM_THREADS='2')
+    os.environ.update(HF_HUB_OFFLINE='1',TRANSFORMERS_OFFLINE='1',OMP_NUM_THREADS='2',MKL_NUM_THREADS='2')
     parser=argparse.ArgumentParser()
     parser.add_argument('--kind',required=True,choices=['grammar-rules','grammar-model','image-fields','image-text'])
     parser.add_argument('--data',type=Path,default=DATA)
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--resume',action='store_true')
+    parser.add_argument('--device',choices=['cpu','cuda'],default='cpu')
     args=parser.parse_args();data=args.data.resolve();output=args.output.resolve()
+    os.environ['CUDA_VISIBLE_DEVICES']='0' if args.device=='cuda' else ''
     if not data.is_relative_to((ROOT/'runtime/datasets').resolve()) or not output.is_relative_to((ROOT/'runtime/experiments').resolve()):
         raise ValueError('Use project dataset and experiment paths')
     output.mkdir(parents=True,exist_ok=True)
     with stage_lock(output/'run.lock'):
-        rows=[];started=time.perf_counter();previous_seconds=0
+        rows=[];started=time.perf_counter();previous_seconds=0;peak_cuda=0
         def status(state,**extra):
+            nonlocal peak_cuda
+            torch=sys.modules.get('torch')
+            if args.device=='cuda' and torch is not None and torch.cuda.is_initialized():peak_cuda=max(peak_cuda,torch.cuda.max_memory_allocated())
             atomic_json(output/'status.json',dict(state=state,processed=len(rows),total=len(samples),
                 elapsedSeconds=previous_seconds+time.perf_counter()-started,**aggregate(rows),
+                cudaPeakAllocatedBytes=peak_cuda,hostRssBytes=psutil.Process().memory_info().rss,
                 qualityAccepted=False,productActivated=False,finalQueriesEvaluated=0,**extra))
         try:
             ready=verify_ready(data)
@@ -73,7 +85,7 @@ def main():
             if not snapshot.exists():snapshot.write_bytes(inspector.read_bytes())
             dependencies=[Path(__file__),material,ROOT/'app/training/corpus.py',ROOT/'app/training/construct_correspondence.py',ROOT/'app/training/run_campus_stage.py',ROOT/'app/python/campus_shared/contracts.py']
             identity=dict(schemaVersion='document-development-evaluation-v1',kind=args.kind,samples=len(samples),
-                datasetReadySha256=sha(data/'READY'),datasetHashes=ready,device='cpu',batchSize=64 if grammar else 6,
+                datasetReadySha256=sha(data/'READY'),datasetHashes=ready,device=args.device,batchSize=64 if grammar else 6,
                 inspectionSnapshotSha256=sha(snapshot),algorithms={str(p.relative_to(ROOT)):sha(p) for p in dependencies},artifactFiles={},
                 candidateOrder='SHA256(sampleId + NUL + contextId)',
                 python=sys.version,software={name:importlib.metadata.version(name) for name in ['torch','transformers','Pillow','psutil']},
@@ -111,19 +123,28 @@ def main():
             module.ROOT=ROOT
             module.QWEN=ROOT/'runtime/models/final/Qwen2.5-3B-Instruct/aa8e72537993ba99e69dfaafa59ed015b17504d1'
             module.CLIP=ROOT/'runtime/models/final/chinese-clip-vit-base-patch16/36e679e65c2a2fead755ae21162091293ad37834'
-            minimum=10*1024**3 if args.kind=='grammar-model' else 4*1024**3 if args.kind=='image-text' else 0
+            minimum,gpu_minimum=resource_budget(args.kind,args.device)
             deadline=time.monotonic()+96*3600
             def wait_capacity():
                 while psutil.virtual_memory().available<minimum:
                     guard();status('WAITING_HOST_MEMORY',availableMemoryBytes=psutil.virtual_memory().available,requiredMemoryBytes=minimum)
                     if time.monotonic()>deadline:raise TimeoutError('96-hour finite resource wait exceeded')
                     time.sleep(30)
+                if gpu_minimum:
+                    import torch
+                    if not torch.cuda.is_available():raise RuntimeError('Approved CUDA runtime is unavailable')
+                    while torch.cuda.mem_get_info()[0]<gpu_minimum:
+                        guard();status('WAITING_GPU_RESOURCE',availableGpuBytes=torch.cuda.mem_get_info()[0],requiredGpuBytes=gpu_minimum)
+                        if time.monotonic()>deadline:raise TimeoutError('96-hour finite GPU resource wait exceeded')
+                        time.sleep(30)
             def emit(event):
                 status('RUNNING_DOCUMENT_EVALUATION',steps=event.get('processed',0),totalSteps=event.get('total',0))
             def execute():
                 with history.open('a',encoding='utf-8') as stream:
                     for offset in range(len(rows),len(samples),identity['batchSize']):
-                        batch=samples[offset:offset+identity['batchSize']];guard();wait_capacity();status('RUNNING_DOCUMENT_EVALUATION')
+                        # The run already owns the compute lock and its resident model budget.
+                        # Do not require a second model's worth of free memory at each batch.
+                        batch=samples[offset:offset+identity['batchSize']];guard();status('RUNNING_DOCUMENT_EVALUATION')
                         tick=time.perf_counter();outputs=[]
                         if grammar:
                             pieces=[];citations=[];bounds=[];cursor=0
@@ -134,12 +155,13 @@ def main():
                             plain='\n'.join(pieces)
                             if len(plain)>10000:raise ValueError('Grammar batch exceeds product text budget')
                             error=None
-                            try:result=module.grammar(dict(title='',plainText=plain,citations=citations,device='cpu'),emit,enhanced=args.kind=='grammar-model')
+                            try:result=module.grammar(dict(title='',plainText=plain,citations=citations,device=args.device,captureDiagnostics=True),emit,enhanced=args.kind=='grammar-model')
                             except Exception as failure:
                                 error=type(failure).__name__+': '+str(failure);result={'issues':[]}
                             for sample,(left,right) in zip(batch,bounds):
                                 issues=[dict(issue,start=issue['start']-left,end=issue['end']-left) for issue in result['issues'] if left<=issue['start']<right]
-                                outputs.append(dict(issues=issues,metrics=edit_score(sample,issues),category=sample['category'],error=error))
+                                diagnostics=[dict(entry,start=entry['start']-left) for entry in result.get('diagnostics',[]) if left<=entry['start']<right]
+                                outputs.append(dict(issues=issues,metrics=edit_score(sample,issues),category=sample['category'],error=error,diagnostics=diagnostics))
                         elif args.kind=='image-fields':
                             for sample in batch:
                                 recognized='\n'.join(r['text'] for r in sample['cachedOcr']['recognitionLines'] if r['confidence']>=.8)
@@ -152,7 +174,7 @@ def main():
                                 contexts=sorted(sample['contexts'],key=lambda item:hashlib.sha256((sample['sampleId']+'\0'+item['contextId']).encode()).hexdigest())
                                 pictures.append(dict(path=str(path),sha256=sample['imageSha256'],nodeId=sample['sampleId'],fileId=sample['sampleId'],
                                     caption='',contexts=contexts,factContext=sample['factContext']))
-                            result=module.image_text(dict(checkId=run_id,images=pictures,ocrConfig=identity['ocrConfiguration']),emit)
+                            result=module.image_text(dict(checkId=run_id,images=pictures,ocrConfig=identity['ocrConfiguration'],device=args.device),emit)
                             for sample,result in zip(batch,result['images']):
                                 related=next((i+1 for i,r in enumerate(result['matches']) if r.get('contextId')==sample['expectedContextId']),None) if sample['expectedContextId'] else None
                                 metrics=field_score(sample['expectedFields'],result['fields']) if sample['expectedFields'] else {}
@@ -164,6 +186,9 @@ def main():
                             row=dict(sampleId=sample['sampleId'],sourceFamilyId=sample['sourceFamilyId'],runId=run_id,inputSha256=digest_json(sample),
                                      batchAmortizedElapsedMs=(time.perf_counter()-tick)*1000/len(batch),**result)
                             stream.write(json.dumps(row,ensure_ascii=False,allow_nan=False)+'\n');stream.flush();os.fsync(stream.fileno());rows.append(row)
+                        if gpu_minimum:
+                            import gc,torch
+                            gc.collect();torch.cuda.empty_cache()
                         status('RUNNING_DOCUMENT_EVALUATION')
             if minimum:
                 # Serialize only these two CPU neural evaluators, independent of the formal GPU queue.
@@ -171,7 +196,9 @@ def main():
                     wait_capacity()
                     try:
                         with stage_lock(ROOT/'runtime/locks/document-neural-evaluation.lock'):
-                            execute()
+                            from contextlib import nullcontext
+                            from campus_workbench.training import compute_slot
+                            with compute_slot(ROOT/'runtime',True) if gpu_minimum else nullcontext():execute()
                         break
                     except RuntimeError as lock_error:
                         if 'holds the project lock' not in str(lock_error):raise
@@ -181,7 +208,7 @@ def main():
             else:execute()
             guard();verify_ready(data)
             summary=dict(state='DOCUMENT_EVALUATION_COMPLETE',kind=args.kind,queries=len(rows),runId=run_id,**aggregate(rows),
-                         scope=identity['scope'],qualityAccepted=False,finalQueriesEvaluated=0,
+                         scope=identity['scope'],qualityAccepted=False,finalQueriesEvaluated=0,cudaPeakAllocatedBytes=peak_cuda,
                          byCategory={name:aggregate([r for r in rows if r.get('category',r.get('transformation'))==name]) for name in sorted({r.get('category',r.get('transformation','runtime')) for r in rows})})
             atomic_json(output/'summary.json',summary);status(summary['state'])
             print(json.dumps({'state':summary['state'],'kind':args.kind,'queries':len(rows),**aggregate(rows)}),flush=True)

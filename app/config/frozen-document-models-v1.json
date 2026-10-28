@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "document-models-v1",
+  "algorithmSha256": "174abfc3da21fc16be2f7643f291be370b08869de7cf5c603464b42afba2327a",
+  "software": {
+    "torch": "2.8.0+cu128",
+    "transformers": "4.57.1",
+    "tokenizers": "0.22.2",
+    "numpy": "2.3.3",
+    "Pillow": "13.0.0"
+  },
+  "adapterSha256": "f847ee35c32d70c7597752851e6d39235a7845c2cbfb66e76be7938b1cf9d481",
+  "coordinatorSha256": "f5cb62032bf34427c4ee327f86e5ed84c81d71ef1d685478a42b9528f48e010e",
+  "engineAlgorithms": {
+    "grammar": "3f3bc721feb92abc3f9c54d8d18d724afb141966bd318c5c6923ff52ff9035f7",
+    "imageText": "5df50f32d4b67bc102798ef8c4ffa9fcb20adf1c700733bb88a89d04768626da"
+  },
+  "devicePreference": "cuda",
+  "gpuMinimumGiB": {
+    "GRAMMAR_MODEL": 6.5,
+    "IMAGE_TEXT": 2.0
+  },
+  "ocrConfiguration": {
+    "schemaVersion": "ocr-v2",
+    "baselineConfigId": "ocr-c6b8101cb2cfb7e4acf136c60595ecdb29de837898a33624512d8defb3bed15e",
+    "modelFiles": {
+      "PP-OCRv5_mobile_det_infer/inference.json": "05feef1acb00aa4cd7362b15f7f501fc4f99d7b1fa73c1c871e0c7b1504b0f5c",
+      "PP-OCRv5_mobile_det_infer/inference.pdiparams": "afa1820cb16c1fd0dad589d0f8b389139061c1ef6d68019685fd07be997dda5b",
+      "PP-OCRv5_mobile_det_infer/inference.yml": "98069072e1b6b37d727fd9d9f11725faa46d6ea0de012f2ed26caea011c37699",
+      "PP-OCRv5_mobile_rec_infer/inference.json": "24587345250c7332d0fc6f9a44e794d078cdaeb64c302fef906f325619de2569",
+      "PP-OCRv5_mobile_rec_infer/inference.pdiparams": "2460da90875937c94db97eba74ae3d9e5d4c4c57c42f1f41531c09a26bcc771a",
+      "PP-OCRv5_mobile_rec_infer/inference.yml": "5dfeb2777f6d0db8177d8128a8acfcf6e6276dc4ac73ea3bf0dc06d6a5e85d8e"
+    },
+    "device": "cpu",
+    "policy": {
+      "baselineLongEdge": 960,
+      "fallbackLongEdge": 1600,
+      "smallProcessedLineHeight": 14.0,
+      "lowConfidenceThreshold": 0.8,
+      "lowConfidenceFraction": 0.25,
+      "tileLongEdgeTrigger": 2000,
+      "tileSize": 1024,
+      "tileOverlap": 128,
+      "maxTiles": 9,
+      "lineIouThreshold": 0.6
+    },
+    "algorithmSha256": "40caf859f3e399012e0f0b92d437a1fbb0b1ed207229ddbd729cd56d8b7d9a7f",
+    "software": {
+      "opencv": "4.10.0",
+      "Pillow": "13.0.0",
+      "numpy": "1.26.4"
+    },
+    "inputDecoder": "Content-based OpenCV IMREAD_COLOR; Pillow EXIF/RGB fallback if codec unavailable; first frame only.",
+    "coordinatePolicy": "Decoded original image pixels, including decoder EXIF orientation; tile polygons translated into that same frame.",
+    "serviceAlgorithms": {
+      "service_profiles.py": "def7b21bae5a9ab5b38cfb335262a673c2de594df931518917f9463299121231",
+      "recognizer.py": "727484ad152e7f9f530234e42ea512aaebc2550c26d9f7bf55dabde3b8a53afd"
+    },
+    "featureSpaceId": "ocr-715f4c0ec22d3706249046b84a7eb0e5443c7e5601f6816b1225d300b700c7e6",
+    "configId": "ocr-3d4ac8fb3be0dbfde616587b73eb70a82638caf736634d5d0f8a92fa9a1de29f"
+  },
+  "models": {
+    "grammar": {
+      "name": "Qwen2.5-3B-Instruct",
+      "revision": "aa8e72537993ba99e69dfaafa59ed015b17504d1",
+      "acquisitionSha256": "f211fc0bfa9dec194e8becfdd6cfbc263aefd559b084a02f1701c8c0f1e86bdf"
+    },
+    "imageText": {
+      "name": "Chinese-CLIP ViT-B/16",
+      "revision": "36e679e65c2a2fead755ae21162091293ad37834",
+      "acquisitionSha256": "76d6a8c423ce328be7b828719c67949ebb6ed18c59138a3772b9ad08e451bd03"
+    }
+  },
+  "evaluations": {
+    "grammar": "862e0a694d441aaf8465f8fe45da40efb5b1bf958f4a5f0273bc4abba31382eb",
+    "imageText": "dea8d4c040497fbf484230795e87ee1b47c2e01a405b2df2623a71fcc0ad2a8d"
+  },
+  "finalQualityAccepted": false,
+  "profileId": "document-cb6265844c4ae132a371221702f87ddf129cbab5a80e57e67499bc6b73e8cd97"
+}

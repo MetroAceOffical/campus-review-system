@@ -11,7 +11,17 @@ if __name__ == '__main__':
     try:
         config = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
         emit = lambda value: send('event', value)
-        if config['kind'] == 'GRAMMAR_MODEL':
+        profile=config.get('modelProfile')
+        if profile is not None and config['kind'] in ('GRAMMAR_MODEL','IMAGE_TEXT'):
+            from campus_workbench.document_profiles import validate,device
+            from campus_shared.document_compute import document_slot
+            validate(profile)
+            with document_slot(config['runtime'],neural=True):
+                config['device']=device(config['kind'],profile)
+                result=grammar(config,emit,True) if config['kind']=='GRAMMAR_MODEL' else image_text(config,emit)
+            result['modelProfile']=profile
+            result['executionDevice']=config['device']
+        elif config['kind'] == 'GRAMMAR_MODEL':
             import psutil
             import torch
             from contextlib import nullcontext

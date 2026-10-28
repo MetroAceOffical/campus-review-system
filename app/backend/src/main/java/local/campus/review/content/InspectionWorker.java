@@ -36,6 +36,7 @@ public class InspectionWorker {
             if("CONTENT".equals(job.get("kind"))){result=content(id,payload);if(result==null)return;}
             else {result=python(id,payload);if(result==null)return;}
             if(!payload.path("inputHash").asText().equals(result.path("inputHash").asText()))throw new IOException("检查结果与稿件版本不一致");
+            if(payload.has("modelProfile")&&!payload.path("modelProfile").equals(result.path("modelProfile")))throw new IOException("检查模型与选定方案不一致");
             if(checks.db.update("UPDATE document_check SET status='COMPLETED',result_json=?,finished_at=UTC_TIMESTAMP(3) WHERE id=? AND status='RUNNING'",result.toString(),id)==1)checks.event(id,Map.of("stage","COMPLETED"));
         }catch(Exception error){String message=Objects.toString(error.getMessage(),"检查未完成");if(message.length()>900)message=message.substring(0,900);if(checks.db.update("UPDATE document_check SET status='FAILED',error_message=?,finished_at=UTC_TIMESTAMP(3) WHERE id=? AND status='RUNNING'",message,id)==1)checks.event(id,Map.of("stage","FAILED","message",message));}
     }
@@ -43,7 +44,7 @@ public class InspectionWorker {
         var folder=checks.settings.runtime().resolve("document-checks").resolve(id);Files.createDirectories(folder);var file=folder.resolve("input.json");Files.writeString(file,payload.toString());
         var builder=new ProcessBuilder(checks.settings.root().resolve("runtime/environments/final-training/Scripts/python.exe").toString(),"-B",checks.settings.root().resolve("app/scripts/check_manuscript.py").toString(),file.toString()).directory(checks.settings.root().toFile()).redirectError(folder.resolve("stderr.log").toFile());
         builder.environment().putAll(Map.of("HF_HUB_OFFLINE","1","TOKENIZERS_PARALLELISM","false","OMP_NUM_THREADS","2","MKL_NUM_THREADS","2","PYTHONIOENCODING","utf-8"));
-        if(!"GRAMMAR_MODEL".equals(payload.path("kind").asText()))builder.environment().put("CUDA_VISIBLE_DEVICES","-1");
+        if(!Set.of("GRAMMAR_MODEL","IMAGE_TEXT").contains(payload.path("kind").asText()))builder.environment().put("CUDA_VISIBLE_DEVICES","-1");
         var process=builder.start();checks.processes.put(id,process);var timeout=monitor.schedule(()->InspectionService.stop(process),30,TimeUnit.MINUTES);
         var cancellation=monitor.scheduleWithFixedDelay(()->{try{if(!"RUNNING".equals(checks.db.queryForObject("SELECT status FROM document_check WHERE id=?",String.class,id)))InspectionService.stop(process);}catch(Exception e){InspectionService.stop(process);}},2,2,TimeUnit.SECONDS);
         JsonNode result=null;String message="检查进程未返回结果";
