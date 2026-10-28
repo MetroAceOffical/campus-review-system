@@ -135,6 +135,6 @@ def prepared(folder):
     if manifest.get('taskType') != 'PREPARATION' or not manifest.get('trainReady'):
         raise ValueError('该样本版本尚缺可训练的标签或类别，请先准备带标签句对')
     for name, digest in manifest['artifacts'].items():
-        if name not in {'train.jsonl', 'validation.jsonl', 'test.jsonl', 'calibration.jsonl'} or sha(folder / name) != digest:
+        if name not in {'train.jsonl', 'validation.jsonl', 'test.jsonl', 'calibration.jsonl', 'pairs.jsonl', 'quarantine.jsonl'} or sha(folder / name) != digest:
             raise ValueError('样本版本校验失败')
     return manifest, {name: lines(folder / f'{name}.jsonl') for name in ('train', 'validation', 'test')}

@@ -9,7 +9,7 @@ const links = computed(() => [
   ...(session.user?.role === 'MEMBER' || session.user?.role === 'ADMIN' ? [{ to: '/datasets', label: '数据中心' }, { to: '/training', label: '模型训练' }, { to: '/models', label: '模型管理与预测' }] : []),
   ...(session.user?.role === 'MEMBER' ? [{ to: '/manuscripts', label: '组织稿件' }, { to: '/manuscripts/new', label: '新建稿件' }] : []),
   ...(session.user?.role === 'REVIEWER' ? [{ to: '/reviews', label: '审核工作台' }] : []),
-  ...(session.user?.role === 'ADMIN' ? [{ to: '/experiments', label: '模型实验' }, { to: '/references', label: '参考作品' }] : []),
+  ...(session.user?.role === 'ADMIN' ? [{ to: '/references', label: '参考作品' }] : []),
   { to: '/publications', label: '已发布' },
 ])
 async function signOut() {

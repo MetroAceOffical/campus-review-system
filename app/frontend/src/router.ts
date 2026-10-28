@@ -18,7 +18,7 @@ export const router = createRouter({
       { path: 'manuscripts/:id/edit', component: EditorView, meta: { title: '编辑稿件', role: 'MEMBER' } },
       { path: 'reviews', component: () => import('./views/ReviewQueueView.vue'), meta: { title: '审核工作台', role: 'REVIEWER' } },
       { path: 'reviews/:id', component: () => import('./views/ReviewDetailView.vue'), meta: { title: '稿件审核', role: 'REVIEWER' } },
-      { path: 'experiments', component: () => import('./views/ExperimentView.vue'), meta: { title: '模型实验', role: 'ADMIN' } },
+      { path: 'experiments', redirect: '/models' },
       { path: 'references', component: () => import('./views/ReferenceListView.vue'), meta: { title: '参考作品', role: 'ADMIN' } },
       { path: 'references/new', component: () => import('./views/ReferenceEditorView.vue'), meta: { title: '添加参考作品', role: 'ADMIN' } },
       { path: 'publications', component: () => import('./views/PublicationListView.vue'), meta: { title: '已发布' } },

@@ -37,12 +37,12 @@ public class TrainingWorker {
             try(var result=claim.executeQuery()){if(!result.next() || result.getInt(1)!=1)return;}
             try{
                 data.transactions.executeWithoutResult(tx->{
-                    for(var row:data.db.queryForList("SELECT id FROM ml_run WHERE status='RUNNING' AND action IN ('PREPARE','TRAIN','EVALUATE','PREDICT')")){
+                    for(var row:data.db.queryForList("SELECT id FROM ml_run WHERE status='RUNNING' AND action IN ('PREPARE','GENERATE','TRAIN','EVALUATE','PREDICT')")){
                         data.db.update("UPDATE ml_run SET status='INTERRUPTED',finished_at=UTC_TIMESTAMP(3),error_message='服务已重启，请复制参数重新运行' WHERE id=? AND status='RUNNING'",row.get("id"));
                         data.event(row.get("id").toString(),Map.of("stage","INTERRUPTED"));
                     }
                 });
-                var jobs=data.db.queryForList("SELECT * FROM ml_run WHERE status='QUEUED' AND action IN ('PREPARE','TRAIN','EVALUATE','PREDICT') ORDER BY created_at,id LIMIT 1");
+                var jobs=data.db.queryForList("SELECT * FROM ml_run WHERE status='QUEUED' AND action IN ('PREPARE','GENERATE','TRAIN','EVALUATE','PREDICT') ORDER BY created_at,id LIMIT 1");
                 if(jobs.isEmpty())return;var job=jobs.getFirst();String id=job.get("id").toString();
                 Boolean claimed=data.transactions.execute(tx->{if(data.db.update("UPDATE ml_run SET status='RUNNING',started_at=COALESCE(started_at,UTC_TIMESTAMP(3)) WHERE id=? AND status='QUEUED'",id)!=1)return false;data.event(id,Map.of("stage","RESOURCE_CHECK"));return true;});
                 if(!Boolean.TRUE.equals(claimed))return;
@@ -63,12 +63,19 @@ public class TrainingWorker {
         config.set("parameters",options.path("parameters"));
         if(options.has("family"))config.put("family",options.path("family").asText());
         if(options.has("preparationId"))config.put("preparation",training.directory(options.path("preparationId").asText()).resolve("output").toString());
+        if(options.has("resumeRunId"))config.put("resume",training.directory(options.path("resumeRunId").asText()).toString());
+        if(action.equals("GENERATE")){
+            var caches=config.putArray("caches");
+            for(var previous:data.db.queryForList("SELECT id FROM ml_run WHERE dataset_id=? AND input_version_id=? AND action='GENERATE' AND id<>? AND status IN ('COMPLETED','CANCELLED','INTERRUPTED','FAILED') ORDER BY created_at DESC LIMIT 20",dataset,source.get("id"),id)){
+                var folder=training.directory(previous.get("id").toString());if(Files.isRegularFile(folder.resolve("generation.sqlite")))caches.add(folder.toString());
+            }
+        }
         if(options.has("modelId")){
             String modelRun=data.db.queryForObject("SELECT run_id FROM ml_model WHERE id=?",String.class,options.path("modelId").asText());
             var model=data.db.queryForMap("SELECT manifest_json FROM ml_model WHERE id=?",options.path("modelId").asText());
             config.put("model",training.directory(modelRun).resolve("output").toString());
             config.put("device",JsonSupport.parse(data.json,model.get("manifest_json").toString()).path("parameters").path("device").asText("cpu"));
-        }else config.put("device",options.path("parameters").path("device").asText("cpu"));
+        }else config.put("device",options.path("parameters").path("device").asText(action.equals("GENERATE")?"cuda":"cpu"));
         if(options.has("rows"))config.set("rows",options.get("rows"));
         Path configFile=directory.resolve("config.json");Files.writeString(configFile,config.toString());
         Path python=data.settings.root().resolve("runtime/environments/final-training/Scripts/python.exe");

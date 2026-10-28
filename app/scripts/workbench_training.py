@@ -6,10 +6,11 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'app/python'))
-from campus_workbench.preparation import prepare, write_json
+from campus_workbench.preparation import prepare, prepared, write_json
 from campus_workbench.datasets import read_dataset
 from campus_workbench.preparation import sha
 from campus_workbench.training import compute_slot, train, predict, evaluate
+from campus_workbench.news_samples import generate
 
 
 def send(kind, value):
@@ -30,14 +31,20 @@ def main():
     else:
         gpu = config.get('device') == 'cuda'
         with compute_slot(config['runtime'], gpu):
-            if action == 'TRAIN':
+            if action == 'GENERATE':
+                result = generate(config['preparation'], config['output'], config.get('parameters', {}), emit, resume=config.get('resume'), caches=config.get('caches', []))
+            elif action == 'TRAIN':
                 result = train(config['preparation'], config['output'], config['family'], config.get('parameters', {}), emit)
             elif action == 'EVALUATE':
                 result = evaluate(config['model'], config['preparation'], config['output'], emit)
             elif action == 'PREDICT':
                 rows = config.get('rows')
                 if rows is None:
-                    rows = read_dataset(config['input'], 'PAIRS', internal=True)['rows']
+                    if config.get('preparation'):
+                        _, partitions = prepared(config['preparation'])
+                        rows = [row for values in partitions.values() for row in values]
+                    else:
+                        rows = read_dataset(config['input'], 'PAIRS', internal=True)['rows']
                 result_rows = predict(config['model'], rows, emit)
                 output = Path(config['output']); output.mkdir(parents=True, exist_ok=False)
                 path = output / 'predictions.jsonl'

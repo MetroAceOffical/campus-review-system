@@ -1,0 +1,75 @@
+{
+  "stage": "news-sample-workbench",
+  "featureStatus": "implemented",
+  "legacyExperimentPage": "navigation removed; legacy route redirects to models; admin home training; history retained",
+  "coreWorkflow": {
+    "initialSettledSegmentsPreserved": 28,
+    "cancelledStatus": "CANCELLED",
+    "continuedStatus": "COMPLETED",
+    "outputRows": 17,
+    "trainReady": false,
+    "partitions": {
+      "test": {
+        "rows": 1,
+        "groups": 1,
+        "labels": {
+          "1": 1
+        }
+      },
+      "train": {
+        "rows": 15,
+        "groups": 1,
+        "labels": {
+          "0": 6,
+          "1": 9
+        }
+      },
+      "validation": {
+        "rows": 1,
+        "groups": 1,
+        "labels": {
+          "1": 1
+        }
+      },
+      "calibration": {
+        "rows": 0,
+        "groups": 0,
+        "labels": {}
+      }
+    },
+    "segmentCounts": {
+      "ACCEPTED": 11,
+      "QUARANTINED": 27
+    },
+    "pairsTotal": 17,
+    "quarantineTotal": 27,
+    "crossDepartmentSamples": 404
+  },
+  "fullCampusNewsRun": {
+    "status": "RUNNING",
+    "inputOriginals": 217,
+    "plannedWindows": 1394,
+    "maxOriginals": 0,
+    "modelTrainingStarted": false,
+    "latestCounts": {
+      "processed": 8,
+      "total": 1394,
+      "accepted": 2,
+      "quarantined": 6,
+      "reused": 2,
+      "elapsedSeconds": 69.1880000000001
+    }
+  },
+  "verification": [
+    "frontend typecheck/build",
+    "backend compile/package",
+    "real Qwen generation through Web queue",
+    "cancel and resume to a new run",
+    "28 previously settled segment records unchanged",
+    "paged pairs/quarantine",
+    "cross-department samples rejected"
+  ],
+  "browserVisualCheck": "pending; browser tool unavailable in this turn",
+  "newDependenciesInstalled": false,
+  "formalCampusTrainingComplete": false
+}
