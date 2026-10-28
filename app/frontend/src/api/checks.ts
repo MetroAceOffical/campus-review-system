@@ -1,0 +1,15 @@
+import { request } from './http'
+import type { DocumentInput } from '../types/document'
+import type { PositionMap } from '../editor/positions'
+import type { TextEvidenceItem, ImageEvidenceItem } from './review'
+export interface GrammarIssue { id: string; field: 'TITLE' | 'BODY'; start: number; end: number; original: string; replacement: string; category: string; engine: string }
+export interface ImageCheck { nodeId: string; fileId: string; caption: string; matches: Array<{ field: string; text: string; label: string; start?: number; end?: number; score: number }>; fields: Array<{ field: string; imageValues: string[]; textValues: string[]; status: string }>; factStatus: string; ocrStatus: string; ocrText: string; ocrError: string }
+export interface Check { checkId: string; kind: string; status: string; inputHash: string; error: string; document: DocumentInput; positionMap: PositionMap[]; feedback?: Record<string, string>; result?: { model?: string; issues?: GrammarIssue[]; categoryCounts?: Record<string, number>; protectedSuggestions?: number; images?: ImageCheck[]; evidence?: TextEvidenceItem[]; imageResults?: Array<{ nodeId: string; evidence: ImageEvidenceItem[] }> } }
+export const start = (manuscriptId: string, submissionId: string | undefined, kind: string, document: DocumentInput) => request<Check>(submissionId ? `/api/submissions/${submissionId}/checks` : `/api/manuscripts/${manuscriptId}/checks`, { method: 'POST', body: JSON.stringify({ kind, document }) })
+export const list = (manuscript: string, submission?: string) => request<Check[]>(submission ? `/api/submissions/${submission}/checks` : `/api/manuscripts/${manuscript}/checks`)
+export const get = (id: string) => request<Check>(`/api/document-checks/${id}`)
+export const events = (id: string, after: number) => request<Array<{ sequence: number; data: { stage: string; processed?: number; total?: number; issues?: number } }>>(`/api/document-checks/${id}/events?after=${after}`)
+export const cancel = (id: string) => request(`/api/document-checks/${id}/cancel`, { method: 'POST' })
+export const feedback = (id: string, issueId: string, action: string) => request(`/api/document-checks/${id}/feedback`, { method: 'POST', body: JSON.stringify({ issueId, action }) })
+export const done = (status: string) => ['COMPLETED', 'FAILED', 'CANCELLED', 'INTERRUPTED'].includes(status)
+export function signature(value: DocumentInput): string { const sort = (v: any): any => Array.isArray(v) ? v.map(sort) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().filter(k => v[k] !== undefined && v[k] !== null).map(k => [k, sort(v[k])])) : v; return JSON.stringify(sort({ title: value.title, schemaVersion: value.schemaVersion, content: value.content, sources: value.sources.map(({sourceId,url,kind,workId,revisionId,title})=>({sourceId,url,kind,workId,revisionId,title})) })) }

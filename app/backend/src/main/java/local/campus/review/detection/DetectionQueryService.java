@@ -2,6 +2,7 @@ package local.campus.review.detection;
 import com.fasterxml.jackson.databind.*;
 import local.campus.review.auth.*;
 import local.campus.review.common.*;
+import local.campus.review.content.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import java.util.*;
@@ -9,7 +10,8 @@ import java.util.*;
 @Service
 public class DetectionQueryService {
     private final JdbcTemplate db;private final ObjectMapper json;
-    public DetectionQueryService(JdbcTemplate db,ObjectMapper json){this.db=db;this.json=json;}
+    private final CitationService citations;private final DocumentCodec codec;
+    public DetectionQueryService(JdbcTemplate db,ObjectMapper json,CitationService citations,DocumentCodec codec){this.db=db;this.json=json;this.citations=citations;this.codec=codec;}
     private Map<String,Object> require(CurrentUser user,String id,boolean report){
         if(report)AccessPolicy.requireReviewer(user);
         var rows=db.queryForList("SELECT b.*,v.version_no,v.manuscript_id,m.organization_id FROM detection_batch b JOIN submission_version v ON v.id=b.submission_version_id JOIN manuscript m ON m.id=v.manuscript_id WHERE b.id=?",id);
@@ -34,6 +36,8 @@ public class DetectionQueryService {
         result.put("generatedAt",java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC).toString());
         if(batch.get("library_generation_id")==null)result.putNull("libraryGenerationId");else result.put("libraryGenerationId",batch.get("library_generation_id").toString());
         result.set("pipelineManifest",batch.get("pipeline_manifest_json")==null?json.nullNode():JsonSupport.parse(json,batch.get("pipeline_manifest_json").toString()));
+        var version=db.queryForMap("SELECT * FROM submission_version WHERE id=?",batch.get("submission_version_id"));
+        var document=codec.validateAndExtract(new DocumentModels.DocumentInput(version.get("title").toString(),version.get("schema_version").toString(),JsonSupport.parse(json,version.get("content_json").toString()),json.convertValue(JsonSupport.parse(json,version.get("sources_json").toString()),new com.fasterxml.jackson.core.type.TypeReference<java.util.List<DocumentModels.Source>>(){})));
         for(var item:result.path("items")){
             var value=(com.fasterxml.jackson.databind.node.ObjectNode)item;
             if(item.path("activeAttemptId").isNull()){value.putNull("activeAttempt");value.set("evidence",json.createArrayNode());continue;}
@@ -43,6 +47,7 @@ public class DetectionQueryService {
             execution.set("modelConfig",JsonSupport.parse(json,attempt.get("model_config_json").toString()));execution.put("errorCode",Objects.toString(attempt.get("error_code"),"")).put("errorMessage",Objects.toString(attempt.get("error_message"),""));
             var output=JsonSupport.parse(json,attempt.get("result_json").toString());execution.set("result",output);value.set("activeAttempt",execution);
             value.set("evidence",output.path("evidence").isArray()?output.path("evidence"):output.path("textEvidence").isArray()?output.path("textEvidence"):json.createArrayNode());value.set("qualityFlags",output.path("qualityFlags").isArray()?output.path("qualityFlags"):json.createArrayNode());
+            if("TEXT".equals(item.path("type").asText()))citations.annotate(value.path("evidence"),document);
         }
         return result;
     }

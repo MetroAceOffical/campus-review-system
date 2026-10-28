@@ -17,7 +17,8 @@ public class DraftService {
     private final DocumentCodec codec;
     private final FileService files;
     private final ObjectMapper json;
-    public DraftService(JdbcTemplate db,DocumentCodec codec,FileService files,ObjectMapper json){this.db=db;this.codec=codec;this.files=files;this.json=json;}
+    private final CitationService citations;
+    public DraftService(JdbcTemplate db,DocumentCodec codec,FileService files,ObjectMapper json,CitationService citations){this.db=db;this.codec=codec;this.files=files;this.json=json;this.citations=citations;}
     private String encode(Object value){try{return json.writeValueAsString(value);}catch(Exception e){throw new IllegalArgumentException("Invalid document",e);}}
     public Map<String,Object> requireDraft(CurrentUser user,String id,boolean lock) {
         if(id==null || !id.matches("[1-9][0-9]{0,18}"))throw new ApiException(404,"RESOURCE_NOT_FOUND","未找到稿件");
@@ -51,7 +52,7 @@ public class DraftService {
     }
     @Transactional public Map<String,Object> save(CurrentUser user,String id,long expectedRevision,DocumentInput input) {
         var manuscript=requireDraft(user,id,true);
-        var result=codec.validateAndExtract(input);
+        var result=codec.validateAndExtract(citations.normalize(user,input));
         for(var image:result.images())files.requireBindable(user,image.fileId());
         int changed=db.update("UPDATE manuscript_draft SET title=?,schema_version=?,content_json=?,sources_json=?,content_sha256=?,revision=revision+1,updated_by=?,updated_at=UTC_TIMESTAMP(3) WHERE manuscript_id=? AND revision=?",input.title(),result.schemaVersion(),encode(result.document().content()),encode(result.document().sources()),result.contentHash(),user.userId(),id,expectedRevision);
         if(changed!=1)throw new ApiException(409,"DRAFT_REVISION_CONFLICT","另一窗口已更新稿件，当前内容仍保留，请核对后重试");

@@ -46,3 +46,13 @@ runtime\environments\final-training\Scripts\python.exe -B app\scripts\workbench_
 输出四个固定分区、pairs.jsonl、quarantine.jsonl和最后落盘的manifest，包含标签来源、分区类别量、跳过原因、原文/候选位置及SHA。`trainReady`只表示分区具备所需类别，并非训练已执行。Web选择此样本版本后继续原六模型训练、评估及批量预测；语料、权重和业务默认审核模型仍分开管理。
 
 旧“模型实验”已从日常导航移除，旧地址跳转模型管理，历史代码、报告和数据继续保留。
+
+## 共用稿件检查
+
+创作者在同一编辑器通过content/grammar/image面板切换，稿件保持挂载。schema2 citation mark记录来源ID，服务端重算Unicode范围；站内来源按作品身份核对，完整覆盖只免除对应警告，仍保留检测证据，站外网址交人工核验。schema1兼容。
+
+`inspection.py`通过固定文件CLI `app/scripts/check_manuscript.py`运行，输入由后端生成，结果绑定内容SHA。规则检查和Chinese-CLIP使用CPU；Qwen语法优先CPU，内存不足时使用已有CUDA和计算锁，资源繁忙进入等待。结果和事件持久化，可取消、重查，修改稿件后旧结果不能直接回写。审核页只检查送审快照；采用/忽略仅作用于可编辑草稿。
+
+Chinese-CLIP使用经授权下载的官方`OFA-Sys/chinese-clip-vit-base-patch16`固定revision `36e679e65c2a2fead755ae21162091293ad37834`。`app/scripts/acquire_chinese_clip.py`复用既有下载器写入项目模型目录及SHA清单。图文结果给出真实余弦相似度与关联段落；OCR日期/显式地点/主办单位只与图注和邻近正文比较，证据不足返回对应状态。原始相似度不换算成未经校准的类别或准确率。
+
+核心接入记录见`docs/assets/workbench-stage5-20261028.json`。正式语法评价、图文任务阈值及独立测试尚待后续阶段，不修改历史正式评价数据。

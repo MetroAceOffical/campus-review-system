@@ -13,7 +13,7 @@ spring:
     username: ${CAMPUS_DB_USER:campus_app}
     password: ${CAMPUS_DB_PASSWORD}
     hikari:
-      maximum-pool-size: 4
+      maximum-pool-size: 8
   servlet:
     multipart:
       max-file-size: 50MB

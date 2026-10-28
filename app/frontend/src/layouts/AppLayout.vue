@@ -5,9 +5,11 @@ import { ElMessageBox } from 'element-plus'
 import { session, logout, home } from '../session'
 import { applyTheme, readTheme } from '../theme'
 const route = useRoute(), router = useRouter(), theme = reactive(readTheme())
+const workspaceLink = (panel: string) => /^\/manuscripts\/\d+\/edit$/.test(route.path) ? `${route.path}?panel=${panel}` : `/workspace/${panel}`
 const links = computed(() => [
   ...(session.user?.role === 'REVIEWER' || session.user?.role === 'ADMIN' ? [{ to: '/datasets', label: '数据中心' }, { to: '/training', label: '模型训练' }, { to: '/models', label: '模型管理与预测' }] : []),
   ...(session.user?.role === 'MEMBER' ? [{ to: '/manuscripts', label: '组织稿件' }, { to: '/manuscripts/new', label: '新建稿件' }] : []),
+  ...(session.user?.role === 'MEMBER' ? [{ to: workspaceLink('content'), label: '内容审核' }, { to: workspaceLink('grammar'), label: '语法检查' }, { to: workspaceLink('image'), label: '图文一致性' }] : []),
   ...(session.user?.role === 'REVIEWER' ? [{ to: '/reviews', label: '审核工作台' }] : []),
   ...(session.user?.role === 'ADMIN' ? [{ to: '/references', label: '参考作品' }] : []),
   { to: '/publications', label: '已发布' },

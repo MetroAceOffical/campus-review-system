@@ -18,7 +18,7 @@ public class DocumentCodec {
     public ExtractedDocument validateAndExtract(DocumentInput input) {return extract(input,false);}
     public ExtractedDocument validateForSubmission(DocumentInput input) {return extract(input,true);}
     private ExtractedDocument extract(DocumentInput input,boolean complete) {
-        if(input==null || input.title()==null || !"1".equals(input.schemaVersion()) || input.content()==null || !input.content().isObject() || !"doc".equals(input.content().path("type").asText())) invalid("文档结构或版本无效");
+        if(input==null || input.title()==null || input.schemaVersion()==null || !Set.of("1","2").contains(input.schemaVersion()) || input.content()==null || !input.content().isObject() || !"doc".equals(input.content().path("type").asText())) invalid("文档结构或版本无效");
         if(points(input.title())>settings.limit("titleCodePoints")) oversized("标题超过字符上限");
         var content=(ObjectNode)input.content().deepCopy();
         var state=new Extraction(complete);
@@ -30,13 +30,16 @@ public class DocumentCodec {
         var sourceIds=new HashSet<String>();
         for(var source:sources) {
             if(source==null || !validId(source.sourceId()) || !sourceIds.add(source.sourceId())) invalid("来源编号重复或无效");
-            checkUrl(source.url(),!complete);
+            if(source.title()!=null && points(source.title())>200)invalid("来源名称过长");
+            if(source.kind()==null || source.kind().equals("EXTERNAL"))checkUrl(source.url(),!complete);
+            else if(!source.kind().equals("INTERNAL") || source.workId()==null || !source.workId().matches("[1-9][0-9]{0,18}") || source.revisionId()==null || !source.revisionId().matches("[1-9][0-9]{0,18}"))invalid("站内来源身份无效");
         }
+        for(var citation:state.citations)if(!"2".equals(input.schemaVersion()) || !sourceIds.contains(citation.sourceId()))invalid("片段引用没有对应来源，请检查引用清单");
         if(complete && (input.title().isBlank() || (state.text.toString().isBlank() && state.images.isEmpty()))) invalid("请填写标题，并添加正文或配图");
-        var normalized=new DocumentInput(input.title(),"1",content,sources);
+        var normalized=new DocumentInput(input.title(),input.schemaVersion(),content,sources);
         try {
             String hash=HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(json.writeValueAsString(sorted(json.valueToTree(normalized))).getBytes(StandardCharsets.UTF_8)));
-            return new ExtractedDocument(normalized,state.text.toString(),List.copyOf(state.positions),List.copyOf(state.images),hash,"1","1");
+            return new ExtractedDocument(normalized,state.text.toString(),List.copyOf(state.positions),List.copyOf(state.images),hash,input.schemaVersion(),"2".equals(input.schemaVersion())?"2":"1",List.copyOf(state.citations));
         } catch(java.security.NoSuchAlgorithmException|com.fasterxml.jackson.core.JsonProcessingException e) {throw new IllegalStateException(e);}
     }
     private JsonNode sorted(JsonNode value) {
@@ -59,6 +62,7 @@ public class DocumentCodec {
         final StringBuilder text=new StringBuilder();
         final List<Position> positions=new ArrayList<>();
         final List<ImageNode> images=new ArrayList<>();
+        final List<CitationSpan> citations=new ArrayList<>();
         final Set<String> nodeIds=new HashSet<>();
         int blocks=0,nodes=0;
         Extraction(boolean complete){this.complete=complete;}
@@ -107,11 +111,12 @@ public class DocumentCodec {
                 for(var child:node.path("content")) {
                     if(!child.isObject())invalid("子节点无效");
                     walk((ObjectNode)child,type,depth+1);
-                    String value="hardBreak".equals(child.path("type").asText()) ? "\n" : child.path("text").asText("").replace("\r\n","\n").replace('\r','\n');
+                    String value="hardBreak".equals(child.path("type").asText()) ? "\n" : child.path("text").asText("").replace("\n","\n").replace('\r','\n');
                     if(child.has("text"))((ObjectNode)child).put("text",value);
                     int start=points(text.toString()),length=points(value);
                     if(start+length>settings.limit("bodyCodePoints"))oversized("正文超过字符上限");
                     text.append(value);positions.add(new Position(a.path("nodeId").asText(),start,start+length,offset,offset+length));offset+=length;
+                    for(var mark:child.path("marks"))if("citation".equals(mark.path("type").asText()))for(var source:mark.path("attrs").path("sourceIds"))if(length>0)citations.add(new CitationSpan(source.asText(),a.path("nodeId").asText(),start,start+length));
                 }
                 if(offset==0) {int start=points(text.toString());positions.add(new Position(a.path("nodeId").asText(),start,start,0,0));}
                 return;
@@ -121,10 +126,14 @@ public class DocumentCodec {
                 attrs(node,Set.of(),false);
                 if(node.has("marks") && !node.get("marks").isArray())invalid("文字格式无效");
                 for(var mark:node.path("marks")) {
-                    if(!mark.isObject() || !Set.of("bold","italic","link").contains(mark.path("type").asText()))invalid("不支持的文字格式");
+                    if(!mark.isObject() || !Set.of("bold","italic","link","citation").contains(mark.path("type").asText()))invalid("不支持的文字格式");
                     if("link".equals(mark.path("type").asText())) {
                         checkUrl(mark.path("attrs").path("href").asText(),false);
                         var safe=json.createObjectNode().put("href",mark.path("attrs").path("href").asText()).put("target","_blank").put("rel","noopener noreferrer nofollow");((ObjectNode)mark).set("attrs",safe);
+                    } else if("citation".equals(mark.path("type").asText())){
+                        var ids=mark.path("attrs").path("sourceIds");if(!ids.isArray() || ids.isEmpty() || ids.size()>16)invalid("引用标记无效");
+                        var unique=new LinkedHashSet<String>();for(var id:ids)if(!id.isTextual() || !validId(id.asText()) || !unique.add(id.asText()))invalid("引用来源编号无效");
+                        var attributes=json.createObjectNode();attributes.set("sourceIds",json.valueToTree(unique));((ObjectNode)mark).set("attrs",attributes);
                     } else ((ObjectNode)mark).remove("attrs");
                 }
                 return;

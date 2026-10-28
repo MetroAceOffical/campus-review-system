@@ -16,7 +16,8 @@ import java.util.*;
 public class SubmissionService {
     private final JdbcTemplate db;private final ObjectMapper json;private final IdempotencyStore keys;
     private final DocumentCodec codec;private final FileService files;private final DetectionService detection;
-    public SubmissionService(JdbcTemplate db,ObjectMapper json,IdempotencyStore keys,DocumentCodec codec,FileService files,DetectionService detection){this.db=db;this.json=json;this.keys=keys;this.codec=codec;this.files=files;this.detection=detection;}
+    private final CitationService citations;
+    public SubmissionService(JdbcTemplate db,ObjectMapper json,IdempotencyStore keys,DocumentCodec codec,FileService files,DetectionService detection,CitationService citations){this.db=db;this.json=json;this.keys=keys;this.codec=codec;this.files=files;this.detection=detection;this.citations=citations;}
     @Transactional public JsonNode submit(CurrentUser user,String id,String key,long expectedRevision,DocumentInput input){
         var rows=db.queryForList("SELECT * FROM manuscript WHERE id=? AND deleted_at IS NULL FOR UPDATE",id);
         if(rows.isEmpty())throw new ApiException(404,"RESOURCE_NOT_FOUND","未找到稿件");var manuscript=rows.getFirst();String organization=manuscript.get("organization_id").toString();AccessPolicy.requireOrganization(user,organization);
@@ -24,7 +25,7 @@ public class SubmissionService {
         if(!Set.of("DRAFT","RETURNED").contains(manuscript.get("status")))throw new ApiException(409,"INVALID_STATE","当前稿件不允许送审");
         var draft=db.queryForMap("SELECT * FROM manuscript_draft WHERE manuscript_id=? FOR UPDATE",id);
         if(((Number)draft.get("revision")).longValue()!=expectedRevision)throw new ApiException(409,"DRAFT_REVISION_CONFLICT","其他窗口已修改稿件，请核对内容");
-        var extracted=codec.validateForSubmission(input);for(var image:extracted.images())files.requireBindable(user,image.fileId());
+        var extracted=codec.validateForSubmission(citations.normalize(user,input));for(var image:extracted.images())files.requireBindable(user,image.fileId());
         String content=JsonSupport.encode(json,extracted.document().content()),sources=JsonSupport.encode(json,extracted.document().sources());
         db.update("UPDATE manuscript_draft SET title=?,schema_version=?,content_json=?,sources_json=?,content_sha256=?,revision=revision+1,updated_by=?,updated_at=UTC_TIMESTAMP(3) WHERE manuscript_id=?",input.title(),extracted.schemaVersion(),content,sources,extracted.contentHash(),user.userId(),id);
         db.update("DELETE FROM file_binding WHERE draft_manuscript_id=?",id);
@@ -32,6 +33,7 @@ public class SubmissionService {
         int number=((Number)manuscript.get("next_version_no")).intValue();
         long version=SqlSupport.insert(db,"INSERT INTO submission_version(manuscript_id,version_no,schema_version,extractor_version,title,content_json,sources_json,plain_text,position_map_json,content_sha256,lifecycle_status,submitted_by,submitted_at) VALUES(?,?,?,?,?,?,?,?,?,?,'PENDING',?,UTC_TIMESTAMP(3))",id,number,extracted.schemaVersion(),extracted.extractorVersion(),input.title(),content,sources,extracted.plainText(),JsonSupport.encode(json,extracted.positionMap()),extracted.contentHash(),user.userId());
         for(var image:extracted.images())db.update("INSERT INTO file_binding(file_id,submission_version_id,node_id,purpose) VALUES(?,?,?,'BODY_IMAGE')",image.fileId(),version,image.nodeId());
+        db.update("UPDATE document_check SET submission_version_id=? WHERE manuscript_id=? AND submission_version_id IS NULL AND input_sha256=? AND status='COMPLETED'",version,id,extracted.contentHash());
         String batch=detection.createFormalBatch(Long.toString(version),extracted.contentHash());
         db.update("UPDATE manuscript SET status='PENDING',current_submission_id=?,next_version_no=next_version_no+1,updated_at=UTC_TIMESTAMP(3) WHERE id=?",version,id);
         var details=Map.of("schemaVersion","1","actorName",user.displayName(),"organizationName",db.queryForObject("SELECT name FROM organization WHERE id=?",String.class,organization),"versionNo",number,"saveKind","SUBMIT");

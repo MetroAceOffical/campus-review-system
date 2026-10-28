@@ -1,0 +1,101 @@
+{
+  "stage": "shared-manuscript-citations-grammar-image-text",
+  "date": "2026-10-28",
+  "status": "feature_integrated_core_verified",
+  "editor": {
+    "singleMountedEditorAcrossQueryPanels": true,
+    "schema1Compatible": true,
+    "schema2SaveReadVerified": true,
+    "sourcePicker": "internal search/department/pagination; external URL",
+    "browserVisualCheck": "pending: browser.user unavailable"
+  },
+  "citation": {
+    "sameWorkFullCoverage": "warning suppressed; raw evidence retained",
+    "wrongWorkPartialOrExternal": "warning/manual verification retained",
+    "unicodeOffsetCore": true,
+    "realDetector": {
+      "checkId": "6fe31798-8c3f-4e2a-9201-9b87f34be724",
+      "status": "COMPLETED",
+      "sourceWorkId": "209",
+      "fullyCited": true,
+      "literalMatchesPreserved": 1,
+      "imageItems": 1
+    }
+  },
+  "grammar": {
+    "rulesIssues": 2,
+    "feedbackPersisted": true,
+    "realModel": "Qwen2.5-3B-Instruct / CUDA",
+    "positiveTypo": {
+      "original": "坐",
+      "replacement": "座",
+      "start": 9,
+      "end": 10,
+      "actualCheckStatus": "COMPLETED"
+    },
+    "devicePolicy": "CPU when >=8GiB available; otherwise existing CUDA with compute lease and >=6.5GiB free; busy persisted as WAITING_RESOURCE"
+  },
+  "imageText": {
+    "checkId": "b30f153e-4172-4419-b11d-ccec50c2edc8",
+    "model": "Chinese-CLIP ViT-B/16 / CPU",
+    "scores": [
+      0.4848155379295349,
+      0.40417423844337463,
+      0.3939644694328308
+    ],
+    "ocrStatus": "COMPLETED",
+    "factStatus": "INSUFFICIENT",
+    "revision": "36e679e65c2a2fead755ae21162091293ad37834",
+    "semantics": "raw cosine and ranked context; no uncalibrated class threshold",
+    "factFields": [
+      "date",
+      "explicit location",
+      "explicit organizer"
+    ],
+    "factFieldCore": [
+      "CONFLICT",
+      "MATCH",
+      "MATCH"
+    ]
+  },
+  "reviewerSnapshot": {
+    "checkId": "caf8c85f-f7f4-4efd-8656-abf8c5650870",
+    "submissionId": "41",
+    "status": "COMPLETED",
+    "immutableDocumentMatched": true
+  },
+  "access": {
+    "reviewerPrivateDraftDenied": true,
+    "missingSubmission404": true,
+    "datasetAndTrainingRoles": [
+      "REVIEWER",
+      "ADMIN"
+    ]
+  },
+  "checks": [
+    "frontend vue-tsc and Vite build PASS",
+    "backend package PASS",
+    "CitationCoverageTest 1 test PASS",
+    "real localhost API/real Qwen/real ChineseCLIP/real OCR/real content detector PASS",
+    "no broad regression suite this stage"
+  ],
+  "backgroundGenerationResume": {
+    "oldRunId": "969af591-a1b0-40c0-bbd3-a5da5fa2a0f9",
+    "newRunId": "b39117d7-6d5a-4a09-a309-f4e176763d92",
+    "settledPreserved": 344,
+    "acceptedBeforeResume": 169,
+    "quarantinedBeforeResume": 175,
+    "windows": 1394,
+    "max_originals": 0,
+    "parametersUnchanged": true
+  },
+  "remaining": [
+    "browser visual interaction check",
+    "formal grammar and image-text independent quality evaluation/calibration",
+    "formal corpus and campus BGE/M3 training/final evaluation",
+    "home and system/model lifecycle management",
+    "whole-system final acceptance and report"
+  ],
+  "trainingScaleUnchanged": true,
+  "newDependenciesInstalled": false
+}

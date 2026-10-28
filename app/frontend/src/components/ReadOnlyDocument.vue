@@ -20,6 +20,7 @@ function content() {
         if (mark.type === 'bold') result = h('strong', {}, result)
         if (mark.type === 'italic') result = h('em', {}, result)
         if (mark.type === 'link') result = h('a', { href: url(mark.attrs?.href), target: '_blank', rel: 'noopener noreferrer' }, result)
+        if (mark.type === 'citation') { const ids = Array.isArray(mark.attrs?.sourceIds) ? mark.attrs.sourceIds as string[] : []; const sources = props.document.sources.filter(source => ids.includes(source.sourceId)); result = h('span', { class: 'citation-text', title: sources.map(source => source.title || source.url).join(' / ') }, result) }
       }
       return result
     }
@@ -35,4 +36,4 @@ function content() {
   return h('div', { class: 'article-body' }, [node(props.document.content)])
 }
 </script>
-<template><article><h2 class="article-title">{{ document.title }}</h2><component :is="content" /><section v-if="document.sources.length" class="article-sources"><h3>正文来源</h3><p v-for="source in document.sources" :key="source.sourceId"><a :href="url(source.url)" target="_blank" rel="noopener noreferrer">{{ source.url }}</a></p></section></article></template>
+<template><article><h2 class="article-title">{{ document.title }}</h2><component :is="content" /><section v-if="document.sources.length" class="article-sources"><h3>正文来源</h3><p v-for="source in document.sources" :key="source.sourceId"><RouterLink v-if="source.kind === 'INTERNAL'" :to="`/sources/${source.revisionId}`">{{ source.title }} · 站内版本{{ source.revisionId }}</RouterLink><a v-else :href="url(source.url)" target="_blank" rel="noopener noreferrer">{{ source.title || source.url }}</a></p></section></article></template>
