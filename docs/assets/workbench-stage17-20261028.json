@@ -1,0 +1,207 @@
+{
+  "stage": 17,
+  "date": "2026-10-28",
+  "snapshotAt": "2026-10-28T16:23:08.154040+08:00",
+  "state": "DEPLOYED_AND_FOCUSED_LOCALHOST_BROWSER_CHECKED",
+  "scope": "Stages9-16 source unified on Java8080, CPU and administrative workflows checked",
+  "deployment": {
+    "deployedJarSha256": "3a603ea50beae9cc9dbb1aee4ef9592a05f1cbd7de304490b946b19fbc24475c",
+    "staticFilesVerified": 41,
+    "servedIndexMatches": true,
+    "migrationsVerified": [
+      "007_text_release_profiles.sql",
+      "008_automatic_pipeline.sql"
+    ],
+    "privateBackupsIntact": true,
+    "databaseIdentity": "campus_review_midterm@127.0.0.1:3308",
+    "activeGeneration": "CURRENT_LIBRARY\t18",
+    "releasePointers": "1:TEXT_REUSE\tNULL\n2:PAIR_PREDICTION\tf7442ec3-9128-4ddd-b0cc-318b711ad931",
+    "externalWebTrainingEntrySha256": "63bb30160ccc0be3dfa4535c31da7978697a60ccc08bb3ebd0285c9e11359783"
+  },
+  "http": {
+    "readEndpointsPassed": 13,
+    "roleChecksPassed": 6,
+    "roles": [
+      {
+        "actor": "reviewer",
+        "path": "/api/workbench/datasets",
+        "httpStatus": 200
+      },
+      {
+        "actor": "reviewer",
+        "path": "/api/workbench/training/models",
+        "httpStatus": 200
+      },
+      {
+        "actor": "reviewer",
+        "path": "/api/workbench/training/formal-progress",
+        "httpStatus": 200
+      },
+      {
+        "actor": "member1",
+        "path": "/api/workbench/datasets",
+        "httpStatus": 403
+      },
+      {
+        "actor": "member1",
+        "path": "/api/workbench/training/models",
+        "httpStatus": 403
+      },
+      {
+        "actor": "member1",
+        "path": "/api/workbench/training/formal-progress",
+        "httpStatus": 403
+      }
+    ],
+    "pipelineId": "6bef3fae-0aa1-4304-9074-853b1093c729",
+    "actions": [
+      "CLEAN",
+      "PREPARE",
+      "TRAIN",
+      "EVALUATE",
+      "TRAIN",
+      "TRAIN",
+      "EVALUATE"
+    ],
+    "modelFamilies": [
+      "lr",
+      "cnn"
+    ],
+    "neuralCancellationAndResume": true,
+    "neuralCheckEpochs": 2,
+    "engineeringTrainRows": 48,
+    "engineeringValidationRows": 6,
+    "engineeringTestRows": 6,
+    "officialTraining": false,
+    "filePredictionRows": 5,
+    "paginationVerified": true
+  },
+  "existingMaterialComposition": {
+    "inputRows": 3238,
+    "outputRows": 3021,
+    "duplicateRows": 217,
+    "quarantineRows": 0,
+    "newOriginalArticles": 0
+  },
+  "browser": {
+    "checkedAt": "2026-10-28T08:21:11.671Z",
+    "browser": "Edge",
+    "accountRole": "ADMIN",
+    "pages": [
+      "首页",
+      "数据中心",
+      "模型训练",
+      "模型管理与预测",
+      "系统管理",
+      "模型发布与回退",
+      "批量参考入库"
+    ],
+    "trainingRefreshRestoresRun": true,
+    "chartsObserved": [
+      "清洗前后对比",
+      "字段缺失",
+      "正文长度分布",
+      "标签分布",
+      "训练损失",
+      "验证指标",
+      "学习率",
+      "同划分验证指标",
+      "同划分耗时与效果",
+      "混淆矩阵",
+      "ROC曲线",
+      "PR曲线"
+    ],
+    "singlePredictionTriggeredInBrowser": true,
+    "comparisonViaVisibleLabels": true,
+    "currentUrl": "http://127.0.0.1:8080/#/training",
+    "consoleErrors": 0,
+    "screenshot": "runtime/workbench-implementation/stage17-browser.jpg"
+  },
+  "cleanup": {
+    "temporaryEngineeringModelsArchived": 2,
+    "temporaryEngineeringDatasetsArchived": 2,
+    "recordsAndArtifactsRetained": true,
+    "archivedIds": [
+      "3c9abd8b-ecba-4145-a053-d9732b68d5ce",
+      "ef19426d-db56-49e6-8e18-4798193cc7b7",
+      "84b6e075-394b-442e-a005-524c19078d15",
+      "babcdeee-5c3f-438e-9643-2a95192147a6"
+    ]
+  },
+  "checks": {
+    "cpuLaneRealCliPassed": 1,
+    "frozenFormalAlgorithmsUnchanged": 18,
+    "heldoutAlgorithmsUnchanged": 5,
+    "trainAndRecipeUnchanged": true,
+    "staticFilesVerified": 41,
+    "servedIndexVerified": true,
+    "fullRegressionRun": false
+  },
+  "actualFix": {
+    "problem": "CPU Web jobs were blocked by formal GPU generation holding the shared compute lock",
+    "change": "Web CPU tasks use a separate serial lane; GPU uses the original shared lane",
+    "frozenTrainingCoreModified": false,
+    "before": "RESOURCE_BUSY repeated on actual CPU LR run",
+    "after": "same queued run progressed; full CPU pipeline and cancel/resume completed"
+  },
+  "deferredUiMinor": [
+    "COMPOSE task label and task-list destination in Home/System need UI follow-up",
+    "legacy pagination small attribute deprecation warning",
+    "formal percentage display precision and generated stacked-chart ARIA text need UI polish"
+  ],
+  "backgroundGeneration": {
+    "state": "GENERATING_TRAIN_MATERIAL",
+    "segmentCounts": {
+      "ACCEPTED": 1304,
+      "PENDING": 15219,
+      "QUARANTINED": 250
+    },
+    "selectedOriginals": 3684,
+    "elapsedSeconds": 8841.938000000002,
+    "device": "cuda",
+    "promptVersion": "3",
+    "reusedSegments": 440,
+    "estimatedRemainingSeconds": 120794.8423895871,
+    "semanticCorrectnessCertified": false,
+    "modelLoadSeconds": 9.06199999999808,
+    "hostRssBytes": 239534080,
+    "cudaPeakAllocatedBytes": 6301956608
+  },
+  "formalGenerationOriginals": 3684,
+  "formalGenerationWindows": 16773,
+  "formalEpochsEach": 2,
+  "dataScaleReduced": false,
+  "trainingEpochsReduced": false,
+  "detectorGpuServiceStarted": false,
+  "ocrServiceRestarted": false,
+  "newDependenciesInstalled": false,
+  "chartImageExportAdded": false,
+  "formalQualityAccepted": false,
+  "formalCampusTrainingFinished": false,
+  "productionModelActivationChanged": false,
+  "activeLibraryGeneration": "18",
+  "remaining": [
+    "image/OCR enhanced pipeline integration",
+    "complete formal material and real BGE/M3 training",
+    "calibration and full heldout/five-variant evaluation",
+    "grammar/image-text independent quality and final reports",
+    "GPU-dependent live review integration when resources are free",
+    "frontend follow-up after functional work"
+  ],
+  "estimateHours": {
+    "nextEnhancementIntegrationEngineering": [
+      6,
+      12
+    ],
+    "generationRemainingPoint": 33.6,
+    "formalTwoModelTraining": [
+      4,
+      12
+    ],
+    "heldoutGeneration": [
+      10,
+      20
+    ],
+    "completeProjectEstimateAvailable": false
+  }
+}

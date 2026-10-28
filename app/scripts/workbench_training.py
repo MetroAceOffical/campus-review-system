@@ -30,7 +30,10 @@ def main():
         result = prepare(config['input'], config['output'], config['kind'], config.get('parameters', {}), emit)
     else:
         gpu = config.get('device') == 'cuda'
-        with compute_slot(config['runtime'], gpu):
+        # CPU work has its own serial lane while formal GPU preparation runs.
+        # Keep the frozen core and the shared GPU exclusion unchanged.
+        compute_runtime = config['runtime'] if gpu else str(Path(config['runtime']) / 'web-cpu')
+        with compute_slot(compute_runtime, gpu):
             if action == 'GENERATE':
                 result = generate(config['preparation'], config['output'], config.get('parameters', {}), emit, resume=config.get('resume'), caches=config.get('caches', []))
             elif action == 'TRAIN':

@@ -307,3 +307,6 @@ run位于runtime/experiments/final-training-20261026/campus-training-stage-v1。
 网页训练扩展`campus_workbench/training_resume.py`由`workbench_training.py`仅为CNN/BiLSTM/BERT调用；不修改正式控制器绑定的training.py/preparation.py。元数据resume.json指向两个原子检查点槽之一，包含实际模型/优化器/随机状态/顺序游标/历史和最佳权重身份。新运行必须原划分、参数（含总轮数）、代码与软件版本一致，读取前重新核验SHA；旧last-checkpoint.pt不具新身份时不能续训。CPU中断恢复机制已对照连续训练；CUDA及真实浏览器续训留待部署联调，不计正式校园适配完成。
 
 后端AutomaticPipelineService持久衔接CLEAN/PREPARE/GENERATE/TRAIN/EVALUATE，标签句对跳过GENERATE，多个所选模型串行，并可选择自动测试集评价。新增008迁移只在独立测试库实际验证，正式启动时按既有MigrationRunner执行。流程状态/子任务创建同事务；重启读取原任务ID，权限每次派发重查；取消/失败后重试有可核验检查点才续接，否则按原完整参数新建阶段。不会自动发布生产审核模型，也不改变已在后台运行的正式配方。详细进度与工程证据见docs/当前进度.md和docs/assets/workbench-stage16-20261028.json。
+
+
+阶段17已将上述入口部署到8080，并实际通过CPU自动流程、CNN取消/续训与模型评价。网页CLI的CPU计算改用runtime/web-cpu/workbench/compute.lock单独串行；GPU继续沿用原共享锁及既有GPU消费者排他检查，正式训练核心不变。这样后台正式GPU生成不会使CPU网页训练永久等待。1项真实CLI锁占用检查通过，另有真实HTTP/浏览器工程证据；这些小型CPU检查不计校园正式训练或新检出率。部署工件、迁移与剩余GPU接入事项见阶段17摘要。
