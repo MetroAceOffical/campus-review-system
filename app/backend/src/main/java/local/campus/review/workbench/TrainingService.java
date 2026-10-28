@@ -118,7 +118,6 @@ public class TrainingService {
         data.role(user);if(page<1 || q.length()>120)throw invalid("查询参数无效");
         String from=" FROM ml_run r JOIN ml_dataset d ON d.id=r.dataset_id WHERE r.action IN ('PREPARE','GENERATE','TRAIN','EVALUATE','PREDICT') AND d.name LIKE ?";
         var args=new ArrayList<Object>(List.of("%"+q+"%"));
-        if(user.role()!=CurrentUser.Role.ADMIN){from+=" AND EXISTS(SELECT 1 FROM organization_member m WHERE m.organization_id=d.organization_id AND m.user_id=? AND m.enabled=true)";args.add(user.userId());}
         var result=data.json.createObjectNode().put("total",data.db.queryForObject("SELECT COUNT(*)"+from,Long.class,args.toArray()));
         args.add((page-1L)*20);var items=result.putArray("items");
         for(var row:data.db.queryForList("SELECT r.*,d.name AS dataset_name"+from+" ORDER BY r.created_at DESC,r.id LIMIT 20 OFFSET ?",args.toArray())){var item=(ObjectNode)data.runJson(row);item.put("datasetName",row.get("dataset_name").toString());items.add(item);}
@@ -127,7 +126,6 @@ public class TrainingService {
     public JsonNode models(CurrentUser user,int page,String q,boolean archived){
         data.role(user);if(page<1 || q.length()>120)throw invalid("查询参数无效");
         String from=" FROM ml_model m WHERE m.archived=? AND m.name LIKE ?";var args=new ArrayList<Object>(List.of(archived,"%"+q+"%"));
-        if(user.role()!=CurrentUser.Role.ADMIN){from+=" AND EXISTS(SELECT 1 FROM organization_member o WHERE o.organization_id=m.organization_id AND o.user_id=? AND o.enabled=true)";args.add(user.userId());}
         var result=data.json.createObjectNode().put("total",data.db.queryForObject("SELECT COUNT(*)"+from,Long.class,args.toArray()));args.add((page-1L)*20);var items=result.putArray("items");
         for(var row:data.db.queryForList("SELECT m.*"+from+" ORDER BY m.created_at DESC,m.id LIMIT 20 OFFSET ?",args.toArray()))items.add(modelJson(row));return result;
     }

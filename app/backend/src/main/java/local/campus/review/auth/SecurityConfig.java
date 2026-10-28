@@ -40,6 +40,10 @@ public class SecurityConfig {
             .securityContext(context -> context.securityContextRepository(contexts))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/csrf","/api/auth/login").permitAll()
+                .requestMatchers("/api/workbench/**").access((authentication,context) -> {
+                    try { var role=current.require(authentication.get()).role();return new AuthorizationDecision(role==CurrentUser.Role.REVIEWER || role==CurrentUser.Role.ADMIN); }
+                    catch(ApiException e) { return new AuthorizationDecision(false); }
+                })
                 .requestMatchers("/api/experiments/**","/api/references/**").access((authentication,context) -> {
                     try { return new AuthorizationDecision(current.require(authentication.get()).role()==CurrentUser.Role.ADMIN); }
                     catch(ApiException e) { return new AuthorizationDecision(false); }

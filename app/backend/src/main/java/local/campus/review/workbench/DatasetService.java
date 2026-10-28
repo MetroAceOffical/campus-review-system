@@ -29,16 +29,15 @@ public class DatasetService {
     static String uuid(){return UUID.randomUUID().toString();}
     static void identity(String id){if(id==null || !id.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))throw missing();}
     static ApiException missing(){return new ApiException(404,"RESOURCE_NOT_FOUND","未找到可访问的数据");}
-    void role(CurrentUser user){if(user.role()!=CurrentUser.Role.ADMIN && user.role()!=CurrentUser.Role.MEMBER)throw new ApiException(403,"ACCESS_DENIED","无权使用数据中心");}
+    void role(CurrentUser user){if(user.role()!=CurrentUser.Role.ADMIN && user.role()!=CurrentUser.Role.REVIEWER)throw new ApiException(403,"ACCESS_DENIED","仅审核员和管理员可管理数据集与模型");}
     void organization(CurrentUser user,String id){
         role(user);
-        if(id==null || !id.matches("[1-9][0-9]{0,18}") || (user.role()!=CurrentUser.Role.ADMIN && !user.organizationIds().contains(id)))throw missing();
+        if(id==null || !id.matches("[1-9][0-9]{0,18}"))throw missing();
         if(db.queryForObject("SELECT COUNT(*) FROM organization WHERE id=? AND enabled=true",Integer.class,id)!=1)throw missing();
     }
     public JsonNode organizations(CurrentUser user){
         role(user);var result=json.createArrayNode();
-        var query=user.role()==CurrentUser.Role.ADMIN?db.queryForList("SELECT id,name FROM organization WHERE enabled=true ORDER BY id"):
-            db.queryForList("SELECT o.id,o.name FROM organization o JOIN organization_member m ON m.organization_id=o.id WHERE o.enabled=true AND m.enabled=true AND m.user_id=? ORDER BY o.id",user.userId());
+        var query=db.queryForList("SELECT id,name FROM organization WHERE enabled=true ORDER BY id");
         for(var row:query)result.addObject().put("organizationId",row.get("id").toString()).put("name",row.get("name").toString());
         return result;
     }
@@ -84,7 +83,6 @@ public class DatasetService {
         role(user);if(page<1 || size<1 || size>100 || q.length()>120)throw new ApiException(400,"VALIDATION_ERROR","列表参数无效");
         String from=" FROM ml_dataset d JOIN organization o ON o.id=d.organization_id WHERE o.enabled=true AND d.archived=? AND d.name LIKE ?";
         var args=new ArrayList<Object>(List.of(archived,"%"+q+"%"));
-        if(user.role()!=CurrentUser.Role.ADMIN){from+=" AND EXISTS(SELECT 1 FROM organization_member m WHERE m.organization_id=d.organization_id AND m.user_id=? AND m.enabled=true)";args.add(user.userId());}
         var result=json.createObjectNode().put("total",db.queryForObject("SELECT COUNT(*)"+from,Long.class,args.toArray())).put("page",page).put("pageSize",size);
         args.add(size);args.add((long)(page-1)*size);var items=result.putArray("items");
         for(var row:db.queryForList("SELECT d.*,o.name AS organization_name"+from+" ORDER BY d.updated_at DESC,d.id LIMIT ? OFFSET ?",args.toArray()))items.add(summary(row));

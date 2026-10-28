@@ -28,7 +28,7 @@ class DatasetRecoveryIT extends HttpTestSupport {
         return json.readTree(response.getResponse().getContentAsString()).path("data");
     }
     @Test void claimAndInitialEventRollbackTogetherOnTransientDatabaseFailure()throws Exception{
-        var member=login("member1");var uploaded=upload(member);String run=uploaded.path("runId").asText();
+        var staff=login("reviewer");var uploaded=upload(staff);String run=uploaded.path("runId").asText();
         var once=new AtomicBoolean(true);
         doAnswer(invocation->{
             Object payload=invocation.getArgument(1);
@@ -41,19 +41,19 @@ class DatasetRecoveryIT extends HttpTestSupport {
                 try{worker.runOne();}catch(org.springframework.dao.TransientDataAccessResourceException expected){injected=true;}
             }
             assertTrue(injected,"必须实际到达该任务的初始事件故障点");
-            http.perform(get("/api/workbench/runs/"+run).session(member)).andExpect(jsonPath("$.data.status").value("QUEUED"));
+            http.perform(get("/api/workbench/runs/"+run).session(staff)).andExpect(jsonPath("$.data.status").value("QUEUED"));
             worker.runOne();
-            http.perform(get("/api/workbench/runs/"+run).session(member)).andExpect(jsonPath("$.data.status").value("COMPLETED"));
+            http.perform(get("/api/workbench/runs/"+run).session(staff)).andExpect(jsonPath("$.data.status").value("COMPLETED"));
         }finally{reset(service);}
     }
     @Test void archiveCannotRacePastAQueuedRunInsert()throws Exception{
-        var member=login("member1");var uploaded=upload(member);String dataset=uploaded.path("datasetId").asText();
-        http.perform(csrf(post("/api/workbench/runs/"+uploaded.path("runId").asText()+"/cancel"),member)).andExpect(status().isOk());
+        var staff=login("reviewer");var uploaded=upload(staff);String dataset=uploaded.path("datasetId").asText();
+        http.perform(csrf(post("/api/workbench/runs/"+uploaded.path("runId").asText()+"/cancel"),staff)).andExpect(status().isOk());
         var paused=new CountDownLatch(1);var release=new CountDownLatch(1);
         doAnswer(invocation->{paused.countDown();assertTrue(release.await(8,TimeUnit.SECONDS));return invocation.callRealMethod();})
             .when(service).insertRun(anyString(),eq(dataset),anyString(),isNull(),eq("AUDIT"),anyString(),anyString(),anyString());
-        var startRequest=csrf(post("/api/workbench/datasets/"+dataset+"/runs"),member).contentType("application/json").content(json.writeValueAsBytes(Map.of("versionId",uploaded.path("versionId").asText(),"action","AUDIT")));
-        var archiveRequest=csrf(patch("/api/workbench/datasets/"+dataset),member).contentType("application/json").content("{\"archived\":true}");
+        var startRequest=csrf(post("/api/workbench/datasets/"+dataset+"/runs"),staff).contentType("application/json").content(json.writeValueAsBytes(Map.of("versionId",uploaded.path("versionId").asText(),"action","AUDIT")));
+        var archiveRequest=csrf(patch("/api/workbench/datasets/"+dataset),staff).contentType("application/json").content("{\"archived\":true}");
         try(var threads=Executors.newFixedThreadPool(2)){
             var start=threads.submit(()->http.perform(startRequest).andReturn());assertTrue(paused.await(5,TimeUnit.SECONDS));
             var archive=threads.submit(()->http.perform(archiveRequest).andReturn());

@@ -27,7 +27,7 @@ Java通过`--config-file`传递UTF-8任务配置，避免Windows命令行破坏�
 
 `training.py`提供LR/SVM/RF/CNN/BiLSTM/BERT参数化训练、保存重载、独立测试评价及单条/批量预测。只读复用冻结实验中的纯结构/特征函数，预处理只拟合训练集；验证选择最佳轮次，测试在独立评价任务执行。记录SVM间隔分数与其他模型概率分数，保存逐条预测和混淆矩阵/ROC/PR。
 
-Web入口：`#/training`、`#/models`，MEMBER和ADMIN按部门访问；历史实验数据和报告保留。训练完成登记实验模型，不自动切换正式审核。NEWS可在完成原稿分组后发起GENERATE准备标签句对；正式校园v3仍为后续独立阶段。
+Web入口：`#/training`、`#/models`，REVIEWER和ADMIN可管理校内部门数据与模型，MEMBER不能访问训练或数据集管理；历史实验数据和报告保留。训练完成登记实验模型，不自动切换正式审核。NEWS可在完成原稿分组后发起GENERATE准备标签句对；正式校园v3仍为后续独立阶段。
 
 CMD调用同一执行器：
 
