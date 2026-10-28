@@ -55,6 +55,8 @@ public class LibraryGenerationService {
         db.update("UPDATE runtime_state SET library_generation_id=?,updated_at=UTC_TIMESTAMP(3) WHERE name='CURRENT_LIBRARY'",id);
     }
     public JsonNode currentManifest(){String id=currentId();return id==null?json.createObjectNode():verify(generation(id,false),generation(id,false).get("manifest_sha256").toString());}
+    /** Read the selected generation with the caller's CURRENT_LIBRARY transaction lock. */
+    @Transactional public JsonNode lockedManifest(String id){var row=generation(id,true);return verify(row,row.get("manifest_sha256").toString());}
     public void fail(String id,String errorCode){
         db.update("UPDATE library_generation SET status='FAILED' WHERE id=? AND status='BUILDING'",id);
         try{var folder=settings.runtime().resolve("indexes").resolve(id);Files.createDirectories(folder);Files.writeString(folder.resolve("FAILED"),errorCode);}catch(Exception e){throw new IllegalStateException("Failed index marker could not be recorded",e);}

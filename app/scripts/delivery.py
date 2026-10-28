@@ -7,6 +7,13 @@ sys.path.insert(0,str(ROOT/'app/python'))
 from campus_shared.contracts import file_sha256, digest_json
 
 def run(config):
+    if config['action']=='PROFILE_CANDIDATES':
+        from campus_detection.service_profile import candidates
+        return candidates()
+    if config['action']=='V3_CONFIG':
+        from campus_detection.service_profile import verify_profile
+        result=verify_profile(config['profileId'])
+        return {'scene':'TEXT_REUSE',**{key:result[key] for key in ('textConfig','imageConfig','verifiedFiles','profileId','libraryGenerationId','libraryManifestSha256','profileSha256','quality')}}
     from campus_detection.models import configurations
     if config['action']=='CONFIG':
         text,image=configurations(legacy=config['preset']=='LEGACY')

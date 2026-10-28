@@ -82,9 +82,9 @@ def load_bundle(folder,*,device='cuda',precision='BF16',batch_size=8):
     return {'manifest':manifest,'retriever':retriever,'reranker':reranker,'documents':documents}
 
 
-def attach_runtime(models,session,index,calibration):
-    """Opt in only after loading the exact index and a formal calibration package."""
-    base=models['textConfig'];references_sha=session['manifest']['references']['sha256']
+def service_configuration(base,session,index,calibration):
+    """Validate the frozen working point without loading neural weights."""
+    references_sha=session['manifest']['references']['sha256']
     if calibration.get('referenceManifestSha256')!=references_sha:raise ValueError('Calibration belongs to another reference bank')
     if calibration.get('operatingPointFrozen') is not True:raise ValueError('Service profile requires a frozen development working point')
     development=controlled(calibration['developmentRun']);predictions=controlled(calibration['developmentPredictions'])
@@ -105,8 +105,14 @@ def attach_runtime(models,session,index,calibration):
         'bundleId':session['manifest']['bundleId'],'denseFeatureSpaceId':index['manifest']['featureSpaceId'],
         'calibrationSha256':retrieval._digest(calibration)}
     configuration.pop('configId');configuration['configId']='text-'+retrieval._digest(configuration)
-    return {**models,'textConfig':configuration,'textConfigs':{**models['textConfigs'],configuration['configId']:configuration},
-        'v3Runtime':{**session,'index':index,'calibration':calibration,'baseConfigId':base['configId']}}
+    return configuration
+
+
+def attach_runtime(models,session,index,calibration):
+    """Expose an explicit v3 choice while preserving the default v2 service."""
+    base=models['textConfig'];configuration=service_configuration(base,session,index,calibration)
+    return {**models,'textConfigs':{**models['textConfigs'],configuration['configId']:configuration},
+        'v3Runtime':{**session,'index':index,'calibration':calibration,'baseConfigId':base['configId'],'configId':configuration['configId']}}
 
 
 def analyze(session,index,text,*,literal_hits=(),exclude_manuscript_id=None,exclude_source_revision_ids=(),calibration=None):
@@ -123,11 +129,13 @@ def detect(request,library,models):
     from campus_detection.text import detect_text
     from campus_detection.v3_delivery import merge_report
     runtime=models['v3Runtime']
+    if request['configId']!=runtime['configId']:raise ValueError('Requested v3 configuration is not loaded')
+    selected=models['textConfigs'][request['configId']]
     if retrieval._digest(library['documents'])!=runtime['index']['manifest']['inputManifestSha256']:raise ValueError('This reference generation requires a matching v3 index/calibration')
     base_request={**request,'configId':runtime['baseConfigId']}
     base_models={**models,'textConfig':models['textConfigs'][runtime['baseConfigId']]}
     literal=detect_text(base_request,library,base_models)
-    if literal['status']=='NOT_APPLICABLE':return {**literal,'configId':request['configId'],'actualConfig':models['textConfig']}
+    if literal['status']=='NOT_APPLICABLE':return {**literal,'configId':request['configId'],'actualConfig':selected}
     result=analyze(runtime,runtime['index'],request['text'],literal_hits=literal['evidence'],exclude_manuscript_id=request.get('excludeManuscriptId'),calibration=runtime['calibration'])
-    report=merge_report(literal,result,library['documents']);report['configId']=request['configId'];report['actualConfig']=models['textConfig']
+    report=merge_report(literal,result,library['documents']);report['configId']=request['configId'];report['actualConfig']=selected
     return report

@@ -1,0 +1,117 @@
+{
+  "stage": "production-profile-and-release-integration",
+  "date": "2026-10-28",
+  "snapshotAt": "2026-10-28T14:15:15.498056+08:00",
+  "state": "SOURCE_COMPLETE_REAL_MODEL_PROFILE_PENDING",
+  "businessSnapshot": {
+    "generationId": "18",
+    "manifestPath": "D:\\Data\\GraduationProjectVersionC\\runtime\\indexes\\18\\manifest.json",
+    "manifestSha256": "e63c6c8b7f18dab04e99e6904bee07624bf30d0b90eba558520a982edc3609db",
+    "documentsDigest": "5cf15f5c1c9bdc394c2fc47e37569569c0a7fe037d678793e1d106815d70feef",
+    "sourceFields": 385,
+    "referencesSha256": "84cda7efa04cbe682cc556f75280d2f8e9787e6866f54c9244911fc103f63b6e"
+  },
+  "profileCandidates": 0,
+  "productionProfileCreated": false,
+  "productActivated": false,
+  "qualityAccepted": false,
+  "semanticAccuracyImprovementMeasured": false,
+  "productionTextMethod": "text-v2",
+  "checks": {
+    "pythonFocused": 6,
+    "javaFocused": 2,
+    "tinyCpuTaskModelLoadAndScore": 1,
+    "tinyModelIsQualityEvidence": false,
+    "frontendTypeBuild": true,
+    "backendCompile": true,
+    "backgroundBoundAlgorithmsUnchanged": 18,
+    "heldoutAlgorithmsUnchanged": 5,
+    "originalTrainSha256": "d238ba76c76fe455f68cc0ad2a4466117f607f18c8abaa18da623bdb3c5eb70f",
+    "fullRegressionRun": false
+  },
+  "releaseTargets": {
+    "finalQueries": 1200,
+    "homeQueriesMinimum": 720,
+    "sourceEventMinimum": 400,
+    "devQueries": 400,
+    "recallAt20Minimum": 0.95,
+    "wholeEachEvidenceMinimum": 0.85,
+    "normalFalsePromptMaximum": 0.05,
+    "localMultiMaximumDrop": 0.03,
+    "validOffsets": 1
+  },
+  "backgroundGeneration": {
+    "state": "GENERATING_TRAIN_MATERIAL",
+    "segmentCounts": {
+      "ACCEPTED": 539,
+      "PENDING": 16195,
+      "QUARANTINED": 39
+    },
+    "selectedOriginals": 3684,
+    "elapsedSeconds": 1165.844000000001,
+    "device": "cuda",
+    "promptVersion": "3",
+    "reusedSegments": 440,
+    "estimatedRemainingSeconds": 136817.7071014494,
+    "semanticCorrectnessCertified": false,
+    "modelLoadSeconds": 9.06199999999808,
+    "hostRssBytes": 1755017216,
+    "cudaPeakAllocatedBytes": 6282586112
+  },
+  "formalController": {
+    "state": "RUNNING_CHILD",
+    "productActivated": false,
+    "qualityAccepted": false,
+    "script": "construct_correspondence.py"
+  },
+  "heldout": {
+    "state": "WAITING_CAMPUS_TRAINING_COMPLETION",
+    "neuralTrainingStarted": false,
+    "modelEvaluationStarted": false,
+    "upstreamState": "NOT_STARTED"
+  },
+  "publicAcquisition": {
+    "state": "SOURCE_TEMPORARILY_UNAVAILABLE",
+    "newDownloadedPages": 0,
+    "reusedHistoricalPages": 12,
+    "newCorpusSourcesAudited": 0,
+    "trainingInputsChanged": false,
+    "retryAfterSeconds": 1800
+  },
+  "epochsEach": 2,
+  "dataScaleReduced": false,
+  "serviceRestarted": false,
+  "deployed": false,
+  "migrationApplied": false,
+  "newDependenciesInstalled": false,
+  "frontendChange": "release selection only; original square style retained",
+  "chartImageExportAdded": false,
+  "limitations": [
+    "No completed campus training, real final quality grade or READY production profile",
+    "Evaluation bank and business library differ; matching calibration/evaluation still required",
+    "One loaded v3 profile; another v3 requires explicit service load",
+    "Reference updates reject stale profiles; automatic rebuild/recalibration pending",
+    "Baseline development directory not re-read because historical run stores its SHA without its path",
+    "Full real HTTP release/rollback integration pending model readiness and deployment"
+  ],
+  "estimateHours": {
+    "remainingEngineeringAndFocusedQA": [
+      4,
+      10
+    ],
+    "formalGeneration": [
+      40,
+      80
+    ],
+    "campusTraining": [
+      4,
+      12
+    ],
+    "heldoutGeneration": [
+      10,
+      20
+    ],
+    "fullEvaluationComputeMeasured": false,
+    "publicSourceCompletionKnown": false
+  }
+}

@@ -1,7 +1,9 @@
 import { request } from './http'
 export const sceneNames:Record<string,string>={TEXT_REUSE:'正文审核',PAIR_PREDICTION:'句对预测'}
 export const deliveryStates:Record<string,string>={QUEUED:'排队中',VERIFYING:'核验中',READY:'可发布',FAILED:'失败',INTERRUPTED:'已中断',PENDING_APPROVAL:'待管理员批准',RUNNING:'准备参考作品',INDEXING:'构建与切换索引',COMPLETED:'入库完成',WAITING_INDEX:'等待索引'}
-export interface Release {id:string;name:string;scene:string;organizationId:string;department:string;status:string;error:string;manifest?:{metrics?:{macro_f1:number};threshold?:number;family?:string;reloadRows?:number;textConfig?:{method:string;configId:string}}}
+export interface Release {id:string;name:string;scene:string;organizationId:string;department:string;status:string;error:string;manifest?:{metrics?:{macro_f1:number};threshold?:number;family?:string;reloadRows?:number;profileId?:string;libraryGenerationId?:string;textConfig?:{method:string;configId:string}}}
+export interface TextProfile {profileId:string;name:string;libraryGenerationId:string}
+export const textProfiles=()=>request<{items:TextProfile[]}>('/api/workbench/releases/text-profiles')
 export interface Releases {items:Release[];total:number;pointers:Array<{scopeKey:string;releaseId:string|null}>;history:Array<{scopeKey:string;previousId:string|null;releaseId:string|null;createdAt:string}>}
 export const releases=(page=1)=>request<Releases>(`/api/workbench/releases?page=${page}`)
 export const releaseEvaluations=(id:string)=>request<Array<{runId:string;name:string}>>(`/api/workbench/releases/models/${id}/evaluations`)

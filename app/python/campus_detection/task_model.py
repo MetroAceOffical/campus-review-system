@@ -37,6 +37,16 @@ def verify_export(folder,expected_export_id=None):
     return manifest
 
 
+def configuration_for(folder,manifest,*,device='cuda',precision='BF16'):
+    """Describe an already verified export without allocating neural weights."""
+    configuration={'schemaVersion':'task-model-v1','exportId':manifest['exportId'],
+                   'exportManifestSha256':_sha(Path(folder)/'export-manifest.json'),'device':device,'precision':precision,
+                   'parameterPrecision':'FP32','maxJointTokens':512,'scoreType':'CONTENT_CORRESPONDENCE_SCORE',
+                   'algorithmSha256':_sha(Path(__file__))}
+    configuration['configId']='task-'+hashlib.sha256(json.dumps(configuration,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+    return configuration
+
+
 def load_correspondence_model(folder,*,expected_export_id,device='cuda',precision='BF16'):
     import torch
     from transformers import AutoModelForSequenceClassification,AutoTokenizer
@@ -47,11 +57,7 @@ def load_correspondence_model(folder,*,expected_export_id,device='cuda',precisio
     tokenizer=AutoTokenizer.from_pretrained(folder/'model',local_files_only=True,trust_remote_code=False,use_fast=True)
     model=AutoModelForSequenceClassification.from_pretrained(folder/'model',local_files_only=True,trust_remote_code=False).float().to(device).eval()
     if model.config.num_labels!=1:raise ValueError('Correspondence model must have one task logit')
-    configuration={'schemaVersion':'task-model-v1','exportId':manifest['exportId'],
-                   'exportManifestSha256':_sha(folder/'export-manifest.json'),'device':device,'precision':precision,
-                   'parameterPrecision':'FP32','maxJointTokens':512,'scoreType':'CONTENT_CORRESPONDENCE_SCORE',
-                   'algorithmSha256':_sha(Path(__file__))}
-    configuration['configId']='task-'+hashlib.sha256(json.dumps(configuration,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+    configuration=configuration_for(folder,manifest,device=device,precision=precision)
     def score_pair(pair):
         query,source=pair['queryText'],pair['sourceText']
         if not isinstance(query,str) or not isinstance(source,str) or not query.strip() or not source.strip():raise ValueError('Require nonempty original query/source slices')

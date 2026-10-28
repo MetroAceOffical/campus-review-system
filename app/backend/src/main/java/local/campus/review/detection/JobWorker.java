@@ -48,7 +48,7 @@ public class JobWorker {
                     db.update("UPDATE background_job SET status='COMPLETED',finished_at=UTC_TIMESTAMP(3) WHERE id=? AND owner_run_id=? AND status='RUNNING'",id,owner);
                     return new JobOutcome("COMPLETED",id);
                 }catch(WaitingService e){db.update("UPDATE background_job SET status='WAITING_SERVICE' WHERE id=? AND owner_run_id=? AND status='RUNNING'",id,owner);markWaiting(job);return new JobOutcome("WAITING_SERVICE",id);
-                }catch(Exception e){String code=e instanceof DetectorClient.DetectorFailure failure?failure.code:"JOB_FAILED";
+                }catch(Exception e){String code=e instanceof DetectorClient.DetectorFailure failure?failure.code:e instanceof ApiException api?api.code:"JOB_FAILED";
                     if("PREPARE_REFERENCE".equals(job.get("kind")))db.update("UPDATE reference_revision SET processing_status='FAILED' WHERE id=?",job.get("reference_revision_id"));
                     db.update("UPDATE background_job SET status='FAILED',error_code=?,finished_at=UTC_TIMESTAMP(3) WHERE id=? AND owner_run_id=? AND status='RUNNING'",code,id,owner);return new JobOutcome("FAILED",id);}
             }finally{try(var release=connection.prepareStatement("SELECT RELEASE_LOCK(?)")){release.setString(1,lockName);release.execute();}}
@@ -64,8 +64,20 @@ public class JobWorker {
         JsonNode pipeline;
         if(batch.get("pipeline_manifest_json")==null){
             String generation=libraries.currentId();if(generation==null)throw new DetectorClient.DetectorFailure("LIBRARY_UNAVAILABLE");
-            String org=db.queryForObject("SELECT organization_id FROM manuscript WHERE id=?",String.class,batch.get("manuscript_id"));var pin=releases.textSelection(org,main.path("configs").path("textConfig"));pin.set("imageConfig",main.path("configs").path("imageConfig"));pin.set("ocrConfig",client.frozenOcrConfig());pin.put("libraryGenerationId",generation);
-            var library=db.queryForMap("SELECT manifest_sha256 FROM library_generation WHERE id=?",generation);pin.put("libraryManifestSha256",library.get("manifest_sha256").toString());
+            var library=db.queryForMap("SELECT manifest_sha256 FROM library_generation WHERE id=?",generation);String libraryHash=library.get("manifest_sha256").toString();
+            String org=db.queryForObject("SELECT organization_id FROM manuscript WHERE id=?",String.class,batch.get("manuscript_id"));ObjectNode pin;
+            try{pin=releases.textSelection(org,main.path("configs").path("textConfig"),generation,libraryHash);}
+            catch(ApiException error){
+                if(!"REFERENCE_PROFILE_STALE".equals(error.code))throw error;
+                // Record a rejected selection, without pinning a model that never ran.
+                var rejected=json.createObjectNode().put("selectionStatus","REJECTED").put("libraryGenerationId",generation).put("libraryManifestSha256",libraryHash);
+                for(String item:db.queryForList("SELECT id FROM detection_item WHERE batch_id=? AND status='QUEUED'",String.class,batchId)){
+                    if(onlyItem!=null&&!onlyItem.equals(item))continue;
+                    String attempt=attempts.start(item,rejected);attempts.failIfCurrent(attempt,error.code,error.getMessage());
+                }
+                detection.finish(batchId);throw error;
+            }
+            pin.set("imageConfig",main.path("configs").path("imageConfig"));pin.set("ocrConfig",client.frozenOcrConfig());pin.put("libraryGenerationId",generation).put("libraryManifestSha256",libraryHash);
             pipeline=detection.pin(batchId,generation,pin);
         }else pipeline=JsonSupport.parse(json,batch.get("pipeline_manifest_json").toString());
         db.update("UPDATE detection_batch SET status='RUNNING',started_at=COALESCE(started_at,UTC_TIMESTAMP(3)) WHERE id=?",batchId);

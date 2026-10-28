@@ -1,5 +1,22 @@
 # 期末离线数据与训练
 
+## 10月28日正式模型发布接入（阶段12）
+
+`prepare_service_profile.py`新增`snapshot/prepare/verify/list`。实际业务库18的385个来源字段已逐项冻结到`runtime/delivery/business-references-18-20261028-v1`，包括原始来源编号、字段、正文及顺序；原索引未改写。6,311篇离线评价库不等于该业务库，不能修改SHA将二者混用。
+
+准备顺序：快照业务库 → 以该references登记真实校园bundle → 按CUDA/BF16/batch8身份构建密集索引 → 使用相同参考库的完整校准、开发及最终协议执行 → 保存旧v2同协议最终对照 → `prepare`生成服务profile。`prepare`的五项质量证据目录是`--protocol --evaluation --predictions --baseline --baseline-predictions`，另需`--name --generation --bundle --index --calibration`。未齐备时失败，不创建READY；新版本均使用新目录。
+
+准入CPU重算两份保存的1,200条预测，要求实际本校至少720条、至少400来源事件、完整类别与400开发、正确来源Recall@20至少95%、两类整篇改写各至少85%、正常稿误提示及未完成范围保守上界不高于5%、局部/多来源相对旧v2不下降超过3个百分点、偏移全部有效。核对模型/特征、工作点、预测与代码SHA；旧评价摘要不改写。合成检查夹具通过不构成真实模型达标。基线开发工件路径未入原run，目前仅核对预测/评价绑定的开发SHA一致，完整读取该目录仍待后续补齐。
+
+```cmd
+runtime\environments\final-training\Scripts\python.exe -B app\training\prepare_service_profile.py prepare --help
+runtime\environments\final-training\Scripts\python.exe -B app\training\prepare_service_profile.py list
+```
+
+合格包保存为`runtime/delivery/text-profiles/<UUID>/profile.json`。后续部署时可在`app/config/local.json`设置`detectorProfile`为该项目相对路径；现有supervisor会使用已批准的final-training环境，并传递`--v3-profile`，不安装依赖。检测服务原默认配置仍为v2，health同时返回已加载的v2/v3；随后由管理员在发布页选择正式校园模型、登记、显式发布。配置改变但旧服务仍在运行时启动器明确拒绝，不自动重启或声称新配置已加载。回退v2可直接切换；切换另一v3包需要先显式加载它。
+
+当前只完成源码/构建与真实业务快照，候选列表实际为空：未完成正式训练、校准与最终评价，没有生产v3 READY，也未运行007迁移、部署或重启。参考库新增后旧profile会明确失配，新任务记录失败原因；历史报告与已固定快照不改。自动重建密集索引、再次校准及真实业务送审联调仍待后续，不能将该失配保护称为自动兼容。
+
 ## 10月28日两条模型对照接入（阶段11）
 
 `ablation_models.py`登记两种**离线对照**，不改变正式校园模型包或线上配置：

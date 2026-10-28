@@ -9,6 +9,7 @@ public class DeliveryController {
     private final ReleaseService releases;private final ReferenceImportService imports;private final CurrentUserService users;
     public DeliveryController(ReleaseService releases,ReferenceImportService imports,CurrentUserService users){this.releases=releases;this.imports=imports;this.users=users;}
     @GetMapping("/releases")Api list(Authentication a,@RequestParam(defaultValue="1")int page){return Api.ok(releases.list(users.require(a),page));}
+    @GetMapping("/releases/text-profiles")Api profiles(Authentication a)throws Exception{return Api.ok(releases.textProfiles(users.require(a)));}
     @GetMapping("/releases/models/{id}/evaluations")Api evaluations(Authentication a,@PathVariable String id){return Api.ok(releases.evaluations(users.require(a),id));}
     @PostMapping("/releases")Api create(Authentication a,@RequestBody ReleaseService.Create input){return Api.ok(releases.create(users.require(a),input));}
     public record Switch(String expectedId){}

@@ -19,24 +19,35 @@ class Runtime:
         self.index_root=Path(index_root).resolve()
         if not self.index_root.is_relative_to(ROOT/'runtime'):raise ValueError('Index root must stay inside project runtime')
         self.token=token;self.run_id=str(uuid.uuid4());self.models=None;self.load_error=None;self.v3_profile=v3_profile
-        self.compute=threading.Lock();self.active_attempt=None;self.libraries={}
+        self.compute=threading.Lock();self.active_attempt=None;self.libraries={};self.loaded_profile_id=None
     def load(self):
         try:
-            models=load_models()
+            profile=None
             if self.v3_profile:
+                from campus_detection.service_profile import verify_profile,profile_directory
+                location=Path(self.v3_profile).resolve()
+                if location!=profile_directory(location.parent.name)/'profile.json':raise ValueError('Select a prepared production service profile')
+                profile=verify_profile(location.parent.name)
+            models=load_models()
+            if profile:
                 from campus_detection.v3_runtime import controlled,read,verify_files,load_bundle,attach_runtime
                 from campus_detection.retrieval import load_dense_index
-                profile=read(controlled(self.v3_profile));calibration_folder=controlled(profile['calibration']);verify_files(calibration_folder)
+                calibration_folder=controlled(profile['calibration']);verify_files(calibration_folder)
                 calibration=read(calibration_folder/'calibration.json')
                 if calibration.get('operatingPointFrozen') is not True:raise ValueError('Require a frozen operating point for service activation')
                 session=load_bundle(controlled(profile['bundle']),device='cuda',precision='BF16')
                 index=load_dense_index(controlled(profile['index']),session['retriever']['identity'])
                 models=attach_runtime(models,session,index,calibration)
+                if models['textConfigs'][models['v3Runtime']['configId']]!=profile['textConfig']:raise ValueError('Loaded profile configuration differs')
+                self.loaded_profile_id=profile['profileId']
             self.models=models
         except Exception as error:self.load_error=getattr(error,'code',type(error).__name__)
     def health(self):
         return {'ready':self.models is not None,'runId':self.run_id,'busy':self.compute.locked(),
                 'activeAttemptId':self.active_attempt,'errorCode':self.load_error,
+                'availableTextConfigs':[] if self.models is None else [
+                    {'configId':key,'profileId':self.loaded_profile_id if value.get('schemaVersion')=='text-v3' else None}
+                    for key,value in self.models['textConfigs'].items()],
                 'configs':None if self.models is None else {name:self.models[name] for name in ('textConfig','imageConfig')}}
     def library(self,request):
         generation=request.get('libraryGenerationId')
