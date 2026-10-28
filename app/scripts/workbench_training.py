@@ -39,7 +39,12 @@ def main():
                 result = evaluate(config['model'], config['preparation'], config['output'], emit)
             elif action == 'PREDICT':
                 rows = config.get('rows')
-                if rows is None:
+                uploaded=config.get('predictionInput')
+                if uploaded:
+                    if rows is not None or config.get('preparation'):raise ValueError('预测输入只能选择一种来源')
+                    from campus_workbench.prediction_input import read_prediction_input
+                    rows=read_prediction_input(uploaded,config['runtime'])
+                elif rows is None:
                     if config.get('preparation'):
                         _, partitions = prepared(config['preparation'])
                         rows = [row for values in partitions.values() for row in values]
@@ -49,7 +54,8 @@ def main():
                 output = Path(config['output']); output.mkdir(parents=True, exist_ok=False)
                 path = output / 'predictions.jsonl'
                 path.write_text(''.join(json.dumps(row, ensure_ascii=False) + '\n' for row in result_rows), encoding='utf-8')
-                result = {'taskType': 'PREDICTION', 'status': 'COMPLETED', 'count': len(result_rows), 'rows': result_rows[:20], 'artifacts': {'predictions.jsonl': sha(path)}}
+                result = {'taskType': 'PREDICTION', 'status': 'COMPLETED', 'count': len(result_rows), 'rows': result_rows[:20], 'modelSha256':sha(Path(config['model'])/'manifest.json'), 'artifacts': {'predictions.jsonl': sha(path)}}
+                if uploaded:result.update(inputKind='UPLOADED_FILE',inputName=uploaded['name'],inputSha256=uploaded['sha256'])
                 write_json(output / 'manifest.json', result)
             else:
                 raise ValueError('不支持的任务')

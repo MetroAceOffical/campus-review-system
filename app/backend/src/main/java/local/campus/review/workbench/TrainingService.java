@@ -5,7 +5,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import local.campus.review.auth.CurrentUser;
 import local.campus.review.common.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.security.*;
 import java.util.*;
 
 /** Experiments consume immutable data versions and never change production models. */
@@ -114,10 +118,15 @@ public class TrainingService {
         if(!model.get("organization_id").toString().equals(dataset.get("organization_id").toString()))throw invalid("请选择同一部门的模型和数据");
         options.put("modelId",id);
     }
-    public JsonNode runs(CurrentUser user,int page,String q){
+    public JsonNode runs(CurrentUser user,int page,String q){return runs(user,page,q,null);}
+    public JsonNode runs(CurrentUser user,int page,String q,String modelId){
         data.role(user);if(page<1 || q.length()>120)throw invalid("查询参数无效");
         String from=" FROM ml_run r JOIN ml_dataset d ON d.id=r.dataset_id WHERE r.action IN ('PREPARE','GENERATE','TRAIN','EVALUATE','PREDICT') AND d.name LIKE ?";
         var args=new ArrayList<Object>(List.of("%"+q+"%"));
+        if(modelId!=null&&!modelId.isBlank()){
+            var selected=model(user,modelId);from+=" AND (JSON_UNQUOTE(JSON_EXTRACT(r.options_json,'$.modelId'))=? OR r.id=?)";
+            args.add(modelId);args.add(selected.get("run_id").toString());
+        }
         var result=data.json.createObjectNode().put("total",data.db.queryForObject("SELECT COUNT(*)"+from,Long.class,args.toArray()));
         args.add((page-1L)*20);var items=result.putArray("items");
         for(var row:data.db.queryForList("SELECT r.*,d.name AS dataset_name"+from+" ORDER BY r.created_at DESC,r.id LIMIT 20 OFFSET ?",args.toArray())){var item=(ObjectNode)data.runJson(row);item.put("datasetName",row.get("dataset_name").toString());items.add(item);}
@@ -125,12 +134,14 @@ public class TrainingService {
     }
     public JsonNode models(CurrentUser user,int page,String q,boolean archived){
         data.role(user);if(page<1 || q.length()>120)throw invalid("查询参数无效");
-        String from=" FROM ml_model m WHERE m.archived=? AND m.name LIKE ?";var args=new ArrayList<Object>(List.of(archived,"%"+q+"%"));
+        String from=" FROM ml_model m JOIN ml_dataset d ON d.id=m.dataset_id JOIN ml_run r ON r.id=m.run_id WHERE m.archived=? AND m.name LIKE ?";var args=new ArrayList<Object>(List.of(archived,"%"+q+"%"));
         var result=data.json.createObjectNode().put("total",data.db.queryForObject("SELECT COUNT(*)"+from,Long.class,args.toArray()));args.add((page-1L)*20);var items=result.putArray("items");
-        for(var row:data.db.queryForList("SELECT m.*"+from+" ORDER BY m.created_at DESC,m.id LIMIT 20 OFFSET ?",args.toArray()))items.add(modelJson(row));return result;
+        for(var row:data.db.queryForList("SELECT m.*,d.name AS dataset_name,r.input_version_id"+from+" ORDER BY m.created_at DESC,m.id LIMIT 20 OFFSET ?",args.toArray()))items.add(modelJson(row));return result;
     }
     ObjectNode modelJson(Map<String,Object> row){
         var result=data.json.createObjectNode().put("modelId",row.get("id").toString()).put("datasetId",row.get("dataset_id").toString()).put("runId",row.get("run_id").toString()).put("name",row.get("name").toString()).put("family",row.get("family").toString()).put("organizationId",row.get("organization_id").toString()).put("archived",Boolean.TRUE.equals(row.get("archived"))).put("createdAt",row.get("created_at").toString());
+        if(row.get("dataset_name")!=null)result.put("datasetName",row.get("dataset_name").toString());
+        if(row.get("input_version_id")!=null)result.put("inputVersionId",row.get("input_version_id").toString());
         result.set("manifest",JsonSupport.parse(data.json,row.get("manifest_json").toString()));return result;
     }
     public JsonNode updateModel(CurrentUser user,String id,String name,Boolean archived){
@@ -147,5 +158,80 @@ public class TrainingService {
         Path file=artifact(user,id,kind+".jsonl");var result=data.json.createObjectNode().put("page",page);var items=result.putArray("items");
         long total=0;try(var reader=Files.newBufferedReader(file)){String line;long begin=(long)(page-1)*size;while((line=reader.readLine())!=null){if(total>=begin && items.size()<size)items.add(data.json.readTree(line));total++;}}
         result.put("total",total);return result;
+    }
+    public JsonNode predictions(CurrentUser user,String id,int page,int size,String q,Integer predicted,String outcome)throws Exception{
+        data.role(user);predictionFilters(page,size,q,predicted,outcome);
+        var task=data.runRow(user,id);
+        if(!Set.of("PREDICT","EVALUATE").contains(task.get("action"))||!"COMPLETED".equals(task.get("status")))throw new ApiException(409,"RESULT_NOT_READY","请选择已完成的评价或预测任务");
+        Path output=directory(id).resolve("output"),manifestFile=output.resolve("manifest.json"),file=output.resolve("predictions.jsonl");
+        if(!Files.isRegularFile(manifestFile)||!Files.isRegularFile(file)||!manifestFile.toRealPath().startsWith(output.toRealPath())||!file.toRealPath().startsWith(output.toRealPath()))throw DatasetService.missing();
+        var manifest=data.json.readTree(Files.readString(manifestFile));
+        if(!manifest.equals(JsonSupport.parse(data.json,task.get("result_json").toString())))throw new ApiException(409,"ARTIFACT_CHANGED","结果工件发生变化，请重新执行任务");
+        return predictionPage(data.json,file,manifest,page,size,q,predicted,outcome);
+    }
+    public JsonNode predictFile(CurrentUser user,String modelId,MultipartFile file)throws Exception{
+        var selected=model(user,modelId);
+        if(Boolean.TRUE.equals(selected.get("archived")))throw invalid("请先恢复模型");
+        var trained=data.runRow(user,selected.get("run_id").toString());
+        String id=DatasetService.uuid();Path folder=directory(id);Files.createDirectories(folder);
+        var descriptor=storePredictionInput(data.json,file,folder);
+        var options=data.json.createObjectNode().put("name",selected.get("name").toString()+" · 文件预测").put("modelId",modelId).put("inputKind","UPLOADED_FILE");
+        options.set("predictionInput",descriptor);
+        options.put("inputName",descriptor.path("name").asText()).put("inputSha256",descriptor.path("sha256").asText());
+        try{
+            data.transactions.executeWithoutResult(tx->{
+                if(Boolean.TRUE.equals(data.db.queryForObject("SELECT archived FROM ml_model WHERE id=? FOR UPDATE",Boolean.class,modelId)))throw new ApiException(409,"MODEL_ARCHIVED","请先恢复模型");
+                if(Boolean.TRUE.equals(data.db.queryForObject("SELECT archived FROM ml_dataset WHERE id=? FOR UPDATE",Boolean.class,trained.get("dataset_id"))))throw new ApiException(409,"DATASET_ARCHIVED","请先恢复模型所属数据集");
+                data.insertRun(id,trained.get("dataset_id").toString(),trained.get("input_version_id").toString(),null,"PREDICT","{}",options.toString(),user.userId());
+            });
+        }catch(Exception error){Files.deleteIfExists(folder.resolve("prediction-source."+descriptor.path("format").asText()));throw error;}
+        return data.json.createObjectNode().put("runId",id);
+    }
+    static ObjectNode storePredictionInput(com.fasterxml.jackson.databind.ObjectMapper json,MultipartFile file,Path folder)throws Exception{
+        if(file==null||file.isEmpty())throw new ApiException(400,"VALIDATION_ERROR","请选择预测文件");
+        if(file.getSize()>DatasetService.UPLOAD_LIMIT)throw new ApiException(413,"UPLOAD_TOO_LARGE","预测文件不能超过50MiB");
+        String name=Objects.toString(file.getOriginalFilename(),"").replace('\\','/');name=name.substring(name.lastIndexOf('/')+1);
+        if(name.isBlank()||name.length()>200||name.chars().anyMatch(c->Character.isISOControl(c)))throw new ApiException(400,"VALIDATION_ERROR","预测文件名无效");
+        String lower=name.toLowerCase(Locale.ROOT),format=lower.endsWith(".csv")?"csv":lower.endsWith(".jsonl")?"jsonl":null;
+        if(format==null)throw new ApiException(415,"UNSUPPORTED_DATASET","预测文件仅支持CSV或JSONL");
+        Path target=folder.resolve("prediction-source."+format);var digest=MessageDigest.getInstance("SHA-256");long bytes=0;
+        Files.createFile(target);
+        try(var input=file.getInputStream();var output=Files.newOutputStream(target,StandardOpenOption.WRITE)){
+            byte[] buffer=new byte[65536];int size;while((size=input.read(buffer))!=-1){bytes+=size;if(bytes>DatasetService.UPLOAD_LIMIT)throw new ApiException(413,"UPLOAD_TOO_LARGE","预测文件不能超过50MiB");digest.update(buffer,0,size);output.write(buffer,0,size);}
+        }catch(Exception error){Files.deleteIfExists(target);throw error;}
+        return json.createObjectNode().put("format",format).put("name",name).put("sha256",HexFormat.of().formatHex(digest.digest()));
+    }
+    private static ApiException resultChanged(){return new ApiException(409,"ARTIFACT_CHANGED","预测结果不完整或校验失败，请重新执行任务");}
+    private static void predictionFilters(int page,int size,String q,Integer predicted,String outcome){
+        if(page<1||size<1||size>100||q==null||q.length()>120||predicted!=null&&predicted!=0&&predicted!=1||!Set.of("all","FP","FN","TP","TN").contains(Objects.toString(outcome,"")))throw new ApiException(400,"VALIDATION_ERROR","预测结果筛选或分页参数无效");
+    }
+    /** One bounded-memory pass both hashes the immutable file and selects a result page. */
+    static ObjectNode predictionPage(com.fasterxml.jackson.databind.ObjectMapper json,Path file,JsonNode manifest,int page,int size,String q,Integer predicted,String outcome)throws Exception{
+        predictionFilters(page,size,q,predicted,outcome);
+        String expected=manifest.path("artifacts").path("predictions.jsonl").asText();
+        boolean evaluation="EVALUATION".equals(manifest.path("taskType").asText());
+        if(!"COMPLETED".equals(manifest.path("status").asText())||!Set.of("EVALUATION","PREDICTION").contains(manifest.path("taskType").asText())||!expected.matches("[0-9a-f]{64}"))throw resultChanged();
+        long expectedRows=evaluation?manifest.path("metrics").path("rows").asLong(-1):manifest.path("count").asLong(-1);
+        if(expectedRows<1||expectedRows>100000)throw resultChanged();
+        var result=json.createObjectNode().put("page",page).put("pageSize",size);var items=result.putArray("items");
+        var digest=MessageDigest.getInstance("SHA-256");long count=0,total=0,begin=(page-1L)*size;String type=null,query=q.toLowerCase(Locale.ROOT);
+        try(var stream=new DigestInputStream(Files.newInputStream(file),digest);var reader=new BufferedReader(new InputStreamReader(stream,StandardCharsets.UTF_8))){
+            String line;while((line=predictionLine(reader))!=null){
+                if(++count>100000||line.isBlank())throw resultChanged();var row=json.readTree(line);
+                if(row==null||!row.isObject()||!row.path("sentence1").isTextual()||!row.path("sentence2").isTextual()||!row.path("predicted").isIntegralNumber()||!Set.of(0,1).contains(row.path("predicted").asInt())||!row.path("score").isNumber()||!Double.isFinite(row.path("score").asDouble())||evaluation&&!row.has("label")||row.has("label")&&(!row.path("label").isIntegralNumber()||!Set.of(0,1).contains(row.path("label").asInt())))throw resultChanged();
+                String rowType=row.path("scoreType").asText();if(!Set.of("margin","probability").contains(rowType)||type!=null&&!type.equals(rowType))throw resultChanged();type=rowType;
+                String actualOutcome=row.has("label")?(row.path("label").asInt()==1?(row.path("predicted").asInt()==1?"TP":"FN"):(row.path("predicted").asInt()==1?"FP":"TN")):null;
+                boolean matches=(predicted==null||row.path("predicted").asInt()==predicted)&&(outcome.equals("all")||outcome.equals(actualOutcome))&&(query.isBlank()||row.path("sentence1").asText().toLowerCase(Locale.ROOT).contains(query)||row.path("sentence2").asText().toLowerCase(Locale.ROOT).contains(query)||row.path("id").asText().toLowerCase(Locale.ROOT).contains(query));
+                if(matches){if(total>=begin&&items.size()<size){var item=json.createObjectNode();for(String key:List.of("id","sentence1","sentence2","score","predicted","label","scoreType"))if(row.has(key))item.set(key,row.get(key));if(actualOutcome!=null)item.put("outcome",actualOutcome);items.add(item);}total++;}
+            }
+        }catch(com.fasterxml.jackson.core.JacksonException error){throw resultChanged();}
+        if(count!=expectedRows||!HexFormat.of().formatHex(digest.digest()).equals(expected))throw resultChanged();
+        result.put("count",count).put("total",total).put("scoreType",type);return result;
+    }
+    private static String predictionLine(Reader reader)throws IOException{
+        // Uploaded batches are capped at100k rows; one oversized/corrupt row must not grow memory unboundedly.
+        var line=new StringBuilder();int value;
+        while((value=reader.read())!=-1){if(value=='\n')return line.toString();if(line.length()>=8*1024*1024)throw resultChanged();line.append((char)value);}
+        return line.isEmpty()?null:line.toString();
     }
 }

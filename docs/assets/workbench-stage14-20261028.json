@@ -1,0 +1,136 @@
+{
+  "stage": "model-comparison-and-complete-batch-prediction",
+  "date": "2026-10-28",
+  "snapshotAt": "2026-10-28T14:40:59.913839+08:00",
+  "state": "SOURCE_AND_FOCUSED_CHECKS_COMPLETE_NOT_DEPLOYED",
+  "implemented": [
+    "up-to-six-model comparison grouped by actual input/partition SHA and validation count",
+    "complete prediction/evaluation pages with text, predicted class and TP FP TN FN filters",
+    "model-specific task history pages",
+    "direct unlabeled CSV/JSONL file prediction"
+  ],
+  "limits": {
+    "comparedModels": 6,
+    "uploadBytes": 52428800,
+    "uploadRows": 100000,
+    "textCodepointsPerSide": 20000,
+    "resultPageSize": 100
+  },
+  "actualSavedEvaluationRead": {
+    "rows": 4487,
+    "firstPageRows": 20,
+    "secondPageRows": 20,
+    "falsePositives": 466,
+    "artifactSha256": "39d2ef15e5893f0d3784671da65a24a2fd235235597d0bc49c9fb72d33d11953",
+    "newTrainingOrGradeProduced": false
+  },
+  "actualUnlabeledCpuPrediction": {
+    "state": "REAL_CPU_UNLABELED_FILE_PARSE_AND_PREDICT_CHECK_COMPLETE",
+    "sourceRows": 3,
+    "unlabeledRows": 3,
+    "modelFamily": "lr",
+    "modelManifestSha256": "f62cd63712bb49dd90e56918a80e88f52ca33c93ddf0ec0eef293532473dd121",
+    "sourcePredictionSha256": "39d2ef15e5893f0d3784671da65a24a2fd235235597d0bc49c9fb72d33d11953",
+    "uploadedFileSha256": "903b073992ec596312da930a18f05a26059b512906c27c2b1c52160439aa58c7",
+    "predictedLabels": [
+      0,
+      0,
+      0
+    ],
+    "savedScoreMaxDifference": 1.1102230246251565e-16,
+    "elapsedSeconds": 4.3439999999973224,
+    "device": "cpu",
+    "newTrainingPerformed": false,
+    "newAccuracyGrade": false,
+    "gpuUsed": false
+  },
+  "actualReadonlySql": {
+    "state": "READ_ONLY_MODEL_HISTORY_SQL_CHECK_COMPLETE",
+    "modelListJoinRows": 1,
+    "existingLrModelHistoryRows": 3,
+    "databaseMutation": false
+  },
+  "checks": {
+    "backendCompile": true,
+    "javaFocusedPassed": 4,
+    "frontendTypeBuild": true,
+    "frontendFocusedPassed": 1,
+    "pythonInputFocusedPassed": 2,
+    "pythonSyntaxFiles": 2,
+    "formalBoundAlgorithmsUnchanged": 18,
+    "heldoutAlgorithmsUnchanged": 5,
+    "trainSha256Unchanged": true,
+    "fullRegressionRun": false,
+    "realHttpUploadQueueVerified": false,
+    "browserVerified": false
+  },
+  "initialCheckCorrections": [
+    "Java compound-var fixture corrected before final green build",
+    "frontend test stub props/name and TypeScript Component annotation corrected",
+    "readonly DB harness first used restricted socket and then omitted database selection; final isolated USE+SELECT checks passed without writes"
+  ],
+  "background": {
+    "state": "GENERATING_TRAIN_MATERIAL",
+    "segmentCounts": {
+      "ACCEPTED": 675,
+      "PENDING": 16007,
+      "QUARANTINED": 91
+    },
+    "selectedOriginals": 3684,
+    "elapsedSeconds": 2709.3909999999996,
+    "device": "cuda",
+    "promptVersion": "3",
+    "reusedSegments": 440,
+    "estimatedRemainingSeconds": 133034.42250613496,
+    "semanticCorrectnessCertified": false,
+    "modelLoadSeconds": 9.06199999999808,
+    "hostRssBytes": 540295168,
+    "cudaPeakAllocatedBytes": 6301956608
+  },
+  "epochsEach": 2,
+  "generationOriginals": 3684,
+  "generationSegments": 16773,
+  "dataScaleReduced": false,
+  "serviceRestarted": false,
+  "deployed": false,
+  "databaseMutatedByChecks": false,
+  "newDependenciesInstalled": false,
+  "chartImageExportAdded": false,
+  "newCampusTrainingComplete": false,
+  "newAccuracyImprovementVerified": false,
+  "productActivated": false,
+  "qualityAccepted": false,
+  "limitations": [
+    "HTTP upload/queue and browser interaction need unified deployment",
+    "comparison UI check uses synthetic model metadata; only one actual registered model available",
+    "existing 4487-row PAWS-X grade was read, not retrained or improved",
+    "complete results currently require one bounded-memory full-file scan per page"
+  ],
+  "estimateHours": {
+    "remainingDeploymentAndFocusedQA": [
+      3,
+      6
+    ],
+    "formalGeneration": [
+      40,
+      80
+    ],
+    "campusTraining": [
+      4,
+      12
+    ],
+    "heldoutGeneration": [
+      10,
+      20
+    ],
+    "fullEvaluationComputeMeasured": false,
+    "publicSourceCompletionKnown": false
+  },
+  "publicSourceProbe": {
+    "hostsChecked": 3,
+    "newNewsArticles": 0,
+    "newCorpusSourcesAudited": 0,
+    "trainingInputsChanged": false,
+    "report": "docs/assets/source-probes-stage14-20261028.json"
+  }
+}

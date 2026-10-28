@@ -1,0 +1,57 @@
+{
+  "observedAt": "2026-10-28T14:40:36.895521+08:00",
+  "scope": "at most three source hosts; read-only probes; no bulk collection",
+  "newDownloadedNewsArticles": 0,
+  "newCorpusSourcesAudited": 0,
+  "trainingInputsChanged": false,
+  "tlsVerificationDisabled": false,
+  "authenticationBypassed": false,
+  "sources": [
+    {
+      "name": "南京传媒学院招生办",
+      "listUrl": "https://zsb.cucn.edu.cn/",
+      "robotsUrl": "https://zsb.cucn.edu.cn/robots.txt",
+      "institutionalDomain": true,
+      "searchIndexHasNews": true,
+      "searchIndexedExample": "https://zsb.cucn.edu.cn/home/hotshot/info/id/175/catId/11.html",
+      "liveFetch": "FAILED_TLS_UNEXPECTED_EOF",
+      "browserFetch": "TIMEOUT",
+      "robotsStatus": "UNAVAILABLE",
+      "newsBodyObtained": false,
+      "hundredsOfIndependentNewsConfirmed": false,
+      "action": "No collection; keep source unavailable"
+    },
+    {
+      "name": "南京传媒学院移动官网",
+      "listUrl": "https://wap.cucn.edu.cn/",
+      "robotsUrl": "https://wap.cucn.edu.cn/robots.txt",
+      "institutionalDomain": true,
+      "liveFetch": "SITE_NOT_OPEN",
+      "returnedText": "抱歉！该站点尚未开放！",
+      "robotsStatus": "UNAVAILABLE",
+      "newsBodyObtained": false,
+      "hundredsOfIndependentNewsConfirmed": false,
+      "action": "Same closed main-site family; not a new corpus source"
+    },
+    {
+      "name": "央视频平台南京传媒学院用户页",
+      "listUrl": "https://m.yangshipin.cn/user?cpid=33080277343286223",
+      "robotsUrl": "https://m.yangshipin.cn/robots.txt",
+      "institutionalDomain": false,
+      "platform": "央视频",
+      "publisherOwnershipVerified": false,
+      "searchIndexHasSchoolPosts": true,
+      "liveFetch": "HTML_WITH_NO_EXTRACTABLE_BODY_LINES",
+      "robotsStatus": "UNAVAILABLE",
+      "newsBodyObtained": false,
+      "hundredsOfIndependentNewsConfirmed": false,
+      "action": "Candidate only; no bulk requests or undocumented API enumeration"
+    }
+  ],
+  "excludedLeads": [
+    {
+      "hostFamily": "*.gtue.cn",
+      "reason": "Admissions-marketing mirrors exist but university ownership not established; not counted as a new official department source"
+    }
+  ]
+}

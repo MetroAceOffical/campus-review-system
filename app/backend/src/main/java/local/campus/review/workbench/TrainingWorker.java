@@ -56,9 +56,17 @@ public class TrainingWorker {
     private void execute(Map<String,Object> job)throws Exception{
         String id=job.get("id").toString(),action=job.get("action").toString(),dataset=job.get("dataset_id").toString();
         var options=JsonSupport.parse(data.json,job.get("options_json").toString());var source=data.version(dataset,job.get("input_version_id").toString());
-        Path input=data.input(source);if(!sha(input).equals(source.get("sha256")))throw new IOException("清洗数据校验失败");
+        boolean uploaded=action.equals("PREDICT")&&"UPLOADED_FILE".equals(options.path("inputKind").asText());
+        Path input=uploaded?null:data.input(source);if(input!=null&&!sha(input).equals(source.get("sha256")))throw new IOException("清洗数据校验失败");
         Path directory=training.directory(id);Files.createDirectories(directory);Path output=directory.resolve("output");
-        var config=data.json.createObjectNode().put("action",action).put("input",input.toString()).put("output",output.toString()).put("runtime",data.settings.runtime().toString());
+        var config=data.json.createObjectNode().put("action",action).put("output",output.toString()).put("runtime",data.settings.runtime().toString());
+        if(uploaded){
+            var descriptor=options.path("predictionInput");String format=descriptor.path("format").asText();
+            if(!Set.of("csv","jsonl").contains(format))throw new IOException("预测文件格式无效");
+            Path upload=directory.resolve("prediction-source."+format);
+            if(!Files.isRegularFile(upload)||!upload.toRealPath().startsWith(directory.toRealPath())||!sha(upload).equals(descriptor.path("sha256").asText()))throw new IOException("预测文件校验失败");
+            config.set("predictionInput",descriptor.deepCopy());((ObjectNode)config.path("predictionInput")).put("path",upload.toString());
+        }else config.put("input",input.toString());
         config.put("kind",data.db.queryForObject("SELECT kind FROM ml_dataset WHERE id=?",String.class,dataset));
         config.set("parameters",options.path("parameters"));
         if(options.has("family"))config.put("family",options.path("family").asText());

@@ -1,5 +1,22 @@
 # 期末离线数据与训练
 
+## 10月28日模型比较与文件预测（阶段14）
+
+模型管理支持选择2—6个已有模型，按`inputSha256 + preparationSha256 + validationRows`分组展示验证指标/训练耗时；不同划分不合成统一排名。模型任务通过`runs?modelId=...`后端分页查询。
+
+完整逐条输出由`GET /api/workbench/training/runs/{id}/predictions`提供，参数`page/pageSize/q/predicted/outcome`；pageSize最多100，predicted空或0/1，outcome为all/TP/FP/TN/FN。返回count为全部记录数、total为筛选数、items为本页。只读已完成EVALUATE/PREDICT任务，核对数据库冻结结果、manifest、固定工件SHA与原始数量，分数类型保持probability/margin。每页一次流式扫描，当前首版不建立额外结果数据库索引。
+
+`POST /api/workbench/training/models/{id}/predict-file`使用multipart字段`file`。支持UTF-8 CSV/JSONL，CSV允许BOM和引号内换行；字段sentence1/sentence2必填，label和id可选，中文别名包括文本一/文本二、原文/待比对文本、标签/编号。无标签不会填0，不参加TP/FP/TN/FN分类；提供标签时只接受0/1。最大50MiB、100,000行、每侧20,000字，编号不得重复。示例：
+
+```csv
+sentence1,sentence2
+学校举办新闻写作讲座,新闻写作讲座在学校举行
+```
+
+文件保存于本次UUID任务下prediction-source.csv/jsonl，记录inputKind=UPLOADED_FILE、inputName/inputSha256及modelSha256。原模型所属数据集/训练版本用于权限上下文，实际预测只读取上传文件；不会导入训练数据或重新训练。Python解析器在执行前再次核对受限位置、原文件SHA和内容；运行仍遵守现有计算队列与资源等待。
+
+本阶段源码/构建与必要检查通过，现有4,487条评价已核对全量分页与466条FP；现有LR另完成3条无标签CSV解析→CPU预测检查，不构成新效果成绩。尚未部署或执行实际HTTP上传排队，统一部署后核验。证据见docs/assets/workbench-stage14-20261028.json。
+
 ## 10月28日正式训练Web进度（阶段13）
 
 `app/config/formal-pipeline.json`只读登记当前正式配方及7个阶段目录。新增`GET /api/workbench/training/formal-progress`，仅审核员/管理员读取；模型训练页每5秒更新真实工件。原Web数据选择、样本准备和六模型运行仍读取各自的ml_run事件，不将校级后台任务混入部门实验。
