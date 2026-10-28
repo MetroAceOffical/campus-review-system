@@ -69,6 +69,16 @@ class FormalTrainingServiceTest {
             assertEquals(300,document.path("metrics").path("truePositive").asInt(-1));
             assertEquals(150,document.path("metrics").path("correctFields").asInt(-1));
             assertEquals(10737418240L,document.path("metrics").path("requiredMemoryBytes").asLong(-1));
+            Files.writeString(folder.resolve("status.json"),"""
+                {"state":"RUNNING_IMAGE_ERROR_ANALYSIS","processed":2,"total":1064,"enhancedRegressionCount":1,
+                 "byTransformation":{"crop":{"queries":2,"baselineAccepted":1,"enhancedAccepted":2,"pending":150,"privateText":"hidden"},"private_path":{"queries":4}},
+                 "reasonCounts":{"INSUFFICIENT_SPATIAL_SUPPORT":1,"PRIVATE_PATH":999}}
+                """);
+            var analysis=FormalTrainingService.read(root,runtime,json,registry).path("stages").get(0);
+            assertEquals(1,analysis.path("imageTransforms").size());
+            assertEquals(2,analysis.path("imageTransforms").get(0).path("enhancedAccepted").asInt(-1));
+            assertEquals("INSUFFICIENT_SPATIAL_SUPPORT",analysis.path("imageReasons").get(0).path("reason").asText());
+            assertFalse(analysis.toString().contains("privateText"));assertFalse(analysis.toString().contains("PRIVATE_PATH"));
             Files.writeString(folder.resolve("status.json"),"{writing");
             var changed=FormalTrainingService.read(root,runtime,json,registry);
             assertEquals("READ_ERROR",changed.path("stages").get(0).path("availability").asText());

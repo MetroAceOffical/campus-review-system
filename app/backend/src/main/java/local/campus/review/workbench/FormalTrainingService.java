@@ -16,7 +16,7 @@ import java.util.*;
 public class FormalTrainingService {
     private static final long JSON_BYTES=512*1024,TAIL_BYTES=256*1024;
     private static final int HISTORY_POINTS=500;
-    private static final Set<String> LIVE_STATES=Set.of("TRAINING","CORRESPONDENCE_TRAINING","GENERATING_TRAIN_MATERIAL","GENERATING_HELDOUT_QUERIES","WAITING_CAMPUS_TRAINING_COMPLETION","WAITING_GPU_RESOURCE","WAITING_OTHER_GPU_CONSUMER","WAITING_WEB_OR_GPU_RESOURCE","LOADING_IMAGE_EVALUATION","RUNNING_IMAGE_DEVELOPMENT_EVALUATION","WAITING_HOST_MEMORY","WAITING_CPU_EVALUATOR","RUNNING_DOCUMENT_EVALUATION");
+    private static final Set<String> LIVE_STATES=Set.of("TRAINING","CORRESPONDENCE_TRAINING","GENERATING_TRAIN_MATERIAL","GENERATING_HELDOUT_QUERIES","WAITING_CAMPUS_TRAINING_COMPLETION","WAITING_GPU_RESOURCE","WAITING_OTHER_GPU_CONSUMER","WAITING_WEB_OR_GPU_RESOURCE","LOADING_IMAGE_EVALUATION","RUNNING_IMAGE_DEVELOPMENT_EVALUATION","WAITING_HOST_MEMORY","WAITING_CPU_EVALUATOR","RUNNING_DOCUMENT_EVALUATION","RUNNING_IMAGE_ERROR_ANALYSIS","WAITING_IMAGE_EVALUATION_PROGRESS");
     private static final Set<String> METRICS=Set.of("selectedOriginals","elapsedSeconds","estimatedRemainingSeconds","reusedSegments",
         "hostRssBytes","cudaPeakAllocatedBytes","cudaPeakBytes","modelLoadSeconds","processed","total","queries","steps","epochs",
         "plannedSlots","requestedQuerySlots","constructedQueries","pendingSlots","generatedParaphraseQueries","globallySupportedNormalQueries",
@@ -25,9 +25,10 @@ public class FormalTrainingService {
         "failedQueries","partialQueries","unknownAcceptedSources","finalQueriesEvaluated","realHardNegativeTruthCount",
         "truePositive","falsePositive","falseNegative","invalidSuggestions","assessableFields","correctFields","unresolvedFields",
         "conflictFields","detectedConflicts","falseConflicts","insufficientControls","correctInsufficient","knownContextQueries",
-        "relatedTop1","relatedTop3","realRuntimeQueries","realRuntimeCompleted","availableMemoryBytes","requiredMemoryBytes","totalSteps");
+        "relatedTop1","relatedTop3","realRuntimeQueries","realRuntimeCompleted","availableMemoryBytes","requiredMemoryBytes","totalSteps",
+        "pendingQueries","enhancedGainCount","enhancedRegressionCount","completedFamilies","totalFamilies","errorQueries");
     private static final Set<String> FLAGS=Set.of("reloadVerified","qualityAccepted","productActivated","fullQuerySetReady",
-        "neuralTrainingStarted","modelEvaluationStarted","neuralTrainingPerformed","modelPredictionsProduced","finalProtocolExecuted");
+        "neuralTrainingStarted","modelEvaluationStarted","neuralTrainingPerformed","modelPredictionsProduced","finalProtocolExecuted","analysisComplete");
     private static final Set<String> RECORD=Set.of("step","epoch","loss","validationLoss","baselineValidationLoss","gradientNorm",
         "elapsedSeconds","learningRate","hostRssBytes","cudaPeakAllocatedBytes","cudaPeakBytes","actualQueries","actualPairs",
         "remainingOptimizerSteps","estimatedRemainingSeconds","nextCursor","explicitPassagesPerQuery");
@@ -62,6 +63,7 @@ public class FormalTrainingService {
                         item.put("updatedAt",Files.getLastModifiedTime(status).toInstant().toString());
                         item.put("stale",LIVE_STATES.contains(item.path("state").asText())&&Files.getLastModifiedTime(status).toInstant().isBefore(Instant.now().minusSeconds(900)));
                         var metrics=(ObjectNode)item.path("metrics");copyScalars(value,metrics,METRICS);copyFlags(value,metrics);
+                        imageBreakdowns(json,item,value);
                         var counts=value.path("segmentCounts").isObject()?value.path("segmentCounts"):value.path("counts");
                         if(counts.isObject())for(var entry:Map.of("ACCEPTED","accepted","PENDING","pending","QUARANTINED","quarantined").entrySet()){
                             if(!counts.has(entry.getKey()))metrics.put(entry.getValue(),0);else number(counts,entry.getKey(),metrics,entry.getValue());
@@ -85,6 +87,21 @@ public class FormalTrainingService {
         }catch(Exception error){throw new ApiException(503,"FORMAL_PROGRESS_UNAVAILABLE","正式训练进度配置暂不可读取");}
     }
 
+    private static void imageBreakdowns(ObjectMapper json,ObjectNode item,JsonNode value){
+        var transformations=item.putArray("imageTransforms");
+        for(String kind:List.of("original","resize","jpeg","crop","text_overlay","watermark","tint")){
+            var source=value.path("byTransformation").path(kind);if(!source.isObject())continue;
+            var row=json.createObjectNode().put("transformation",kind);
+            copyScalars(source,row,Set.of("queries","baselineAccepted","enhancedAccepted","scopeCorrect","planned","pending","failedQueries"));
+            transformations.add(row);
+        }
+        var reasons=item.putArray("imageReasons");
+        for(String reason:List.of("EXECUTION_FAILURE","SOURCE_UNAVAILABLE","CANDIDATE_BUDGET","NOT_RECALLED","LOW_TEXTURE","TOO_FEW_UNIQUE_MATCHES","DEGENERATE_GEOMETRY","WEAK_GEOMETRY","INSUFFICIENT_SPATIAL_SUPPORT","WRONG_SCOPE","UNRESOLVED")){
+            var source=value.path("reasonCounts");if(!source.has(reason))continue;
+            var row=json.createObjectNode().put("reason",reason);number(source,reason,row,"queries");
+            if(row.has("queries"))reasons.add(row);
+        }
+    }
     private static String state(String value){return value.matches("[A-Z][A-Z0-9_]{0,119}")?value:"OBSERVED";}
     private static JsonNode readJson(ObjectMapper json,Path path)throws Exception{
         if(Files.size(path)>JSON_BYTES)throw new IllegalArgumentException();

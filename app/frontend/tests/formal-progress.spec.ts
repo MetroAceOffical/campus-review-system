@@ -40,8 +40,13 @@ test('refreshes real counters, leaves pending model curves empty and stops polli
     expect(grammarChart.props('option').series[0].data).toEqual([300, 0, 80])
     const fields = wrapper.findAllComponents({ name: 'ExperimentChart' }).find(c => c.props('title') === '图文字段开发诊断')!
     expect(fields.props('option').series[0].data).toEqual([77, 150])
+    response.stages.push({ key: 'image_analysis', title: '图片错误归档', state: 'RUNNING_IMAGE_ERROR_ANALYSIS', availability: 'AVAILABLE', metrics: { processed: 10, total: 1064, pendingQueries: 1054, enhancedGainCount: 2, enhancedRegressionCount: 1 }, latest: {}, history: [], imageTransforms: [{ transformation: 'crop', queries: 10, baselineAccepted: 6, enhancedAccepted: 8, scopeCorrect: 8, pending: 142 }], imageReasons: [{ reason: 'INSUFFICIENT_SPATIAL_SUPPORT', queries: 2 }] })
+    await vi.advanceTimersByTimeAsync(5000); await flushPromises()
+    const transformations = wrapper.findAllComponents({ name: 'ExperimentChart' }).find(c => c.props('title') === '各图片变换正确来源检出')!
+    expect(transformations.props('option').series[0].data).toEqual([6])
+    expect(transformations.props('option').series[1].data).toEqual([8])
     wrapper.unmount()
     await vi.advanceTimersByTimeAsync(10000)
-    expect(api.formalProgress).toHaveBeenCalledTimes(4)
+    expect(api.formalProgress).toHaveBeenCalledTimes(5)
   } finally { if (wrapper.exists()) wrapper.unmount() }
 })
