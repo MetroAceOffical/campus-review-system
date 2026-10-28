@@ -1,0 +1,95 @@
+{
+  "stage": "role-home-and-system-management",
+  "date": "2026-10-28",
+  "status": "feature_integrated_core_http_verified",
+  "home": {
+    "loginDestination": "/home for all three roles",
+    "memberScope": "active member departments only; no dataset/model/task statistics",
+    "staffScope": "school-wide statistics; creator workbench and reviewer/admin task destinations follow roles",
+    "realData": [
+      "manuscript totals and status distribution",
+      "pending/published/check totals",
+      "staff dataset/model/active ML task totals",
+      "14-day actual submission and ML task creation series",
+      "recent manuscripts or pending review and ML runs"
+    ],
+    "refreshSeconds": 10,
+    "features": [
+      "literal reuse",
+      "semantic rewrite",
+      "image reuse",
+      "OCR",
+      "grammar",
+      "image-text"
+    ],
+    "plannedOnly": [
+      "external fact verification"
+    ],
+    "charts": [
+      "line with hover/legend/dataZoom/restore",
+      "status bar with hover/restore"
+    ],
+    "chartImageExport": false
+  },
+  "system": {
+    "roles": [
+      "ADMIN"
+    ],
+    "userOperations": [
+      "search/role/enabled filters/pagination",
+      "create with encoded initial password",
+      "edit display name/role/departments",
+      "enable/disable"
+    ],
+    "departmentOperations": [
+      "search/pagination",
+      "create/rename",
+      "enable/disable",
+      "member/manuscript counts"
+    ],
+    "historyPolicy": "disable rather than hard delete; existing audit and business history preserved",
+    "liveAuthorization": {
+      "roleChangeImmediate": true,
+      "disableImmediate": true
+    },
+    "protections": {
+      "selfProtection": true,
+      "lastEnabledAdmin": "serialized administrator row locks and last-admin guard",
+      "runningDepartmentProtected": true
+    },
+    "runtime": [
+      "data/training, manuscript checks and formal detection task union with search/state/pagination",
+      "actual Java/MySQL/detector/OCR status; diagnostic endpoint does not start/stop services"
+    ],
+    "audit": "operation_log; filters/pagination; initial passwords and password hashes excluded",
+    "passwordReset": "not provided; requires separate session-revocation design"
+  },
+  "verification": {
+    "frontendTypeAndBuild": "PASS",
+    "backendCompileAndPackage": "PASS",
+    "roleScope": true,
+    "systemCrudAndAccess": "PASS",
+    "auditNoSecret": true,
+    "runtimeTasksAndDiagnostics": true,
+    "coreFixture": "new account and department disabled after verification; existing accounts/articles unchanged",
+    "initialFailure": "audit placeholder mismatch; transaction rolled back; fixed and same core flow passed",
+    "broadRegression": "not run per user instruction",
+    "visualKeyboardQA": "pending; browser automation unavailable in previous stage, no full visual acceptance claim"
+  },
+  "backgroundGeneration": {
+    "oldRunId": "5411f28b-36be-4413-b768-cb2979fa29ee",
+    "newRunId": "7a2bd8eb-b0c0-42c8-85a4-4bed5972af9f",
+    "settledPreserved": 524,
+    "windows": 1394,
+    "originals": 217,
+    "parametersUnchanged": true,
+    "status": "RUNNING"
+  },
+  "style": "existing square corners; no added dependencies; no chart export",
+  "remaining": [
+    "formal model release/rollback and reference dataset import integration",
+    "formal corpus extraction correction, campus BGE/M3 training and final evaluation",
+    "grammar/image-text calibration and independent evaluation",
+    "whole-system visual/accessibility/regression acceptance and report"
+  ]
+}

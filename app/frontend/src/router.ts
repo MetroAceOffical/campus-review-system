@@ -9,6 +9,8 @@ export const router = createRouter({
   routes: [
     { path: '/login', component: LoginView },
     { path: '/', component: AppLayout, children: [
+      { path: 'home', component: () => import('./views/HomeView.vue'), meta: { title: '首页' } },
+      { path: 'system', component: () => import('./views/SystemView.vue'), meta: { title: '系统管理', role: 'ADMIN' } },
       { path: 'datasets', component: () => import('./views/DatasetView.vue'), meta: { title: '数据中心', roles: ['REVIEWER', 'ADMIN'] } },
       { path: 'training', component: () => import('./views/TrainingView.vue'), meta: { title: '模型训练', roles: ['REVIEWER', 'ADMIN'] } },
       { path: 'models', component: () => import('./views/ModelView.vue'), meta: { title: '模型管理与预测', roles: ['REVIEWER', 'ADMIN'] } },

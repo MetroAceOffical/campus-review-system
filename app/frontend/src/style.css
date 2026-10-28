@@ -18,7 +18,7 @@ h2 { font-size: 17px; font-weight: 600; margin: 0 0 12px; }
 .sidebar { width: 190px; flex-shrink: 0; padding: 16px 10px; border-right: 1px solid var(--line); background: var(--canvas); }
 .organization-label { color: var(--muted); font-size: 12px; padding: 0 10px 14px; }
 nav { display: grid; gap: 4px; } nav a { display: block; padding: 11px 12px; text-decoration: none; color: inherit; border-left: 3px solid transparent; }
-nav a.router-link-active { color: var(--el-color-primary); border-color: var(--el-color-primary); background: color-mix(in srgb, var(--el-color-primary) 9%, transparent); font-weight: 600; }
+nav a.router-link-active,nav a.workspace-active { color: var(--el-color-primary); border-color: var(--el-color-primary); background: color-mix(in srgb, var(--el-color-primary) 9%, transparent); font-weight: 600; }
 .page-content { flex: 1; min-width: 0; padding: 18px 20px; }
 .panel { background: var(--canvas); border: 1px solid var(--line); padding: 14px; margin-bottom: 12px; }
 .login-page { min-height: 100vh; display: grid; place-items: center; padding: 20px; }

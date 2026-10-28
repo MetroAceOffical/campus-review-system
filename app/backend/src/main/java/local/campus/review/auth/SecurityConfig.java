@@ -44,7 +44,7 @@ public class SecurityConfig {
                     try { var role=current.require(authentication.get()).role();return new AuthorizationDecision(role==CurrentUser.Role.REVIEWER || role==CurrentUser.Role.ADMIN); }
                     catch(ApiException e) { return new AuthorizationDecision(false); }
                 })
-                .requestMatchers("/api/experiments/**","/api/references/**").access((authentication,context) -> {
+                .requestMatchers("/api/system/**","/api/experiments/**","/api/references/**").access((authentication,context) -> {
                     try { return new AuthorizationDecision(current.require(authentication.get()).role()==CurrentUser.Role.ADMIN); }
                     catch(ApiException e) { return new AuthorizationDecision(false); }
                 })
