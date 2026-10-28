@@ -2,7 +2,7 @@
 
 此包独立于线上审核模型。数据部门字段只记录材料来源，Web归属必须由服务端账号权限决定。
 
-首阶段支持NEWS原始新闻与PAIRS标签句对，CSV/JSONL、UTF-8/BOM、中文列名/显式映射、最多50MiB/100000条。质量报告统计缺失、长度、来源、日期、类别、重复和冲突；清洗生成新版本，保留来源和旧分区，冲突/坏行隔离。近重复/事件分组和模型训练属于后续步骤，当前版本不会执行它们。
+数据中心支持NEWS原始新闻与PAIRS标签句对，CSV/JSONL、UTF-8/BOM、中文列名/显式映射、最多50MiB/100000条。质量报告统计缺失、长度、来源、日期、类别、重复和冲突；清洗生成新版本，保留来源和旧分区，冲突/坏行隔离。
 
 项目根目录CMD示例：
 
@@ -20,3 +20,19 @@ validation\text\env\python.exe -B app\scripts\workbench.py clean --input runtime
 Java通过`--config-file`传递UTF-8任务配置，避免Windows命令行破坏中文JSON引号。配置键仅mapping/options/internalVersion；后者由服务端依据输入版本阶段设置。
 
 核验：`set PYTHONPATH=app\python`后运行`validation\text\env\python.exe -B -m unittest discover -s app\python\tests -p test_workbench_datasets.py`。
+
+## 可选模型工作台
+
+`preparation.py`按来源、显式事件/分组和相同句子建立连通分组，整组划分；旧独立分区保持，全train输入可在原train域内生成新划分。NEWS保存原作分组及带范围的待标注段落池，PAIRS在三个分区均有两类时允许训练。它不把随机不同新闻直接标为负例。
+
+`training.py`提供LR/SVM/RF/CNN/BiLSTM/BERT参数化训练、保存重载、独立测试评价及单条/批量预测。只读复用冻结实验中的纯结构/特征函数，预处理只拟合训练集；验证选择最佳轮次，测试在独立评价任务执行。记录SVM间隔分数与其他模型概率分数，保存逐条预测和混淆矩阵/ROC/PR。
+
+Web入口：`#/training`、`#/models`，MEMBER和ADMIN按部门访问；原`#/experiments`历史实验不变。训练完成登记实验模型，不自动切换正式审核。NEWS到有依据标签的生成桥接及正式校园v3仍在后续阶段。
+
+CMD调用同一执行器：
+
+```cmd
+runtime\environments\final-training\Scripts\python.exe -B app\scripts\workbench_training.py --config-file runtime\workbench\computations\任务编号\config.json
+```
+
+配置由服务端固定路径生成，action为PREPARE/TRAIN/EVALUATE/PREDICT；每次新run目录，保留输出和事件。模型计算使用项目文件锁；已知GPU任务或在线检测占用时返回RESOURCE_BUSY，Web队列等待。神经训练保存最后完整checkpoint，当前界面提供复制参数重跑，尚未提供续训按钮。

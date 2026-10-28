@@ -1,0 +1,82 @@
+{
+  "stage": "selectable-model-workbench",
+  "implemented": [
+    "grouped immutable partitions",
+    "six parameterized training families",
+    "persistent compute queue and actual events",
+    "model registry",
+    "copy parameters into new run",
+    "independent test evaluation",
+    "single and batch prediction",
+    "model rename/archive/restore"
+  ],
+  "realWebRun": {
+    "source": "PAWS-X public train only",
+    "inputRows": 49401,
+    "cleanRows": 44865,
+    "groups": 10161,
+    "trainRows": 35891,
+    "validationRows": 4487,
+    "testRows": 4487,
+    "family": "lr",
+    "reloadMaxDifference": 0.0,
+    "testMacroF1": 0.7065707091268996,
+    "testRocAuc": 0.7763202882936554,
+    "modelRegistered": true
+  },
+  "newsPreparation": {
+    "inputRows": 3021,
+    "groups": 2954,
+    "segments": 75078,
+    "trainReady": false,
+    "requiresLabels": true
+  },
+  "sixFamilyCoreChecks": {
+    "lr": {
+      "trainRows": 96,
+      "testRows": 12,
+      "reloadDifference": 0.0
+    },
+    "svm": {
+      "trainRows": 96,
+      "testRows": 12,
+      "reloadDifference": 0.0
+    },
+    "rf": {
+      "trainRows": 96,
+      "testRows": 12,
+      "reloadDifference": 0.0
+    },
+    "cnn": {
+      "trainRows": 96,
+      "testRows": 12,
+      "reloadDifference": 0.0
+    },
+    "bilstm": {
+      "trainRows": 96,
+      "testRows": 12,
+      "reloadDifference": 0.0
+    },
+    "bert": {
+      "trainRows": 96,
+      "testRows": 12,
+      "reloadDifference": 0.0
+    }
+  },
+  "sixFamilyCheckPurpose": "small engineering execution check, separate from the real web run and formal campus training",
+  "verification": [
+    "frontend typecheck and build",
+    "backend package",
+    "real HTTP audit-clean-prepare-train-evaluate-predict",
+    "department model list and run isolation",
+    "browser parameter refill/model registry/metric charts/square corners/no chart export"
+  ],
+  "notCompleted": [
+    "NEWS to supported labelled pairs web bridge",
+    "formal campus BGE/M3 training and final evaluation",
+    "resume UI",
+    "shared manuscript/citation",
+    "grammar and image-text integration",
+    "whole system final regression"
+  ]
+}

@@ -63,7 +63,7 @@ async function select(id: string, preferredVersion?: string) {
   stop(); const token = ++generation; loading.value = true; error.value = ''
   try {
     const result = await api.dataset(id); if (!alive || token !== generation) return
-    detail.value = result; currentRun.value = result.runs[0] ?? null
+    detail.value = result; currentRun.value = result.runs.find(run => ['AUDIT', 'CLEAN'].includes(run.action)) ?? null
     const candidates = [preferredVersion, currentRun.value?.status === 'COMPLETED' ? currentRun.value?.outputVersionId : undefined, currentRun.value?.inputVersionId]
     inputVersion.value = candidates.find(id => result.versions.some(version => version.versionId === id && version.status === 'READY')) ?? result.versions.find(version => version.status === 'READY')?.versionId ?? ''
     events.value = []
@@ -131,7 +131,7 @@ onMounted(initialize); onBeforeUnmount(() => { alive = false; generation++; stop
       <el-pagination small layout="prev, pager, next" :page-size="12" :total="total" v-model:current-page="page" @current-change="initialize" />
     </section>
     <section v-if="detail" class="dataset-detail">
-      <div class="section-heading"><div><h2>{{ detail.name }}</h2><span class="muted">{{ detail.kind === 'NEWS' ? '原始新闻' : '标签句对' }} · {{ detail.versions.length }}个版本</span></div><div><el-button @click="editName">重命名</el-button><el-button :disabled="!!active" @click="archive">{{ detail.archived ? '恢复' : '归档' }}</el-button></div></div>
+      <div class="section-heading"><div><h2>{{ detail.name }}</h2><span class="muted">{{ detail.kind === 'NEWS' ? '原始新闻' : '标签句对' }} · {{ detail.versions.length }}个版本</span></div><div><RouterLink v-if="cleanVersion" :to="`/training?dataset=${detail.datasetId}&version=${cleanVersion.versionId}`">准备与训练</RouterLink><el-button @click="editName">重命名</el-button><el-button :disabled="!!active" @click="archive">{{ detail.archived ? '恢复' : '归档' }}</el-button></div></div>
       <div class="version-selector"><label for="dataset-version">查看与处理版本</label><select id="dataset-version" v-model="inputVersion" aria-label="输入版本" @change="changeVersion"><option v-for="version in detail.versions.filter(v => v.status === 'READY')" :key="version.versionId" :value="version.versionId">{{ version.stage === 'RAW' ? '原始文件' : '清洗版本' }} · {{ version.versionId.slice(0, 8) }}</option></select></div>
       <div v-if="audit" class="dataset-stats"><div><span>总记录</span><el-statistic :value="audit.totalRows" /></div><div class="positive"><span>结构有效</span><el-statistic :value="audit.validRows" /></div><div class="attention"><span>待处理记录</span><el-statistic :value="audit.invalidRows" /></div><div><span>精确重复</span><el-statistic :value="audit.duplicateRows" /></div></div>
       <div v-if="currentRun" class="run-status" aria-live="polite"><div class="section-heading"><strong>{{ currentRun.action === 'AUDIT' ? '数据质量评估' : '数据清洗' }}</strong><el-tag :type="currentRun.status === 'FAILED' ? 'danger' : currentRun.status === 'COMPLETED' ? 'success' : 'info'">{{ statusName[currentRun.status] ?? currentRun.status }}</el-tag></div><el-progress v-if="latestProgress" :percentage="percent" /><p v-if="currentRun.error" class="error-text">{{ currentRun.error }}</p><el-button v-if="active" @click="cancelCurrent">取消任务</el-button></div>

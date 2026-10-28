@@ -1,0 +1,26 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import type { ComputeEvent, ComputeRun } from '../../api/training'
+import { actionNames, stateNames, terminal } from '../../api/training'
+import ExperimentChart from '../experiments/ExperimentChart.vue'
+const props = defineProps<{ run: ComputeRun; events: ComputeEvent[] }>()
+defineEmits<{ cancel: [] }>()
+const latest = computed(() => [...props.events].reverse().find(event => event.data.stage !== 'HEARTBEAT')?.data)
+const progress = computed(() => latest.value?.total ? Math.round((latest.value.processed ?? 0) / latest.value.total * 100) : null)
+const curve = computed(() => props.events.filter(e => e.data.loss !== undefined && e.data.stage === 'TRAINING'))
+const epochs = computed(() => props.events.filter(e => e.data.stage === 'EPOCH' || (e.data.trees !== undefined && e.data.validation)))
+const base = { grid: { left: 55, right: 22, top: 45, bottom: 48 }, dataZoom: [{ type: 'inside' }, { type: 'slider', height: 12, bottom: 4 }], aria: { enabled: true }, tooltip: { trigger: 'axis', borderRadius: 0 } }
+const loss = computed(() => ({ ...base, xAxis: { type: 'category', data: curve.value.map(e => `${e.data.epoch}:${e.data.step}`) }, yAxis: { type: 'value', name: 'Loss' }, series: [{ name: '训练损失', type: 'line', showSymbol: false, data: curve.value.map(e => e.data.loss) }] }))
+const metrics = computed(() => ({ ...base, legend: { data: ['Macro-F1', 'Precision', 'Recall'] }, xAxis: { type: 'category', data: epochs.value.map(e => e.data.epoch ?? e.data.trees) }, yAxis: { type: 'value', min: 0, max: 1 }, series: [['Macro-F1', 'macro_f1'], ['Precision', 'precision'], ['Recall', 'recall']].map(([name, key]) => ({ name, type: 'line', data: epochs.value.map(e => e.data.validation?.[key as keyof NonNullable<ComputeEvent['data']['validation']>]) })) }))
+const rate = computed(() => ({ ...base, xAxis: { type: 'category', data: curve.value.map(e => `${e.data.epoch}:${e.data.step}`) }, yAxis: { type: 'value', name: '学习率' }, series: [{ name: '学习率', type: 'line', showSymbol: false, data: curve.value.map(e => e.data.learningRate) }] }))
+</script>
+<template>
+  <section class="work-panel" aria-live="polite"><div class="work-heading"><div><h2>{{ run.options.name || actionNames[run.action] }}</h2><span class="muted">{{ actionNames[run.action] }} · {{ run.runId.slice(0, 8) }}</span></div><el-tag>{{ stateNames[run.status] || run.status }}</el-tag></div>
+    <div class="work-stats"><div><span>当前阶段</span><strong class="stage-value">{{ stateNames[latest?.stage || run.status] || latest?.stage }}</strong></div><div><span>已处理 / 总量</span><strong>{{ latest?.processed?.toLocaleString() ?? '—' }} <small>/ {{ latest?.total?.toLocaleString() ?? '—' }}</small></strong></div><div><span>轮数</span><strong>{{ latest?.epoch ?? '—' }} <small v-if="latest?.epochs">/ {{ latest.epochs }}</small></strong></div></div>
+    <el-progress v-if="progress !== null" :percentage="Math.min(100, progress)" />
+    <p v-if="run.error" class="work-error" role="alert">{{ run.error }}</p><p v-if="latest?.message">{{ latest.message }}</p>
+    <el-button v-if="!terminal(run.status)" @click="$emit('cancel')">取消任务</el-button>
+    <div class="experiment-grid"><ExperimentChart v-if="curve.length" title="训练损失" :option="loss as any" /><ExperimentChart v-if="epochs.length" title="验证指标" :option="metrics as any" /><ExperimentChart v-if="curve.length" title="学习率" :option="rate as any" /></div>
+    <details><summary>阶段日志（最近{{ events.length }}条）</summary><ol class="work-events"><li v-for="event in events.slice(-60)" :key="event.sequence">{{ stateNames[event.data.stage] || event.data.stage }} <span v-if="event.data.processed !== undefined">{{ event.data.processed }} / {{ event.data.total }}</span><span v-if="event.data.loss !== undefined"> · Loss {{ event.data.loss.toFixed(5) }}</span><span v-if="event.data.message"> · {{ event.data.message }}</span></li></ol></details>
+  </section>
+</template>

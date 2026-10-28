@@ -10,6 +10,8 @@ export const router = createRouter({
     { path: '/login', component: LoginView },
     { path: '/', component: AppLayout, children: [
       { path: 'datasets', component: () => import('./views/DatasetView.vue'), meta: { title: '数据中心', roles: ['MEMBER', 'ADMIN'] } },
+      { path: 'training', component: () => import('./views/TrainingView.vue'), meta: { title: '模型训练', roles: ['MEMBER', 'ADMIN'] } },
+      { path: 'models', component: () => import('./views/ModelView.vue'), meta: { title: '模型管理与预测', roles: ['MEMBER', 'ADMIN'] } },
       { path: 'manuscripts', component: () => import('./views/ManuscriptListView.vue'), meta: { title: '组织稿件', role: 'MEMBER' } },
       { path: 'manuscripts/:id/history', component: () => import('./views/SubmissionHistoryView.vue'), meta: { title: '版本与处理状态', role: 'MEMBER' } },
       { path: 'manuscripts/new', name: 'new-manuscript', component: EditorView, meta: { title: '编辑稿件', role: 'MEMBER' } },

@@ -119,5 +119,5 @@ public class WorkbenchWorker {
             }
         });
     }
-    @PreDestroy public void close(){ready=false;data.processes.values().forEach(Process::destroyForcibly);executor.shutdownNow();watchdog.shutdownNow();}
+    @PreDestroy public void close(){ready=false;data.processes.values().forEach(DatasetService::stopProcess);executor.shutdownNow();watchdog.shutdownNow();}
 }

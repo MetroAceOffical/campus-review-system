@@ -139,8 +139,9 @@ public class DatasetService {
             if(db.update("UPDATE ml_run SET status='CANCELLED',finished_at=UTC_TIMESTAMP(3) WHERE id=? AND status IN ('QUEUED','RUNNING')",id)==1){
                 db.update("UPDATE ml_dataset_version v JOIN ml_run r ON r.output_version_id=v.id SET v.status='CANCELLED' WHERE r.id=?",id);event(id,Map.of("stage","CANCELLED"));
             }
-        });var process=processes.get(id);if(process!=null)process.destroyForcibly();return run(user,id);
+        });var process=processes.get(id);if(process!=null)stopProcess(process);return run(user,id);
     }
+    static void stopProcess(Process process){process.descendants().forEach(ProcessHandle::destroyForcibly);process.destroyForcibly();}
     public Path download(CurrentUser user,String id,String versionId,String artifact){
         dataset(user,id);var version=version(id,versionId);
         Set<String> allowed=Set.of("corpus.jsonl","manifest.json","audit.json","cleaning.json","quarantine.jsonl","changes.jsonl","events.jsonl");
