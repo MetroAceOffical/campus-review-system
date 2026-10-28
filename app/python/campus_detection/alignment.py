@@ -90,13 +90,14 @@ def schedule_pairs(query_blocks,hits_by_query,tokenizer,max_pairs=2048,sources_p
             'scope':'Planned pairs only. Checked regions and evaluated pair counts must come from actual successful model calls. No lexical score floor creates or rejects correspondence truth.'}
 
 
-def evaluate_pairs(plan,score_pair,model_config_id):
+def evaluate_pairs(plan,score_pair,model_config_id,*,score_type='CONTENT_CORRESPONDENCE_SCORE'):
     """Run the supplied task-model callback; retain failures outside evidence.
 
-    The callback returns a sigmoid content-correspondence score. Its caller must
-    load the verified model/adapter and bind model_config_id; a cosine retrieval
-    score is not a substitute. This function does not claim quality acceptance.
+    The caller binds the verified classifier and its explicit score type.
+    Offline BERT/M3 controls retain their own score types; retrieval cosine
+    cannot substitute for a classifier. This function does not accept quality.
     """
+    if score_type not in {'CONTENT_CORRESPONDENCE_SCORE','LEGACY_SEMANTIC_SCORE','PRETRAINED_RELEVANCE_SCORE'}:raise ValueError('Require an explicit trained-head score type, not retrieval cosine')
     if not isinstance(model_config_id,str) or not model_config_id.strip():raise ValueError('Missing task-model configuration identity')
     if plan['coveragePlan'] not in {'COMPLETE','PARTIAL'} or plan['scheduledPairCount']!=len(plan['pairs']):raise ValueError('Invalid alignment plan')
     evaluated=[];failures=[]
@@ -113,8 +114,9 @@ def evaluate_pairs(plan,score_pair,model_config_id):
             continue
         identity={key:pair[key] for key in ['queryStart','queryEnd','sourceRevisionId','sourceKey','sourceStart','sourceEnd','queryText','sourceText']}
         identity['modelConfigId']=model_config_id
+        identity['scoreType']=score_type
         evidence_id='alignment-'+hashlib.sha256(json.dumps(identity,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()).hexdigest()
-        evaluated.append({**pair,'score':score,'scoreType':'CONTENT_CORRESPONDENCE_SCORE',
+        evaluated.append({**pair,'score':score,'scoreType':score_type,
                           'modelConfigId':model_config_id,'evidenceId':evidence_id})
     regions=[]
     for start,end in sorted({(row['queryStart'],row['queryEnd']) for row in evaluated}):

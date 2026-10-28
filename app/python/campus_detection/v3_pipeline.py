@@ -67,7 +67,10 @@ def configuration_for(index,reranker,policy=None):
                                       [('retrieval',retrieval),('alignment',alignment),('aggregation',aggregation)]},
                    'pipelineAlgorithmSha256':retrieval._sha(Path(__file__))}
     config_id='v3-'+retrieval._digest(configuration)
-    return configuration,config_id,{'modelConfigId':config_id,'pairScoreThreshold':policy['pairScoreThreshold']}
+    features={'modelConfigId':config_id,'pairScoreThreshold':policy['pairScoreThreshold']}
+    score_type=reranker['configuration'].get('scoreType','CONTENT_CORRESPONDENCE_SCORE')
+    if score_type!='CONTENT_CORRESPONDENCE_SCORE':features['pairScoreType']=score_type
+    return configuration,config_id,features
 
 
 def analyze_correspondence(text,index,documents,retriever,reranker,*,literal_hits=(),exclude_manuscript_id=None,exclude_source_revision_ids=(),policy=None,calibrator=None,thresholds=None):
@@ -101,7 +104,7 @@ def analyze_correspondence(text,index,documents,retriever,reranker,*,literal_hit
                                 allowed_source_revision_ids={row['sourceRevisionId'] for row in pool},distinct_sources=True)
     plan=alignment.schedule_pairs(query_blocks,hits,reranker['tokenizer'],
                                   max_pairs=policy['pairBudget'],sources_per_query=policy['sourcesPerBlock'],max_joint=policy['jointTokens'],source_contexts=fields)
-    executed=alignment.evaluate_pairs(plan,reranker['scorePair'],reranker['configuration']['configId'])
+    executed=alignment.evaluate_pairs(plan,reranker['scorePair'],reranker['configuration']['configId'],score_type=reranker['configuration'].get('scoreType','CONTENT_CORRESPONDENCE_SCORE'))
     query_templates=_template_intervals(text,templates)
     source_templates={revision+':'+key:_template_intervals(context['text'],templates) for (revision,key),context in fields.items() if revision+':'+key in source_lengths}
     summary=aggregation.summarize_sources(executed['pairs'],len(text),source_lengths,feature_config,query_templates,source_templates)

@@ -55,6 +55,8 @@ def _length(values):return sum(end-start for start,end in values)
 def summarize_sources(pairs,query_length,source_lengths,feature_config,query_templates=(),source_templates=None):
     if query_length<1 or any(length<1 for length in source_lengths.values()):raise ValueError('Invalid query/source lengths')
     threshold=float(feature_config['pairScoreThreshold'])
+    score_type=feature_config.get('pairScoreType','CONTENT_CORRESPONDENCE_SCORE')
+    if score_type not in {'CONTENT_CORRESPONDENCE_SCORE','LEGACY_SEMANTIC_SCORE','PRETRAINED_RELEVANCE_SCORE'}:raise ValueError('Unsupported reranker score type')
     if not 0<=threshold<=1:raise ValueError('Invalid correspondence score threshold')
     query_templates=_intervals(query_templates,query_length);source_templates=source_templates or {};grouped=defaultdict(dict);identities={}
     for row in pairs:
@@ -66,7 +68,7 @@ def summarize_sources(pairs,query_length,source_lengths,feature_config,query_tem
         _intervals([(row['queryStart'],row['queryEnd'])],query_length)
         _intervals([(row['sourceStart'],row['sourceEnd'])],source_lengths[key])
         score=float(row['score'])
-        if row.get('scoreType')!='CONTENT_CORRESPONDENCE_SCORE' or not math.isfinite(score) or not 0<=score<=1:raise ValueError('Require a finite task-correspondence score, not an auxiliary cosine/logit')
+        if row.get('scoreType')!=score_type or not math.isfinite(score) or not 0<=score<=1:raise ValueError('Require the bound reranker score type, not an auxiliary cosine/logit')
         identity=(row['queryStart'],row['queryEnd'],row['sourceStart'],row['sourceEnd'])
         grouped[key][identity]=max(grouped[key].get(identity,0.),score)
     sources=[];all_query=[]

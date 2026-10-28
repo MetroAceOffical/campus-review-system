@@ -1,0 +1,295 @@
+{
+  "stage": "offline-ablation-models-and-typed-export-integration",
+  "date": "2026-10-28",
+  "snapshotAt": "2026-10-28T05:57:12.076278+00:00",
+  "state": "CODE_AND_BASE_BUNDLE_COMPLETE_FORMAL_COMPARISONS_PENDING",
+  "implementedVariants": [
+    "frozen-v2",
+    "untrained-dense",
+    "trained-dense-unadapted-reranker",
+    "full-v3",
+    "semantic-disabled"
+  ],
+  "newVariants": [
+    "untrained-dense",
+    "trained-dense-unadapted-reranker"
+  ],
+  "actualRegisteredVariant": "untrained-dense",
+  "actualRegisteredBundleId": "ablation-bundle-d5c2f979edd52b3c45874e8031889578dca1562d9a3ce69806528ba6dd442e9c",
+  "referenceSources": 6311,
+  "trainedDenseBundleCreated": false,
+  "unfinishedCampusRunRejected": true,
+  "ablationServiceLoadingRejected": true,
+  "scoreTypes": {
+    "frozenBert": "LEGACY_SEMANTIC_SCORE",
+    "officialM3": "PRETRAINED_RELEVANCE_SCORE",
+    "campusTaskM3": "CONTENT_CORRESPONDENCE_SCORE"
+  },
+  "sharedWorkflow": [
+    "index",
+    "calibration-features",
+    "calibrate",
+    "predict",
+    "freeze-point",
+    "evaluate_final"
+  ],
+  "guards": {
+    "explicitAblationFlagRequired": true,
+    "calibrationQueries": 200,
+    "developmentQueries": 400,
+    "finalQueries": 1200,
+    "homeFinalRatio": 0.6,
+    "fullTruthStillRequired": true,
+    "sameFrozenDevelopmentMethodRequired": true
+  },
+  "processing": {
+    "retrievalBlockTokens": 192,
+    "overlapTokens": 48,
+    "jointTokens": 512,
+    "pairBudget": 2048,
+    "truncation": false,
+    "sameLiteralBranchPreserved": true,
+    "oldV2ContextAndAlignmentKeptSeparately": true,
+    "oldV2BertPairMaxTokens": 128
+  },
+  "actualEncoderCheck": {
+    "state": "REAL_CPU_BGE_ENCODING_CHECK_COMPLETE",
+    "variant": "untrained-dense",
+    "queryRows": 3,
+    "sourcePartition": "train",
+    "dimensions": 768,
+    "finite": true,
+    "l2Norms": [
+      0.9999999403953552,
+      1.0,
+      1.0
+    ],
+    "vectorsSha256": "64e0717b11a07f0ceb8d8eb8812214009be7676c2bcf87fe21c8206b4e4c2400",
+    "encoderIdentity": {
+      "weightSha256": "731cf5d88ed555a21ff2f2d9fa4db43b10489173ddd9178db3eecfd7a2bae044",
+      "modelConfigSha256": "6675c035d945dffc89f77a04a254b87cc193a9185a098bb505fe4963b6ddbac1",
+      "tokenizerSha256": "3939b620db45cc29af917d68370dcdd7163a41b36bf781c834e2a390c83dfa5d",
+      "pooling": "CLS",
+      "normalization": "L2",
+      "precision": "FP32",
+      "parameterPrecision": "FP32",
+      "device": "cpu",
+      "maxTokens": 512,
+      "batchSize": 2,
+      "queryPrefix": "",
+      "documentPrefix": "",
+      "algorithmSha256": "94c0cb22428c965c49927b86b97d55ed514726d15a3e28a9a1f6e998b52efb1e"
+    },
+    "elapsedSeconds": 7.163266999999905,
+    "availableBytesBefore": 4131393536,
+    "workingSetBytes": 1040564224,
+    "device": "cpu",
+    "threads": 2,
+    "officialM3AssetsVerified": true,
+    "officialM3ScoreType": "PRETRAINED_RELEVANCE_SCORE",
+    "officialM3NeuralExecution": false,
+    "semanticDetectionGradeProduced": false,
+    "finalQueriesInferred": 0,
+    "qualityAccepted": false,
+    "productActivated": false
+  },
+  "actualFrozenBertCheck": {
+    "state": "REAL_FROZEN_BERT_CPU_CALLBACK_CHECK_COMPLETE",
+    "variant": "untrained-dense",
+    "scoreType": "LEGACY_SEMANTIC_SCORE",
+    "sourcePartition": "train",
+    "pairsExecuted": 3,
+    "scores": [
+      0.2724270224571228,
+      0.2504674792289734,
+      0.25380051136016846
+    ],
+    "oversizeRejectedWithoutTruncation": true,
+    "elapsedSeconds": 9.178621300001396,
+    "workingSetBytes": 1525272576,
+    "device": "cpu",
+    "threads": 2,
+    "configuration": {
+      "schemaVersion": "offline-ablation-head-v1",
+      "assetsSha256": "30b769f48ad98103f0c933e99aada609394b80ccff2ffde46a0f2ed3b9aad8c7",
+      "scoreType": "LEGACY_SEMANTIC_SCORE",
+      "device": "cpu",
+      "precision": "FP32",
+      "parameterPrecision": "FP32",
+      "maxJointTokens": 512,
+      "truncation": false,
+      "algorithmSha256": "6e91edf28ec344ca110414eca9228111b0d80c65d96eca35d8795affe2a84e6e",
+      "configId": "ablation-head-56c9f6608c57816befc03aa49e509da7029aedae2813d0924053eda5117a047d"
+    },
+    "semanticQualityMeasured": false,
+    "finalQueriesInferred": 0,
+    "productActivated": false
+  },
+  "officialM3AssetsVerified": true,
+  "officialM3NeuralExecution": false,
+  "checks": {
+    "syntaxFilesValid": 8,
+    "focusedChecksPassed": 4,
+    "backgroundBoundAlgorithmsUnchanged": 18,
+    "heldoutV2IdentityUnchanged": true,
+    "originalTrainBytesIdentical": true,
+    "fullRegressionRun": false,
+    "defaultTaskScoreTypeChecked": true,
+    "explicitSourceExclusionBeforeTopKChecked": true
+  },
+  "initialTempPermissionFailure": "isolated to sandbox Temp fixture path; focused check uses project runtime temporary directory; no install",
+  "background": {
+    "observedAt": "2026-10-28T05:56:03.758799+00:00",
+    "webRunId": "69ce0f98-93cb-4c63-aedd-840c32b33f34",
+    "webCounts": {
+      "ACCEPTED": 550,
+      "QUARANTINED": 844
+    },
+    "formalMaterial": {
+      "state": "RUNNING_CHILD",
+      "productActivated": false,
+      "qualityAccepted": false,
+      "script": "construct_correspondence.py"
+    },
+    "heldoutConstruction": {
+      "state": "WAITING_CAMPUS_TRAINING_COMPLETION",
+      "neuralTrainingStarted": false,
+      "modelEvaluationStarted": false,
+      "upstreamState": "NOT_STARTED"
+    },
+    "publicAcquisition": {
+      "state": "SOURCE_TEMPORARILY_UNAVAILABLE",
+      "newDownloadedPages": 0,
+      "reusedHistoricalPages": 12,
+      "newCorpusSourcesAudited": 0,
+      "trainingInputsChanged": false,
+      "retryAfterSeconds": 1800
+    },
+    "webSamplePreparation": {
+      "status": "COMPLETED",
+      "sourceKind": "NEWS",
+      "inputRows": 217,
+      "outputRows": 653,
+      "groups": 192,
+      "partitions": {
+        "train": {
+          "rows": 532,
+          "groups": 101,
+          "labels": {
+            "1": 441,
+            "0": 91
+          }
+        },
+        "validation": {
+          "rows": 62,
+          "groups": 13,
+          "labels": {
+            "1": 61,
+            "0": 1
+          }
+        },
+        "test": {
+          "rows": 59,
+          "groups": 16,
+          "labels": {
+            "1": 47,
+            "0": 12
+          }
+        },
+        "calibration": {
+          "rows": 0,
+          "groups": 0,
+          "labels": {}
+        }
+      },
+      "trainReady": true,
+      "selectedOriginals": 217,
+      "segmentCounts": {
+        "ACCEPTED": 550,
+        "QUARANTINED": 844
+      },
+      "labelOrigins": {
+        "controlled_paraphrase": 549,
+        "rule_supported_negative": 104
+      },
+      "skipped": {
+        "SHORT_SEGMENT": 16,
+        "REPEATED_SEGMENT_IN_ARTICLE": 16,
+        "CROSS_PARTITION_SEGMENT": 0,
+        "NO_SUPPORTED_NEGATIVE": 441,
+        "DUPLICATE_PAIR": 6
+      },
+      "artifactsSha256Verified": 6,
+      "formalCampusTraining": false
+    }
+  },
+  "productionTextMethod": "text-v2",
+  "campusBgeM3TrainingComplete": false,
+  "semanticAccuracyImprovementMeasured": false,
+  "formalFiveVariantComparisonComplete": false,
+  "finalQueriesInferred": 0,
+  "productActivated": false,
+  "qualityAccepted": false,
+  "newDependenciesInstalled": false,
+  "serviceRestarted": false,
+  "frontendChanged": false,
+  "chartImageExportAdded": false,
+  "epochsEachUnchanged": 2,
+  "generationOriginalsUnchanged": 3684,
+  "generationSegmentsUnchanged": 16773,
+  "dataScaleReduced": false,
+  "roughWorkEstimate": {
+    "functionalEngineeringPercent": 80,
+    "overallPercentRange": [
+      65,
+      70
+    ],
+    "basis": "scope/workload estimate only, not accuracy or test pass rate"
+  },
+  "estimateHours": {
+    "formalGeneration": [
+      40,
+      80
+    ],
+    "campusBgeM3Training": [
+      4,
+      12
+    ],
+    "heldoutGeneration": [
+      10,
+      20
+    ],
+    "remainingIntegrationAndFocusedQA": [
+      6,
+      12
+    ],
+    "engineeringMayOverlapCompute": true,
+    "publicSourceCompletionKnown": false
+  },
+  "remaining": [
+    "formal generation and actual campus BGE/M3 training/reload",
+    "complete heldout queries, normal truth and home-campus coverage",
+    "real calibration/development/final five-variant comparisons",
+    "current production-bank index/calibration and Web release integration",
+    "independent grammar/image-text evaluation, whole-system QA and reports"
+  ],
+  "formalGenerationFirstRunningObservation": {
+    "state": "GENERATING_TRAIN_MATERIAL",
+    "segmentCounts": {
+      "ACCEPTED": 447,
+      "PENDING": 16322,
+      "QUARANTINED": 4
+    },
+    "selectedOriginals": 3684,
+    "elapsedSeconds": 83.51599999999962,
+    "device": "cuda",
+    "promptVersion": "3",
+    "reusedSegments": 440,
+    "estimatedRemainingSeconds": 123922.5592727267,
+    "semanticCorrectnessCertified": false,
+    "modelLoadSeconds": 9.06199999999808,
+    "hostRssBytes": 1805008896,
+    "cudaPeakAllocatedBytes": 6272871936,
+    "trainingStarted": false
+  }
+}

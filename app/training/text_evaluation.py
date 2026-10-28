@@ -30,7 +30,9 @@ def _supported(pair,prediction):
     if 'scoreType' in pair:
         threshold=prediction.get('pairScoreThreshold',prediction.get('featureConfig',{}).get('pairScoreThreshold'))
         score=pair.get('score')
-        return pair['scoreType'] in {'CONTENT_CORRESPONDENCE_SCORE','LEGACY_SEMANTIC_SCORE'} and isinstance(score,(int,float)) and not isinstance(score,bool) and math.isfinite(score) and isinstance(threshold,(int,float)) and 0<=threshold<=score<=1
+        expected=prediction.get('featureConfig',{}).get('pairScoreType')
+        allowed=({'CONTENT_CORRESPONDENCE_SCORE','LEGACY_SEMANTIC_SCORE'} if expected is None else {expected}&{'CONTENT_CORRESPONDENCE_SCORE','LEGACY_SEMANTIC_SCORE','PRETRAINED_RELEVANCE_SCORE'})
+        return pair['scoreType'] in allowed and isinstance(score,(int,float)) and not isinstance(score,bool) and math.isfinite(score) and isinstance(threshold,(int,float)) and 0<=threshold<=score<=1
     return pair.get('supported') is True
 
 

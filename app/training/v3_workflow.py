@@ -22,9 +22,16 @@ def calibration_identity(package):
 
 
 def implementation():
-    paths=[Path(__file__),ROOT/'app/training/evaluate_final.py',ROOT/'app/training/text_evaluation.py']
+    paths=[Path(__file__),ROOT/'app/training/evaluate_final.py',ROOT/'app/training/text_evaluation.py',ROOT/'app/training/ablation_models.py']
     paths += [ROOT/'app/python/campus_detection'/name for name in ('v3_runtime.py','v3_delivery.py','v3_pipeline.py','text.py','semantic.py','models.py','retrieval.py','retrieval_model.py','task_model.py','alignment.py','aggregation.py')]
     return {p.relative_to(ROOT).as_posix():retrieval._sha(p) for p in paths}
+
+
+def model_runtime(args):
+    if getattr(args,'ablation',False):
+        import ablation_models
+        return ablation_models
+    return runtime
 
 
 def ready_queries(protocol,split,diagnostic=False):
@@ -50,7 +57,8 @@ def predict(args):
     if args.calibration:
         runtime.verify_files(args.calibration);calibration=runtime.read(args.calibration/'calibration.json')
     if args.split!='calibration' and not calibration:raise ValueError('Scored v3 predictions require real fitted calibration')
-    reference_sha=retrieval._sha(protocol/'references.jsonl');bundle=runtime.verify_bundle(args.bundle)
+    loader=model_runtime(args)
+    reference_sha=retrieval._sha(protocol/'references.jsonl');bundle=loader.verify_bundle(args.bundle)
     if bundle['references']['sha256']!=reference_sha:raise ValueError('Model bundle and protocol reference banks differ')
     if args.split=='final' and (not args.development_run or calibration.get('operatingPointFrozen') is not True):raise ValueError('Final needs full development evidence and frozen operating point')
     output=runtime.controlled(args.output)
@@ -59,13 +67,15 @@ def predict(args):
         runtime.verify_files(output)
         raise ValueError('Predictions already frozen; use evaluate_final.py to score the saved export')
     with compute_slot(ROOT/'runtime',args.device=='cuda'):
-        session=runtime.load_bundle(args.bundle,device=args.device,precision='BF16' if args.device=='cuda' else 'FP32',batch_size=args.batch_size)
+        from campus_detection.models import load_models
+        if args.device!='cuda':raise ValueError('Full v2/v3 joint export requires existing CUDA literal-model runtime; CPU index building remains supported')
+        legacy=load_models()
+        options={'device':args.device,'precision':'BF16','batch_size':args.batch_size}
+        if getattr(args,'ablation',False):options['legacy_models']=legacy
+        session=loader.load_bundle(args.bundle,**options)
         index=retrieval.load_dense_index(args.index,session['retriever']['identity'])
         try:
             # Keep the exact existing literal branch and source acceptance policy.
-            from campus_detection.models import load_models
-            if args.device!='cuda':raise ValueError('Full v2/v3 joint export requires existing CUDA literal-model runtime; CPU index building remains supported')
-            legacy=load_models()
             # Legacy indexes use a globally unique sourceKey; v3 indexes use
             # revision+field. Adapt at this boundary without changing either.
             legacy_documents=[{**row,'sourceKey':str(row['sourceRevisionId'])+':'+row.get('sourceKey','BODY')} for row in session['documents']]
@@ -86,8 +96,9 @@ def predict(args):
                 if calibration.get('developmentEvidenceSha256')!=dev_sha or calibration.get('developmentMethodConfigId')!=method:raise ValueError('Working-point freeze belongs to another development run')
             run={'protocolReadySha256':retrieval._sha(protocol/'READY'),'splitQueriesSha256':split_digest(queries),
                 'referenceManifestSha256':reference_sha,'methodConfigId':method,'split':args.split,'diagnosticControls':args.diagnostic_controls,
-                'variant':'full-v3' if calibration else 'candidate-v3-calibration-features','campusRetrieverTrainingComplete':True,
-                'correspondenceTrainingComplete':True,'formalCalibrationFrozen':bool(calibration),
+                'variant':bundle.get('variant','full-v3' if calibration else 'candidate-v3-calibration-features'),
+                'campusRetrieverTrainingComplete':bundle['campusRetrieverTrainingComplete'],
+                'correspondenceTrainingComplete':bundle['correspondenceTrainingComplete'],'formalCalibrationFrozen':bool(calibration),
                 'operatingPointFrozen':bool(calibration and calibration.get('operatingPointFrozen')),
                 'developmentEvidenceSha256':dev_sha,'featureConfig':feature_config,'implementation':implementation(),
                 'calibrationIdentity':calibration_identity(calibration) if calibration else None,
@@ -206,7 +217,9 @@ def main():
     p=argparse.ArgumentParser();sub=p.add_subparsers(dest='action',required=True)
     reg=sub.add_parser('register');reg.add_argument('--retriever-run',type=Path,required=True);reg.add_argument('--correspondence-run',type=Path,required=True);reg.add_argument('--export',type=Path,required=True);reg.add_argument('--references',type=Path,required=True);reg.add_argument('--output',type=Path,required=True)
     index=sub.add_parser('index');index.add_argument('--bundle',type=Path,required=True);index.add_argument('--output',type=Path,required=True);index.add_argument('--device',choices=['cpu','cuda'],default='cuda');index.add_argument('--batch-size',type=int,default=8)
+    index.add_argument('--ablation',action='store_true',help='Explicit offline-only model controls; never enables a service profile')
     pred=sub.add_parser('predict');pred.add_argument('--bundle',type=Path,required=True);pred.add_argument('--index',type=Path,required=True);pred.add_argument('--protocol',type=Path,required=True);pred.add_argument('--output',type=Path,required=True);pred.add_argument('--split',choices=['calibration','dev','final'],required=True);pred.add_argument('--calibration',type=Path);pred.add_argument('--development-run',type=Path);pred.add_argument('--diagnostic-controls',action='store_true');pred.add_argument('--resume',action='store_true');pred.add_argument('--device',choices=['cpu','cuda'],default='cuda');pred.add_argument('--batch-size',type=int,default=8)
+    pred.add_argument('--ablation',action='store_true')
     cal=sub.add_parser('calibrate');cal.add_argument('--protocol',type=Path,required=True);cal.add_argument('--partitions',type=Path,required=True);cal.add_argument('--features',type=Path,required=True);cal.add_argument('--output',type=Path,required=True)
     cal.add_argument('--whole-threshold',type=float,default=.5);cal.add_argument('--local-threshold',type=float,default=.5)
     point=sub.add_parser('freeze-point');point.add_argument('--calibration',type=Path,required=True);point.add_argument('--development-predictions',type=Path,required=True);point.add_argument('--development-run',type=Path,required=True);point.add_argument('--output',type=Path,required=True)
@@ -219,7 +232,7 @@ def main():
         with compute_slot(ROOT/'runtime',args.device=='cuda'):
             # Index construction needs only BGE, not the M3 or old BERT models.
             from campus_detection.retrieval_model import load_retrieval_model
-            bundle=runtime.verify_bundle(args.bundle);descriptor=bundle['retriever'];encoder=load_retrieval_model(descriptor['folder'],expected_hashes=descriptor['files'],device=args.device,precision='BF16' if args.device=='cuda' else 'FP32',batch_size=args.batch_size)
+            bundle=model_runtime(args).verify_bundle(args.bundle);descriptor=bundle['retriever'];encoder=load_retrieval_model(descriptor['folder'],expected_hashes=descriptor['files'],device=args.device,precision='BF16' if args.device=='cuda' else 'FP32',batch_size=args.batch_size)
             retrieval.build_dense_index(list(read_jsonl(Path(bundle['references']['path']))),encoder['tokenizer'],encoder['encode'],args.output,encoder['identity'])
     elif args.action=='predict':predict(args)
     elif args.action=='calibrate':calibrate(args)

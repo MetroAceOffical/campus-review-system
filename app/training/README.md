@@ -1,5 +1,26 @@
 # 期末离线数据与训练
 
+## 10月28日两条模型对照接入（阶段11）
+
+`ablation_models.py`登记两种**离线对照**，不改变正式校园模型包或线上配置：
+
+- `untrained-dense`：已下载的官方原始BGE + 冻结旧BERT。当前真实包为`runtime/experiments/final-training-20261028/ablation-untrained-dense-v1`，绑定6,311参考原稿。BGE支持原始已验证pytorch_model.bin与训练后safetensors，明确选择一种、核对SHA并weights_only加载，不转换或覆盖原始权重。
+- `trained-dense-unadapted-reranker`：完成原规模2epoch并重载的校园BGE + 官方原始M3。正式BGE未完成时明确拒绝登记；公共辅助权重不可冒称校园训练完成，原始M3不能用旧BERT替代。
+
+两条均可通过`v3_workflow.py index/predict --ablation`复用既有执行流。`predict --split calibration`生成完整200查询的真实特征，随后`calibrate`拟合；开发预测必须使用对应校准包，再`freeze-point`绑定完整400开发；最终1,200要求完整真值、本校覆盖和相同工作点。`--ablation`不改变这些门槛，也不使对照包可供生产加载。每条方法需要独立索引/校准/开发/最终输出；参考版本或源码变化后使用新输出，禁止续接旧身份。
+
+```cmd
+runtime\environments\final-training\Scripts\python.exe -B app\training\ablation_models.py --help
+runtime\environments\final-training\Scripts\python.exe -B app\training\v3_workflow.py index --help
+runtime\environments\final-training\Scripts\python.exe -B app\training\v3_workflow.py predict --help
+```
+
+实际登记包已完成，不重复登记同一目录；索引/正式预测待资源和完整评价材料就绪。旧BERT为`LEGACY_SEMANTIC_SCORE`，原始M3为`PRETRAINED_RELEVANCE_SCORE`，校园任务M3为`CONTENT_CORRESPONDENCE_SCORE`；新对齐共用联合512上限、不得截断，旧v2的128输入和对齐政策单独保留。所有分数类型进入方法/校准身份，余弦不替代分类头输出。五组导出代码齐全不等于五组真实成绩已完成。
+
+本阶段实际CPU核验仅3条训练域BGE编码和3对冻结BERT打分，未测改写准确率或最终集；原始M3只核对组件SHA，没有神经执行。原18个后台训练依赖和heldout-generation-v2绑定源码保持不变。
+
+13:56后台接续：217篇Web准备已实际保存653配对，六个工件SHA通过；原正式控制器随后自动启动campus-generation-v4的3,684篇原稿生成。该Web输出不替代正式20,000配对和类别平衡要求，后台生成参数及各2epoch不变。
+
 ## 10月28日留出构造与旧基线导出（阶段10）
 
 当前正式训练仍绑定campus-quality-20261028-v1，**不替换在跑配方**。新增只用于评价的campus-evaluation-partitions-20261028-v2为6,311篇，train文件与原版逐字节相同；新协议为text-evaluation-corrected-20261028-v3，当前仍只有340控制查询，不能称完整1,800条或独立质量已通过。
