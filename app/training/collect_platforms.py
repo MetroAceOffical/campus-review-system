@@ -6,7 +6,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from urllib.robotparser import RobotFileParser
 import requests
-from corpus import extract_article
+from article_extraction import extract_article
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT/'runtime/datasets/campus-final-v1/public-platforms'

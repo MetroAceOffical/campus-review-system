@@ -1,0 +1,190 @@
+{
+  "stage": "corrected-corpus-quality-and-formal-training-preparation",
+  "date": "2026-10-28",
+  "snapshotAt": "2026-10-28T04:15:31.378295+00:00",
+  "state": "CORRECTED_CORPUS_FROZEN_AND_LIVE_MATERIAL_PIPELINE_RUNNING",
+  "corpus": {
+    "rawCandidateRows": 6958,
+    "candidateUniqueBodies": 6303,
+    "acceptedSources": 6281,
+    "quarantinedSources": 22,
+    "sourceCounts": {
+      "train": 3802,
+      "calibration": 430,
+      "dev": 646,
+      "final": 1403
+    },
+    "homeCampusCounts": {
+      "dev": 66,
+      "final": 228,
+      "train": 209,
+      "calibration": 27
+    },
+    "eventGroups": {
+      "train": 3695,
+      "calibration": 418,
+      "dev": 633,
+      "final": 1341
+    },
+    "minimum5000SourcesMet": true
+  },
+  "extractionChanges": {
+    "changedLegacyBodies": 2361,
+    "normalizedBodyChanged": 508,
+    "oldSourcesInNestedParagraphPages": 361
+  },
+  "lineageAudit": {
+    "readyFilesVerified": 13,
+    "oldPartitionsUnchanged": true,
+    "legacySplitLeakCount": 0,
+    "newCrossSplitGroups": 0,
+    "oldSourcesAccountedByAcceptedOrQuarantine": 5042,
+    "oldSourcesExplicitlyExcluded": 1,
+    "unaccountedOldSources": 0,
+    "accepted": 6281,
+    "quarantined": 22,
+    "exclusionReasonCounts": {
+      "INVALID_BODY_OR_TITLE": 139
+    }
+  },
+  "oneOldExplicitExclusion": {
+    "reason": "corrected body only156characters, existing minimum200",
+    "count": 1
+  },
+  "publicTrainingOverlapScan": {
+    "publicBodiesScanned": 301160,
+    "publicCodepointsScanned": 130888292
+  },
+  "publicOverlapRule": "64 normalized codepoint sentinels stride8; guaranteed >=71 contiguous overlap; not semantic-only decontamination",
+  "bootstrap": {
+    "readyFilesVerified": 11,
+    "pairCount": 7678,
+    "classCounts": {
+      "1": 1474,
+      "0": 6204
+    },
+    "allPairsSourceReconstructed": true,
+    "allLabelsEligible": true,
+    "duplicateOrReverseNormalizedPairs": 0,
+    "negativeRulesRechecked": true,
+    "formalScaleAndBalanceReady": false,
+    "neuralTrainingStarted": false
+  },
+  "reuse": {
+    "plannedOriginals": 3684,
+    "plannedSegments": 16773,
+    "reusablePlannedSegments": 440,
+    "remainingGenerationSegments": 16333
+  },
+  "generationAudit": {
+    "generationCandidates": 2981,
+    "strictReusableParagraphs": 892,
+    "unmappableOrAmbiguousGenerationRanges": 289,
+    "duplicateGenerationOutputs": 557,
+    "generationRejectedByCurrentStrictRules": 1243,
+    "generationRejected:INSUFFICIENT_REWORDING": 1241,
+    "generationRejected:REQUIRED_ENTITY_CHANGED": 5,
+    "webSourceSnapshotMismatch": 17,
+    "acceptedGenerationSegments": 892,
+    "shortGeneratedQueries": 120,
+    "copyLikeQuerySlicesExcluded": 204,
+    "unmappableNegativeRanges": 703,
+    "negativeBasisNoLongerSupported": 181,
+    "duplicatePairsExcluded": 1363,
+    "conflictingPairFamiliesQuarantined": 0
+  },
+  "candidateSnapshot": {
+    "processedWindows": 3000,
+    "totalWindows": 18937,
+    "candidateCount": 84978,
+    "labelsCreated": 0,
+    "state": "RUNNING_UNLABELLED_MINING",
+    "maximumDistinctSourcesPerWindow": 30
+  },
+  "materialPipeline": {
+    "state": "WAITING_CORRECTED_CANDIDATES",
+    "recipeSha256": "1e59891189a15b8d1195dc5f3730a737e37506d977758bfce2b55f5fa7e80a81",
+    "sourceIdentityVerified": true,
+    "steps": [
+      "CPU corrected candidate mining already running",
+      "audit every candidate against corrected source ranges/content facts",
+      "wait existing Web shared compute lock without cancellation",
+      "generate all3684selected originals/16773windows, reuse only audited440standard seeds",
+      "assemble unique supported pairs with formal gates",
+      "conditional BGE/M3 training2epochs each then export, no production activation"
+    ],
+    "maximumResourceWaitHours": 48,
+    "recurringAutomation": false
+  },
+  "formalRequirements": {
+    "corpusSources": 5000,
+    "originals": 1200,
+    "queryEvents": 600,
+    "correspondencePairs": 20000,
+    "retrievalGroups": 1000,
+    "bgeEpochs": 2,
+    "m3Epochs": 2,
+    "effectiveBatch": 32
+  },
+  "preflight": {
+    "state": "WAITING_FORMAL_MATERIAL",
+    "productActivated": false,
+    "qualityAccepted": false,
+    "neuralTrainingStarted": false
+  },
+  "backgroundWeb": {
+    "runId": "69ce0f98-93cb-4c63-aedd-840c32b33f34",
+    "inputOriginals": 217,
+    "totalWindows": 1394,
+    "state": "RUNNING",
+    "counts": {
+      "ACCEPTED": 338,
+      "PENDING": 564,
+      "QUARANTINED": 492
+    },
+    "parametersUnchanged": true,
+    "serviceRestarted": false,
+    "snapshotIsCompletedPreparation": false
+  },
+  "checks": {
+    "syntaxFiles": 11,
+    "syntaxValid": true,
+    "focusedTests": 4,
+    "focusedTestsPassed": 4,
+    "fullRegressionRun": false,
+    "newDependenciesInstalled": false
+  },
+  "neuralCampusTrainingStarted": false,
+  "neuralCampusTrainingComplete": false,
+  "qualityAccepted": false,
+  "productionModelChanged": false,
+  "newDependenciesInstalled": false,
+  "frontendChanged": false,
+  "chartImageExportAdded": false,
+  "estimate": {
+    "basis": "existing Web segment last-attempt median about12.9s; retry/length differences remain",
+    "generationHours": [
+      40,
+      80
+    ],
+    "generationBaselineHours": 55,
+    "bgeAndM3HoursProvisional": [
+      4,
+      12
+    ],
+    "parallelIntegrationEvaluationEngineeringHours": [
+      12,
+      24
+    ],
+    "updateAfterActualTrainingThroughput": true,
+    "shrinkForDeadline": false
+  },
+  "remaining": [
+    "full supported materials and generation",
+    "real campus BGE/M3 training and reload",
+    "calibration/development/final query materials including sufficient NCUC heldout coverage",
+    "v3 model/index/report/release integration",
+    "independent grammar/image-text and content quality evaluation",
+    "system-wide final QA, visible delivery task summaries, reports"
+  ]
+}

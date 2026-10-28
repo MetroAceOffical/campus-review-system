@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-28",
+  "scope": "corrected campus formal training, production activation requires separate evaluation",
+  "formalMinimums": {
+    "corpusSources": 5000,
+    "originals": 1200,
+    "queryEvents": 600,
+    "correspondencePairs": 20000,
+    "retrievalGroups": 1000,
+    "bgeEpochs": 2,
+    "m3Epochs": 2,
+    "effectiveBatch": 32
+  },
+  "generation": {
+    "originals": 3684,
+    "segments": 16773,
+    "reusablePlannedSegments": 440,
+    "remainingSegmentsAtSnapshot": 16333,
+    "promptVersion": "3",
+    "variantsPerOriginal": 1,
+    "segmentCharacters": 360
+  },
+  "paths": {
+    "partitions": "runtime/datasets/campus-quality-20261028-v1",
+    "preparation": "runtime/datasets/campus-corrected-preparation-20261028-v1",
+    "candidates": "runtime/datasets/campus-correspondence-candidates-20261028-v3",
+    "negatives": "runtime/datasets/campus-supported-negatives-20261028-v5",
+    "generation": "runtime/experiments/final-training-20261028/campus-generation-v4",
+    "pairs": "runtime/datasets/campus-correspondence-training-20261028-v2",
+    "retrievalData": "runtime/datasets/campus-retrieval-training-20261028-v2",
+    "retrieverRun": "runtime/experiments/final-training-20261028/retriever-campus-v2",
+    "correspondenceRun": "runtime/experiments/final-training-20261028/correspondence-campus-v2",
+    "export": "runtime/models/final/correspondence-campus-v2",
+    "trainingStage": "runtime/experiments/final-training-20261028/campus-training-stage-v2"
+  },
+  "training": {
+    "bge": {
+      "initialWeights": "runtime/experiments/final-training-20261026/retriever-t2-v1",
+      "epochs": 2,
+      "microbatch": 1,
+      "effectiveQueries": 32,
+      "maxTokensPerSide": 512,
+      "explicitNegatives": 4,
+      "learningRate": 2e-05
+    },
+    "m3": {
+      "epochs": 2,
+      "microbatch": 1,
+      "effectivePairs": 32,
+      "maxJointTokens": 512,
+      "loraR": 16,
+      "loraAlpha": 32,
+      "dropout": 0.05,
+      "adapterLearningRate": 0.0001,
+      "headLearningRate": 5e-05,
+      "backboneDtype": "bfloat16",
+      "trainableDtype": "float32"
+    }
+  },
+  "corpusTrainSha256": "d238ba76c76fe455f68cc0ad2a4466117f607f18c8abaa18da623bdb3c5eb70f",
+  "preparationManifestSha256": "dcc83fe19586fdcb00bcc24cefb9c8ca4ab6e67c51d81d81ae9558d3e5f4821c",
+  "formalReadyAtCreation": false,
+  "neuralCampusTrainingStartedAtCreation": false
+}

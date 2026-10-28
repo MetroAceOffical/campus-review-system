@@ -84,6 +84,7 @@ def main():
     parser.add_argument('--campus-correspondence',action='store_true')
     parser.add_argument('--max-tokens',type=int,choices=[256,512],default=256)
     parser.add_argument('--microbatch',type=int,choices=[1,2],default=2)
+    parser.add_argument('--partitions',type=Path,default=ROOT/'runtime/datasets/campus-partitions-20261026-v1')
     args = parser.parse_args()
     if not torch.cuda.is_available() or not torch.cuda.is_bf16_supported():
         raise RuntimeError('Configured CUDA BF16 training is unavailable; do not silently change environments')
@@ -116,7 +117,7 @@ def main():
               'warning':'Known event/story relevance, not campus correspondence training; auxiliary uses leading 256-token windows. Not a product quality result.'}
     config=configure_stage(config,dataset_manifest,args.campus_correspondence,args.max_tokens,args.microbatch)
     if args.campus_correspondence:
-        with (ROOT/'runtime/datasets/campus-partitions-20261026-v1/train.jsonl').open('rb') as stream:
+        with (args.partitions/'train.jsonl').open('rb') as stream:
             if hashlib.file_digest(stream,'sha256').hexdigest()!=dataset_manifest['sourceTrainSha256']:raise ValueError('Frozen campus training source identity changed')
     config_sha = hashlib.sha256(json.dumps(config,sort_keys=True).encode()).hexdigest()
     if directed:

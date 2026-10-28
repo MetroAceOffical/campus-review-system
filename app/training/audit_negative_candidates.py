@@ -14,10 +14,12 @@ OUT=ROOT/'runtime/datasets/campus-supported-negatives-v1'
 
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--output',type=Path,default=OUT);parser.add_argument('--source',type=Path,default=SOURCE);args=parser.parse_args();output=args.output;source=args.source
+    parser=argparse.ArgumentParser();parser.add_argument('--output',type=Path,default=OUT);parser.add_argument('--source',type=Path,default=SOURCE)
+    parser.add_argument('--partitions',type=Path,default=ROOT/'runtime/datasets/campus-partitions-20261026-v1');args=parser.parse_args();output=args.output;source=args.source
     if (output/'READY').exists():raise RuntimeError('Negative version already frozen')
     candidate_hashes=verify_ready(source)
-    partitions=ROOT/'runtime/datasets/campus-partitions-20261026-v1';hashes=verify_ready(partitions)
+    partitions=args.partitions;hashes=verify_ready(partitions)
+    if json.loads((source/'manifest.json').read_text(encoding='utf-8'))['sourceTrainSha256']!=hashes['train.jsonl']:raise ValueError('Candidate partition identity differs')
     originals={row['documentId']:row for row in read_jsonl(partitions/'train.jsonl')}
     output.mkdir(parents=True,exist_ok=True)
     stats=Counter();rejections=Counter();seen=set();parents=set()

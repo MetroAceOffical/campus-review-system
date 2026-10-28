@@ -13,7 +13,8 @@ from urllib.robotparser import RobotFileParser
 
 import requests
 from bs4 import BeautifulSoup
-from corpus import extract_article, normalized
+from corpus import normalized
+from article_extraction import extract_article
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'runtime/datasets/campus-final-v1'

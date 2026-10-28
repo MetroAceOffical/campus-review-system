@@ -1,5 +1,28 @@
 # 期末离线数据与训练
 
+## 10月28日当前作业：修正语料与正式材料队列
+
+当前采用新版本 `runtime/datasets/campus-quality-20261028-v1`（6,281原稿，train3,802），旧分区/报告/生成配置保留。下文旧1,200篇、旧v3、旧训练等待命令均为历史记录，**不要恢复旧材料来替代本轮修正版本，也不要重复启动正在运行的新作业**。
+
+- `article_extraction.py`按DOM文字节点一次提取，保留真实重复段和段落边界；`repair_campus_material.py`只读缓存HTML/历史正文，记录SHA/谱系/排除，重算簇并保留旧留出边界，冲突隔离。原始缓存与冻结旧分区均不覆盖。
+- `prepare_corrected_training.py`读取已冻结新分区，对旧生成和Web已提交部分作SQLite只读一致性快照；仅唯一完整规范化来源段、数字/名称/充分重写通过才复用，旧偏移不直接继承。实际起步7,678对，不等同正式20,000材料。
+- 新生成全量3,684个符合原有选择规则的原稿，16,773窗口（440可复用），不将窗口当独立文章。候选CPU挖掘已启动（18,937窗口、每窗口30来源），未知候选经`audit_negative_candidates.py --partitions <新版本>`的实际内容差异核验才成为负例。
+- `run_corrected_material.py`按冻结配方接续负例、生成、组装和有条件训练。使用现有Web的compute.lock等待资源，不停止Web作业；48小时是**等待资源**上限，真实工作不因该上限中断。源码/数据/配方身份变化会停止并保留产物，不静默换版本。
+- 正式门槛仍是对应20,000对/各类20%、检索1,000组/一正四负/改写至少50%、来源至少1,200/自动事件600、BGE/M3各2epoch、有效32，长度512。未满足会明确停在材料缺口，绝不会自动降低训练量、轮数或切换生产模型。
+
+当前配方的源码副本为`app/training/campus-corrected-recipe-20261028.json`，后台绑定的原样冻结副本为`runtime/experiments/final-training-20261028/corrected-formal-recipe-v1.json`。运行状态位于同目录下`corrected-material-stage-v1/status.json`，各child完整日志在该文件夹；独立CPU挖掘进度在`runtime/datasets/campus-correspondence-candidates-20261028-v3/progress.json`。Web217篇队列保持原数据版本，和这里的正式训练材料分开记录。
+
+以下CMD命令仅供**重启后确认原进程已结束**、当前源码/数据身份仍相同的显式续接；正在运行时不要再次执行。CPU候选未READY且原矿工已退出时先续跑同样完整参数（该矿工从头重算候选输出，未冻结的部分不作已完成数据），候选已READY则跳过第一条：
+
+```cmd
+runtime\environments\final-training\Scripts\python.exe -u -B app\training\mine_correspondence_candidates.py --partitions runtime/datasets/campus-quality-20261028-v1 --output runtime/datasets/campus-correspondence-candidates-20261028-v3 --sources-per-window 30
+runtime\environments\final-training\Scripts\python.exe -u -B app\training\run_corrected_material.py --recipe runtime/experiments/final-training-20261028/corrected-formal-recipe-v1.json --output runtime/experiments/final-training-20261028/corrected-material-stage-v1 --continue-existing-stage
+```
+
+若负例/组装/真实训练中断，控制器会保留未完成产物并停止；不要删除产物或反复重启，须先核对检查点/输入身份并显式恢复或建立新版本。两模型适配完成后，仍需校准、独立评价、新索引及兼容审核配置，不能直接发布为已通过质量验收。
+
+以下按日期保留历史过程，最新状态以本节及真实status为准。
+
 当前依据为 `docs/技术设计.md` 的期末细化设计及10月26日扩大正式训练的补充。旧路线B小样本不作为采集、训练的前置。本文不是训练全部完成或质量验收通过的证明。
 
 所有命令从项目根目录运行，解释器为 `runtime/environments/final-training/Scripts/python.exe`。该环境按用户批准建立，复用现有Torch2.8.0+cu128、Transformers4.57.1，新增依赖固定在requirements.txt；不会修改生产环境。不要直接运行安装或升级命令。
