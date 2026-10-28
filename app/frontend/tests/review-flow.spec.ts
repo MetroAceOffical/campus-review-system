@@ -32,7 +32,7 @@ it('maps emoji and cross-format evidence to UTF-16 editor positions without spli
   expect(codePointRangeToEditorRange(document, map, 1, 3)).toEqual([{ nodeId: 'p1', from: 2, to: 5, nodeFrom: 1, nodeTo: 4 }])
   expect(codePointRangeToEditorRange(document, map, 3, 6)).toEqual([{ nodeId: 'p1', from: 5, to: 6, nodeFrom: 4, nodeTo: 5 }, { nodeId: 'p2', from: 8, to: 9, nodeFrom: 0, nodeTo: 1 }])
 })
-it('shows empty OCR as recognition limitation and never as proof of no reuse', () => {
+it('shows empty recognition and skipped search without reporting a match', () => {
   const wrapper = mount(OcrEvidence, { props: { fileId: '1', result: { ocrStatus: 'EMPTY', recognitionLines: [], combinedText: '', textSearchStatus: 'NOT_RUN', qualityFlags: ['EMPTY_OCR'] } }, global: { plugins: [ElementPlus] } })
-  try { expect(wrapper.text()).toContain('未识别到文字，未进行文字检索；不能据此判断无复用。'); expect(wrapper.text()).toContain('未运行'); expect(wrapper.text()).not.toContain('未发现复用') } finally { wrapper.unmount() }
+  try { expect(wrapper.text()).toContain('未识别到文字'); expect(wrapper.text()).toContain('未运行'); expect(wrapper.text()).not.toContain('未发现复用') } finally { wrapper.unmount() }
 })

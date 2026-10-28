@@ -1,0 +1,23 @@
+{
+  "stage": "dataset-web",
+  "status": "implemented",
+  "trainingPerformed": false,
+  "actualNewsHttp": 3021,
+  "actualNewsBrowser": 217,
+  "syntheticCapacityRows": 100000,
+  "browserVerified": [
+    "square-corners",
+    "raw-clean-version-switch",
+    "refresh-selection-restore",
+    "upload-audit-clean"
+  ],
+  "browserWidth": 820,
+  "chartExport": "removed per user instruction",
+  "verificationPolicy": "necessary build and core flow checks; broad regression after feature completion",
+  "previousChecks": {
+    "python": 30,
+    "java": 17,
+    "frontend": 29
+  },
+  "lastChangeCheck": "frontend typecheck and production build passed"
+}

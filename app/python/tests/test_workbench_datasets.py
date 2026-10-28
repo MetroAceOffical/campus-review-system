@@ -224,6 +224,71 @@ class WorkbenchDatasetTest(unittest.TestCase):
         self.assertEqual(lines[-2]['data']['stage'], 'COMPLETED')
         self.assertEqual([row['data']['sequence'] for row in lines[:-1]], list(range(1, len(lines))))
 
+    def test_cli_mapping_error_returns_columns_for_recovery(self):
+        path = self.write('custom-column.csv', '新闻内容\n可供用户映射的正文\n')
+        cli = Path(__file__).resolve().parents[2] / 'scripts' / 'workbench.py'
+        result = subprocess.run([sys.executable, '-B', str(cli), 'audit', '--input', str(path),
+            '--kind', 'NEWS'], capture_output=True, encoding='utf-8')
+        self.assertEqual(result.returncode, 1)
+        error = json.loads(result.stdout)['data']
+        self.assertEqual(error.get('details', {}).get('columns'), ['新闻内容'])
+
+    def test_cli_config_file_supports_unicode_mapping_and_spaces(self):
+        path = self.write('mapped.csv', '新闻内容\n通过文件传递映射的正文\n')
+        config = self.write('config with spaces.json', json.dumps({'mapping': {'text': '新闻内容'}, 'options': {}}, ensure_ascii=False))
+        cli = Path(__file__).resolve().parents[2] / 'scripts' / 'workbench.py'
+        result = subprocess.run([sys.executable, '-B', str(cli), 'audit', '--input', str(path),
+            '--kind', 'NEWS', '--config-file', str(config)], capture_output=True, encoding='utf-8')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)['data']['audit']['validRows'], 1)
+
+    def test_exact_dedup_preserves_word_boundaries(self):
+        path = self.write('spaces.jsonl', '{"id":"one","text":"a b"}\n{"id":"two","text":"ab"}')
+        result = self.api.clean_dataset(self.api.read_dataset(path, 'NEWS'))
+        self.assertEqual([row['text'] for row in result['rows']], ['a b', 'ab'])
+        self.assertEqual(result['duplicateRows'], 0)
+
+    def test_internal_reclean_preserves_all_origins_without_copying_full_bodies(self):
+        path = self.write('origins.jsonl', '\n'.join(json.dumps(row) for row in [
+            {'id': 'one', 'text': '共同来源正文', 'url': 'https://a.example'},
+            {'id': 'two', 'text': '共同来源正文', 'url': 'https://b.example'}]))
+        self.api.write_dataset_version(path, self.root / 'original-clean', 'NEWS')
+        data = self.api.read_dataset(self.root / 'original-clean/corpus.jsonl', 'NEWS', internal=True)
+        result = self.api.clean_dataset(data)
+        origins = result['rows'][0]['_provenance']
+        self.assertEqual({row['url'] for row in origins}, {'https://a.example', 'https://b.example'})
+        self.assertTrue(all('text' not in row for row in origins))
+
+    def test_duplicate_inherits_consistent_partition_metadata_regardless_of_order(self):
+        rows = [{'id': 'one', 'text': '相同原作'}, {'id': 'two', 'text': '相同原作',
+            'split': 'final', 'sourceClusterId': 'original', 'eventClusterId': 'event'}]
+        for index, records in enumerate([rows, list(reversed(rows))]):
+            path = self.write(f'inherit-{index}.jsonl', '\n'.join(json.dumps(row) for row in records))
+            output = self.api.clean_dataset(self.api.read_dataset(path, 'NEWS'))['rows'][0]
+            self.assertEqual(output['split'], 'final')
+            self.assertEqual(output['source_cluster_id'], 'original')
+            self.assertEqual(output['event_cluster_id'], 'event')
+
+    def test_internal_read_has_a_separate_bounded_budget(self):
+        path = self.write('internal.jsonl', json.dumps({'text': '有效正文' * 40}))
+        with patch.object(self.api, 'MAX_BYTES', 100), patch.object(self.api, 'MAX_INTERNAL_BYTES', 10000):
+            with self.assertRaisesRegex(ValueError, 'BYTE_LIMIT'):
+                self.api.read_dataset(path, 'NEWS')
+            data = self.api.read_dataset(path, 'NEWS', internal=True)
+            self.assertEqual(data['totalRows'], 1)
+
+    def test_raw_missing_id_is_counted_before_generated_identity(self):
+        path = self.write('no-id.jsonl', '{"text":"需要生成编号的正文"}')
+        data = self.api.read_dataset(path, 'NEWS')
+        self.assertEqual(self.api.audit_dataset(data)['missing']['id'], 1)
+        self.assertTrue(data['rows'][0]['id'])
+
+    def test_empty_internal_clean_version_can_be_audited_again(self):
+        path = self.write('empty-after-clean.jsonl', '{"text":""}')
+        self.api.write_dataset_version(path, self.root / 'empty-version', 'NEWS')
+        result = self.api.read_dataset(self.root / 'empty-version/corpus.jsonl', 'NEWS', internal=True)
+        self.assertEqual(self.api.audit_dataset(result)['totalRows'], 0)
+
 
 if __name__ == '__main__':
     unittest.main()

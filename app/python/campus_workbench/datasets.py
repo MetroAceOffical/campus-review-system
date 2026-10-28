@@ -16,6 +16,7 @@ import unicodedata
 
 
 MAX_BYTES = 50 * 1024 * 1024
+MAX_INTERNAL_BYTES = 512 * 1024 * 1024
 MAX_ROWS = 100000
 ALIASES = {
     'id': ('id', 'documentId', '编号', '文章编号'),
@@ -49,8 +50,10 @@ def _key(value):
     return unicodedata.normalize('NFKC', value).strip().casefold()
 
 
-def _normalized(value):
-    return re.sub(r'\s+', '', unicodedata.normalize('NFKC', value))
+def _identity_text(value):
+    # Exact identity after the explicitly selected cleaning rules. Removing all
+    # whitespace would conflate meaningful word boundaries such as "a b"/"ab".
+    return value
 
 
 def _json(value):
@@ -91,7 +94,7 @@ def _mapping(columns, kind, mapping):
     return result
 
 
-def read_dataset(path, kind, mapping=None, max_bytes=MAX_BYTES, max_rows=MAX_ROWS):
+def read_dataset(path, kind, mapping=None, max_bytes=None, max_rows=MAX_ROWS, internal=False):
     """Return mapped rows, recoverable parse issues, source identity and columns.
 
     Row numbers count nonblank records; lineNumber is the physical starting line.
@@ -99,6 +102,10 @@ def read_dataset(path, kind, mapping=None, max_bytes=MAX_BYTES, max_rows=MAX_ROW
     """
     if kind not in FIELDS:
         raise ValueError('INVALID_KIND: 数据类型仅支持NEWS或PAIRS')
+    if type(internal) is not bool:
+        raise ValueError('INVALID_INTERNAL: 内部版本标记无效')
+    if max_bytes is None:
+        max_bytes = MAX_INTERNAL_BYTES if internal else MAX_BYTES
     if type(max_bytes) is not int or type(max_rows) is not int or max_bytes <= 0 or max_rows <= 0:
         raise ValueError('INVALID_LIMIT: 上限必须为正整数')
     path = Path(path)
@@ -164,8 +171,12 @@ def read_dataset(path, kind, mapping=None, max_bytes=MAX_BYTES, max_rows=MAX_ROW
                 if field not in columns:
                     columns.append(field)
             entries.append((row_number, line, item))
-    resolved = _mapping(columns, kind, mapping) if columns else {}
-    if not columns and not issues:
+    try:
+        resolved = _mapping(columns, kind, mapping) if columns else {}
+    except ValueError as error:
+        error.details = {'columns': columns}
+        raise
+    if not columns and not issues and not internal:
         raise ValueError('EMPTY_DATASET: 文件没有记录或表头')
     rows = []
     for number, line, item in entries:
@@ -177,7 +188,15 @@ def read_dataset(path, kind, mapping=None, max_bytes=MAX_BYTES, max_rows=MAX_ROW
                 invalid.append(field)
                 value = ''
             row[field] = '' if value is None else str(value)
+        if not row['id'].strip():
+            row['_missingFields'] = ['id']
         row['id'] = row['id'].strip() or f'row-{number}'
+        if internal and '_provenance' in item:
+            origins = item['_provenance']
+            if not isinstance(origins, list) or len(origins) > MAX_ROWS or any(not isinstance(value, dict) for value in origins):
+                invalid.append('_provenance')
+            else:
+                row['_provenance'] = [_compact_origin(value) for value in origins]
         if invalid:
             row['_invalidFields'] = invalid
         rows.append(row)
@@ -187,8 +206,34 @@ def read_dataset(path, kind, mapping=None, max_bytes=MAX_BYTES, max_rows=MAX_ROW
 
 def _content_key(row, kind):
     if kind == 'NEWS':
-        return (_normalized(row['text']),)
-    return tuple(sorted((_normalized(row['sentence1']), _normalized(row['sentence2']))))
+        return (_identity_text(row['text']),)
+    return tuple(sorted((_identity_text(row['sentence1']), _identity_text(row['sentence2']))))
+
+
+def _compact_origin(origin):
+    # The immutable source file and row reference retain original bodies. Do not
+    # duplicate entire bodies at every cleaning generation.
+    allowed = (set(ALIASES) - {'text', 'sentence1', 'sentence2'}) | {'rowNumber', 'lineNumber', 'inputSha256', 'generatedId'}
+    return {key: value for key, value in origin.items() if key in allowed and
+            (value is None or isinstance(value, (str, int, float, bool)))}
+
+
+def _inherit_metadata(rows, kind):
+    groups = defaultdict(list)
+    for row in rows:
+        groups[_content_key(row, kind)].append(row)
+    conflicts = defaultdict(list)
+    for members in groups.values():
+        for field in PARTITION_FIELDS + ('group_id',):
+            values = {row[field].strip() for row in members if row[field].strip()}
+            if len(values) > 1:
+                for row in members:
+                    conflicts[row['_rowNumber']].append('PARTITION_CONFLICT' if field == 'split' else 'GROUP_CONFLICT')
+            elif values:
+                value = next(iter(values))
+                for row in members:
+                    row[field] = value
+    return conflicts
 
 
 def _diagnose(dataset):
@@ -239,8 +284,8 @@ def audit_dataset(dataset):
     kind, rows, total = dataset['kind'], dataset['rows'], dataset['totalRows']
     reasons = _diagnose(dataset)
     parse_count = len(dataset['issues'])
-    missing = {field: parse_count + sum(not row[field].strip() if isinstance(row[field], str)
-                                      else row[field] is None for row in rows) for field in FIELDS[kind]}
+    missing = {field: parse_count + sum(field in row.get('_missingFields', []) or (not row[field].strip() if isinstance(row[field], str)
+                                      else row[field] is None) for row in rows) for field in FIELDS[kind]}
     counts = Counter(issue['code'] for issue in dataset['issues'])
     for values in reasons.values():
         counts.update(values)
@@ -336,11 +381,12 @@ def clean_dataset(dataset, options=None, on_event=None):
         for field in fields:
             row[field] = _clean_text(row[field], options)
         rows.append(row)
+    metadata_conflicts = _inherit_metadata(rows, kind)
     prepared = dict(dataset, rows=rows)
     reasons = _diagnose(prepared)
     quarantine = [{'rowNumber': issue['rowNumber'], 'lineNumber': issue['lineNumber'],
                    'reasons': [issue['code']], 'record': None} for issue in dataset['issues']]
-    kept, seen = [], {}
+    kept, seen, origin_keys = [], {}, {}
     duplicates, processed = 0, len(quarantine)
     def emit():
         if on_event:
@@ -348,7 +394,7 @@ def clean_dataset(dataset, options=None, on_event=None):
                       'retained': len(kept), 'quarantined': len(quarantine), 'duplicates': duplicates})
     emit()
     for original, row in zip(dataset['rows'], rows):
-        problems = list(reasons[row['_rowNumber']])
+        problems = list(reasons[row['_rowNumber']]) + metadata_conflicts[row['_rowNumber']]
         lengths = [len(row[field]) for field in (('text',) if kind == 'NEWS' else fields)]
         if any(length < options['min_text_length'] or length > options['max_text_length'] for length in lengths):
             problems.append('TEXT_LENGTH')
@@ -358,16 +404,22 @@ def clean_dataset(dataset, options=None, on_event=None):
         else:
             if kind == 'PAIRS':
                 row['label'] = int(row['label'])
-            provenance = {key: original[key] for key in original if not key.startswith('_')}
-            provenance.update(identity)
-            row['_provenance'] = [provenance]
+            provenance = _compact_origin({**{key: original[key] for key in original if not key.startswith('_')},
+                **identity, 'inputSha256': dataset['sourceSha256'], 'generatedId': 'id' in original.get('_missingFields', [])})
+            row['_provenance'] = [dict(value) for value in original.get('_provenance') or [provenance]]
+            row.pop('_missingFields', None)
             key = _content_key(row, kind)
             if options['remove_duplicates'] and key in seen:
-                kept[seen[key]]['_provenance'].append(provenance)
+                target = kept[seen[key]]['_provenance']
+                known = origin_keys[seen[key]]
+                for origin in row['_provenance']:
+                    if _json(origin) not in known:
+                        target.append(origin);known.add(_json(origin))
                 duplicates += 1
                 changes.append(dict(identity, action='DUPLICATE', retainedId=kept[seen[key]]['id']))
             else:
                 seen[key] = len(kept)
+                origin_keys[len(kept)] = {_json(value) for value in row['_provenance']}
                 kept.append(row)
                 changed = [field for field in fields if original[field] != row[field]]
                 changes.append(dict(identity, action='RETAINED', changedFields=changed, retainedId=row['id']))
@@ -380,7 +432,7 @@ def clean_dataset(dataset, options=None, on_event=None):
             'changes': changes, 'before': audit_dataset(dataset), 'after': after}
 
 
-def write_dataset_version(input_path, output_dir, kind, options=None, mapping=None, on_event=None):
+def write_dataset_version(input_path, output_dir, kind, options=None, mapping=None, on_event=None, internal=False):
     """Create an exclusive version directory; manifest is written last.
 
     A failed/interrupted directory is retained without a COMPLETED manifest.
@@ -390,7 +442,7 @@ def write_dataset_version(input_path, output_dir, kind, options=None, mapping=No
     output = Path(output_dir)
     if output.exists():
         raise FileExistsError('VERSION_EXISTS: 版本目录已存在')
-    data = read_dataset(input_path, kind, mapping=mapping)
+    data = read_dataset(input_path, kind, mapping=mapping, internal=internal)
     events = []
     def event(value):
         value = dict(value, sequence=len(events) + 1)
@@ -418,7 +470,7 @@ def write_dataset_version(input_path, output_dir, kind, options=None, mapping=No
     events.append(completed)
     payloads['events.jsonl'] = ''.join(_json(value) + '\n' for value in events)
     (output / 'events.jsonl').write_bytes(payloads['events.jsonl'].encode('utf-8'))
-    manifest = {'schemaVersion': 1, 'taskType': 'DATASET_CLEANING', 'status': 'COMPLETED', 'kind': kind,
+    manifest = {'schemaVersion': 1, 'processorVersion': '2', 'taskType': 'DATASET_CLEANING', 'status': 'COMPLETED', 'kind': kind,
                 'inputSha256': data['sourceSha256'], 'inputRows': data['totalRows'],
                 'outputRows': cleaned['outputRows'], 'quarantineRows': len(cleaned['quarantine']),
                 'duplicateRows': cleaned['duplicateRows'], 'mapping': data['mapping'], 'options': options,

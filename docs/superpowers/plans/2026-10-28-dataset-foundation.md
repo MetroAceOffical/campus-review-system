@@ -1,6 +1,6 @@
 # 数据中心实施计划：解析、质量与清洗
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans逐任务实施，先RED再GREEN；持续更新执行账本。
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans逐任务实施，遵循用户最新的功能优先要求，保留必要构建和核心流程检查；持续更新执行账本。
 
 **Goal:** 为已批准的期末方案提供可供Web任务调用的批量CSV/JSONL解析、真实质量指标、可追溯清洗版本与实际事件。
 
@@ -36,17 +36,27 @@ Interfaces: read_dataset(path,kind,mapping=None,max_bytes=52428800,max_rows=1000
 - [x] RED：BOM/多行CSV/中文别名/映射、坏JSONL、缺字段/编码/超限、重复及冲突、HTML提取、来源保留、真实事件、确定性SHA和旧目录拒绝覆盖测试。
 - [x] GREEN：实现解析/指标/清洗、可审计隔离与版本写入，使用已有标准库。
 - [x] 验证：现有生产Python运行15项内核测试及7项相关旧契约回归，共22项通过；5,043真实原作解析和3,021训练原作CLI处理及SHA复算通过。
-- [ ] 阶段提交：只上传已验证任务，回读分支SHA；账本记录未接Web/未训练。
+- [x] 阶段提交：只上传已验证任务，回读分支SHA（2a83d7f）；账本记录当时未接Web/未训练。
 
 ## Task 2：数据中心Web闭环（Task 1通过后细化接口）
 
 Files: migration003、backend/workbench/{DatasetController,DatasetService,WorkbenchWorker}、frontend/{api/workbench.ts,views/DatasetView.vue,components/workbench/*}及对应测试。
 
-- [ ] RED：部门越权、上传/字段映射、真实进度、取消/失败/断线恢复和计数交互。
-- [ ] GREEN：MySQL数据集/版本/事件持久化；固定命令/安全路径调用Task 1；SSE+轮询恢复；统计卡、质量图、前后对照与样本分页。
-- [ ] 验证：两个部门HTTP批量上传，实际浏览器清洗、查看图表/下载与跨部门拒绝；既有审核链路回归。
+接口固定：`/api/workbench/organizations`返回账号可用部门；`POST /datasets` multipart(name,kind,organizationId,file)保存原件并排队AUDIT；`GET /datasets?page&pageSize&q`分页；`GET/PATCH /datasets/{uuid}`详情/改名归档；`POST /datasets/{uuid}/runs`传action(AUDIT/CLEAN)、versionId、mapping、options创建实际任务；`GET /runs/{uuid}`及`/events`提供JSON结果，`/stream`提供SSE序号续接；`POST /runs/{uuid}/cancel`取消；`GET /datasets/{uuid}/versions/{uuid}/rows?page&pageSize`分页清洗样本；下载只接受固定白名单工件名。UUID和归属每次服务端核验。
+
+MySQL新增ml_dataset、ml_dataset_version、ml_run、ml_run_event；原件目录`runtime[/test]/workbench/datasets/{datasetId}/{versionId}/source.csv|source.jsonl`，clean新版本输出同目录corpus等；Python固定CLI参数数组启动，不拼接shell。一个工作线程处理数据任务，重启将旧RUNNING标INTERRUPTED，不重跑；取消只影响所持Process句柄，不能终止其他服务。
+
+验收测试：member1上传NEWS后轮询到COMPLETED，对照质量数；member2详情/运行/事件/下载均404且不能给部门1上传；修改映射后可重审，清洗产生独立版本和可分页样本；坏编码任务FAILED且原件可保留；归档不破坏历史模型/版本。前端测试上传/加载错误/真实结果与数字卡；同时跑类型和构建。数据处理完成标识不复用到训练。
+
+- [x] RED：部门越权、上传/字段映射、真实进度、取消/失败/断线恢复和计数交互。
+- [x] GREEN：MySQL数据集/版本/事件持久化；固定命令/安全路径调用Task 1；SSE+轮询恢复；统计卡、质量图、前后对照与样本分页。
+- [x] 验证：两个部门HTTP批量上传，实际浏览器清洗、查看图表/下载与跨部门拒绝；既有审核链路回归。
 - [ ] 验证后阶段提交并汇报，转入主计划后续训练/评估/模型管理与共用稿件任务。
 
 ## 主计划后续依赖
 
-训练入口消费固定清洗/样本/分组划分版本；原始新闻须先准备有依据样本，不能直接当标签。六模型训练/预测、SSE持续图表、参考批量入库、共用稿件、片段引用、语法/图文及正式v3按主计划继续实施。每个子系统沿用此RED→GREEN→真实验收→提交步骤，实施前补精确接口，不重复询问已批准范围。
+训练入口消费固定清洗/样本/分组划分版本；原始新闻须先准备有依据样本，不能直接当标签。六模型训练/预测、SSE持续图表、参考批量入库、共用稿件、片段引用、语法/图文及正式v3按主计划继续实施。按用户10月28日最新要求，后续优先实现完整功能，以必要构建和核心流程检查→阶段提交推进，全面回归集中到完整功能之后，实施前补精确接口，不重复询问已批准范围。
+
+## 最新执行调整（2026-10-28）
+
+用户要求不再提供图表导出，已移除该入口与专属测试；后续不添加。日常验证缩减为必要构建与核心流程检查，集中回归放在完整功能之后。数据和模型工件下载属于业务流程，继续保留。

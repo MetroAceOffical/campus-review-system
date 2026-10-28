@@ -16,8 +16,8 @@ spring:
       maximum-pool-size: 4
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 11MB
+      max-file-size: 50MB
+      max-request-size: 52MB
   jackson:
     time-zone: UTC
 mybatis:

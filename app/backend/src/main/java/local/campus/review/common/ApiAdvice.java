@@ -7,7 +7,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 @RestControllerAdvice
 public class ApiAdvice {
     @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
-    ResponseEntity<Api> oversized(Exception e) {return ResponseEntity.status(413).body(Api.error("UPLOAD_TOO_LARGE","单图不能超过10MiB"));}
+    ResponseEntity<Api> oversized(Exception e) {return ResponseEntity.status(413).body(Api.error("UPLOAD_TOO_LARGE","文件超过上传大小上限"));}
     @ExceptionHandler(ApiException.class)
     ResponseEntity<Api> business(ApiException e) { return ResponseEntity.status(e.status).body(Api.error(e.code,e.getMessage())); }
     @ExceptionHandler({HttpMessageNotReadableException.class,IllegalArgumentException.class})
