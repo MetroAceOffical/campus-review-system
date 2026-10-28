@@ -91,9 +91,10 @@ public class DatasetService {
     JsonNode summary(Map<String,Object> row){return json.createObjectNode().put("datasetId",row.get("id").toString()).put("organizationId",row.get("organization_id").toString()).put("name",row.get("name").toString()).put("kind",row.get("kind").toString()).put("archived",Boolean.TRUE.equals(row.get("archived"))).put("updatedAt",row.get("updated_at").toString());}
     public JsonNode get(CurrentUser user,String id){
         var row=dataset(user,id);var result=(com.fasterxml.jackson.databind.node.ObjectNode)summary(row);
-        var versions=result.putArray("versions");for(var version:db.queryForList("SELECT * FROM ml_dataset_version WHERE dataset_id=? ORDER BY created_at DESC,id",id)){
+        var versions=result.putArray("versions");for(var version:db.queryForList("SELECT v.*,p.file_name AS parent_file_name FROM ml_dataset_version v LEFT JOIN ml_dataset_version p ON p.id=v.parent_version_id WHERE v.dataset_id=? ORDER BY v.created_at DESC,v.id",id)){
             var item=versions.addObject().put("versionId",version.get("id").toString()).put("stage",version.get("stage").toString()).put("status",version.get("status").toString()).put("sha256",Objects.toString(version.get("sha256"),"")).put("createdAt",version.get("created_at").toString());
             if(version.get("row_count")==null)item.putNull("rowCount");else item.put("rowCount",((Number)version.get("row_count")).longValue());
+            if("sources.json".equals(version.get("file_name"))||"sources.json".equals(version.get("parent_file_name")))item.put("origin","COMPOSITION");
         }
         var runs=result.putArray("runs");for(var task:db.queryForList("SELECT * FROM ml_run WHERE dataset_id=? ORDER BY created_at DESC,id LIMIT 50",id))runs.add(runJson(task));return result;
     }
@@ -111,6 +112,7 @@ public class DatasetService {
     public JsonNode start(CurrentUser user,String id,String versionId,String action,JsonNode mapping,JsonNode options){
         var dataset=dataset(user,id);if(Boolean.TRUE.equals(dataset.get("archived")))throw new ApiException(409,"DATASET_ARCHIVED","请先恢复数据集");
         var source=version(id,versionId);if(!"READY".equals(source.get("status")))throw new ApiException(409,"VERSION_NOT_READY","数据版本尚未就绪");
+        if("sources.json".equals(source.get("file_name")))throw new ApiException(409,"COMPOSITION_SOURCE_LIST","请选择组合后的清洗版本，来源清单仅供追溯");
         if(action==null || !Set.of("AUDIT","CLEAN").contains(action))throw new ApiException(400,"VALIDATION_ERROR","请选择质量评估或数据清洗");
         if(mapping==null)mapping=json.createObjectNode();if(options==null)options=json.createObjectNode();
         if(!mapping.isObject() || !options.isObject() || mapping.toString().length()>10000 || options.toString().length()>10000)throw new ApiException(400,"VALIDATION_ERROR","映射或清洗参数无效");
@@ -142,7 +144,7 @@ public class DatasetService {
     static void stopProcess(Process process){process.descendants().forEach(ProcessHandle::destroyForcibly);process.destroyForcibly();}
     public Path download(CurrentUser user,String id,String versionId,String artifact){
         dataset(user,id);var version=version(id,versionId);
-        Set<String> allowed=Set.of("corpus.jsonl","manifest.json","audit.json","cleaning.json","quarantine.jsonl","changes.jsonl","events.jsonl");
+        Set<String> allowed=Set.of("corpus.jsonl","manifest.json","audit.json","cleaning.json","quarantine.jsonl","changes.jsonl","events.jsonl","composition.json","lineage.jsonl");
         Path file;
         if("source".equals(artifact) && "RAW".equals(version.get("stage")))file=input(version);
         else {if(!"READY".equals(version.get("status")) || !"CLEAN".equals(version.get("stage")) || !allowed.contains(artifact))throw missing();file=directory(id,versionId).resolve(artifact);}

@@ -7,7 +7,7 @@ export interface Audit {
   dateDistribution: Record<string, number>; classDistribution: Record<string, number>
 }
 export interface Dataset { datasetId: string; organizationId: string; name: string; kind: 'NEWS' | 'PAIRS'; archived: boolean }
-export interface Version { versionId: string; stage: 'RAW' | 'CLEAN'; status: string; sha256: string; rowCount: number | null }
+export interface Version { versionId: string; stage: 'RAW' | 'CLEAN'; status: string; sha256: string; rowCount: number | null; origin?: 'COMPOSITION' }
 export interface RunResult { audit?: Audit; columns?: string[]; mapping?: Record<string, string>; preview?: Array<Record<string, unknown>>; outputRows?: number; quarantineRows?: number; duplicateRows?: number }
 export interface Run { runId: string; datasetId: string; inputVersionId: string; outputVersionId: string; action: string; status: string; error: string; result?: RunResult; mapping?: Record<string, string>; createdAt?: string }
 export interface Detail extends Dataset { versions: Version[]; runs: Run[] }
@@ -26,3 +26,6 @@ export const cancel = (id: string) => request<Run>(`/api/workbench/runs/${id}/ca
 export const report = (id: string, version: string) => request<Cleaning>(`/api/workbench/datasets/${id}/versions/${version}/report`)
 export const rows = (id: string, version: string, page: number) => request<Page<Record<string, unknown>>>(`/api/workbench/datasets/${id}/versions/${version}/rows?page=${page}&pageSize=10`)
 export const downloadUrl = (id: string, version: string, artifact: string) => `/api/workbench/datasets/${id}/versions/${version}/files/${encodeURIComponent(artifact)}`
+export interface Composition { sources: Array<{ datasetId: string; versionId: string; name: string; inputRows: number; retainedRows: number; duplicateRows: number; quarantineRows: number }>; inputRows: number; outputRows: number; duplicateRows: number; quarantineRows: number }
+export const compose = (organizationId: string, name: string, sources: Array<{ datasetId: string; versionId: string }>) => request<{ datasetId: string; versionId: string; runId: string }>('/api/workbench/datasets/compose', { method: 'POST', body: JSON.stringify({ organizationId, name, sources }) })
+export const composition = (id: string, version: string) => request<Composition>(`/api/workbench/datasets/${id}/versions/${version}/composition`)

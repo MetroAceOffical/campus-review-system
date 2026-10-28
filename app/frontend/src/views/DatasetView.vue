@@ -5,6 +5,8 @@ import { useRoute, useRouter } from 'vue-router'
 import * as api from '../api/workbench'
 import type { Audit, Cleaning, Dataset, Detail, Progress, Run } from '../api/workbench'
 import DatasetCharts from '../components/workbench/DatasetCharts.vue'
+import DatasetComposer from '../components/workbench/DatasetComposer.vue'
+import '../styles/workbench.css'
 const route = useRoute(), router = useRouter()
 
 const organizations = ref<Array<{ organizationId: string; name: string }>>([]), items = ref<Dataset[]>([])
@@ -14,13 +16,15 @@ const form = reactive({ name: '', kind: 'NEWS', organizationId: '' }), file = re
 const inputVersion = ref(''), mapping = reactive<Record<string, string>>({}), events = ref<Progress[]>([]), columns = ref<string[]>([])
 const options = reactive({ strip_html: true, normalize_whitespace: true, remove_duplicates: true, min_text_length: 1, max_text_length: 1000000 })
 const samplePage = ref(1), sampleTotal = ref(0), samples = ref<Array<Record<string, unknown>>>([])
+const composed = ref<api.Composition>()
 let stream: EventSource | undefined, timer: ReturnType<typeof setInterval> | undefined, generation = 0, versionGeneration = 0, alive = true
 const terminal = (status: string) => ['COMPLETED', 'FAILED', 'CANCELLED', 'INTERRUPTED'].includes(status)
-const statusName: Record<string, string> = { QUEUED: '排队中', RUNNING: '处理中', COMPLETED: '处理完成', FAILED: '处理失败', CANCELLED: '已取消', INTERRUPTED: '已中断', PARSED: '已解析', CLEANING: '清洗中', SAVING: '保存版本' }
+const statusName: Record<string, string> = { QUEUED: '排队中', RUNNING: '处理中', COMPLETED: '处理完成', FAILED: '处理失败', CANCELLED: '已取消', INTERRUPTED: '已中断', PARSED: '已解析', CLEANING: '清洗中', SAVING: '保存版本', COMPOSING: '读取组合来源' }
 const fieldName: Record<string, string> = { text: '正文', title: '标题', id: '编号', source_institution: '来源学校', url: '来源网址', published_at: '发布日期', department: '材料部门', sentence1: '原句', sentence2: '改写句', label: '标签', source_id: '原作编号', group_id: '分组编号', label_origin: '标签来源' }
 const fields = computed(() => detail.value?.kind === 'PAIRS' ? ['sentence1', 'sentence2', 'label', 'source_id', 'group_id', 'label_origin'] : ['text', 'title', 'id', 'source_institution', 'url', 'published_at', 'department'])
 const active = computed(() => currentRun.value && !terminal(currentRun.value.status))
 const selectedVersion = computed(() => detail.value?.versions.find(v => v.versionId === inputVersion.value))
+const sourceList = computed(() => selectedVersion.value?.stage === 'RAW' && selectedVersion.value.origin === 'COMPOSITION')
 const cleanVersion = computed(() => selectedVersion.value?.stage === 'CLEAN' && selectedVersion.value.status === 'READY' ? selectedVersion.value : undefined)
 const latestProgress = computed(() => [...events.value].reverse().find(e => e.data.stage === 'CLEANING' && typeof e.data.total === 'number'))
 const percent = computed(() => { const value = latestProgress.value?.data; return value?.total ? Math.min(100, Math.round((value.processed ?? 0) / value.total * 100)) : 0 })
@@ -40,7 +44,7 @@ async function readSamples() {
 async function changeVersion() {
   if (!detail.value || !inputVersion.value) return
   const ticket = ++versionGeneration, token = generation, id = detail.value.datasetId, version = inputVersion.value
-  audit.value = null; cleaning.value = null; samples.value = []; samplePage.value = 1; sampleTotal.value = 0; columns.value = []
+  audit.value = null; cleaning.value = null; composed.value = undefined; samples.value = []; samplePage.value = 1; sampleTotal.value = 0; columns.value = []
   for (const key of Object.keys(mapping)) delete mapping[key]
   void router.replace({ query: { ...route.query, dataset: id, version } })
   const valid = () => alive && ticket === versionGeneration && token === generation && detail.value?.datasetId === id && inputVersion.value === version
@@ -48,6 +52,7 @@ async function changeVersion() {
     if (selectedVersion.value?.stage === 'CLEAN') {
       const report = await api.report(id, version); if (!valid()) return
       cleaning.value = report; audit.value = report.after; columns.value = Object.keys(report.after.missing)
+      if (selectedVersion.value?.origin === 'COMPOSITION') { const sources = await api.composition(id, version); if (!valid()) return; composed.value = sources }
       await readSamples()
     } else {
       const matching = detail.value.runs.filter(run => run.action === 'AUDIT' && run.inputVersionId === version)
@@ -63,7 +68,7 @@ async function select(id: string, preferredVersion?: string) {
   stop(); const token = ++generation; loading.value = true; error.value = ''
   try {
     const result = await api.dataset(id); if (!alive || token !== generation) return
-    detail.value = result; currentRun.value = result.runs.find(run => ['AUDIT', 'CLEAN'].includes(run.action)) ?? null
+    detail.value = result; currentRun.value = result.runs.find(run => ['AUDIT', 'CLEAN', 'COMPOSE'].includes(run.action)) ?? null
     const candidates = [preferredVersion, currentRun.value?.status === 'COMPLETED' ? currentRun.value?.outputVersionId : undefined, currentRun.value?.inputVersionId]
     inputVersion.value = candidates.find(id => result.versions.some(version => version.versionId === id && version.status === 'READY')) ?? result.versions.find(version => version.status === 'READY')?.versionId ?? ''
     events.value = []
@@ -97,6 +102,7 @@ async function upload() { await perform(async () => {
   const data = new FormData(); data.set('file', file.value); data.set('name', form.name); data.set('kind', form.kind); data.set('organizationId', form.organizationId)
   const result = await api.upload(data); await refreshList(); await select(result.datasetId); ElMessage.success('已上传，开始质量评估')
 }) }
+async function compositionCreated(id: string) { await refreshList(); await select(id) }
 async function start(action: 'AUDIT' | 'CLEAN') { await perform(async () => {
   if (!detail.value || !inputVersion.value) return
   await api.start(detail.value.datasetId, inputVersion.value, action, Object.fromEntries(Object.entries(mapping).filter(([, value]) => value)), action === 'CLEAN' ? options : {})
@@ -121,6 +127,7 @@ onMounted(initialize); onBeforeUnmount(() => { alive = false; generation++; stop
       <div class="upload-actions"><el-button type="primary" native-type="submit" :loading="busy">上传并评估</el-button><el-button @click="template">下载模板</el-button></div>
     </el-form>
   </section>
+  <DatasetComposer :organizations="organizations" @created="compositionCreated" />
   <div v-if="error" class="dataset-error" role="alert"><el-alert :title="error" type="error" :closable="false" /><el-button @click="initialize">重试</el-button></div>
   <div class="dataset-layout" v-loading="loading">
     <section class="dataset-list">
@@ -131,17 +138,18 @@ onMounted(initialize); onBeforeUnmount(() => { alive = false; generation++; stop
       <el-pagination small layout="prev, pager, next" :page-size="12" :total="total" v-model:current-page="page" @current-change="initialize" />
     </section>
     <section v-if="detail" class="dataset-detail">
+      <details v-if="composed"><summary>组合来源与处理数量</summary><el-table :data="composed.sources"><el-table-column prop="name" label="来源" /><el-table-column prop="inputRows" label="输入" /><el-table-column prop="retainedRows" label="保留" /><el-table-column prop="duplicateRows" label="重复" /><el-table-column prop="quarantineRows" label="隔离" /></el-table><a :href="api.downloadUrl(detail.datasetId, inputVersion, 'lineage.jsonl')">下载逐行来源映射</a></details>
       <div class="section-heading"><div><h2>{{ detail.name }}</h2><span class="muted">{{ detail.kind === 'NEWS' ? '原始新闻' : '标签句对' }} · {{ detail.versions.length }}个版本</span></div><div><RouterLink v-if="cleanVersion" :to="`/training?dataset=${detail.datasetId}&version=${cleanVersion.versionId}`">准备与训练</RouterLink><el-button @click="editName">重命名</el-button><el-button :disabled="!!active" @click="archive">{{ detail.archived ? '恢复' : '归档' }}</el-button></div></div>
-      <div class="version-selector"><label for="dataset-version">查看与处理版本</label><select id="dataset-version" v-model="inputVersion" aria-label="输入版本" @change="changeVersion"><option v-for="version in detail.versions.filter(v => v.status === 'READY')" :key="version.versionId" :value="version.versionId">{{ version.stage === 'RAW' ? '原始文件' : '清洗版本' }} · {{ version.versionId.slice(0, 8) }}</option></select></div>
+      <div class="version-selector"><label for="dataset-version">查看与处理版本</label><select id="dataset-version" v-model="inputVersion" aria-label="输入版本" @change="changeVersion"><option v-for="version in detail.versions.filter(v => v.status === 'READY')" :key="version.versionId" :value="version.versionId">{{ version.stage === 'RAW' ? (version.origin === 'COMPOSITION' ? '组合来源清单' : '原始文件') : '清洗版本' }} · {{ version.versionId.slice(0, 8) }}</option></select></div>
       <div v-if="audit" class="dataset-stats"><div><span>总记录</span><el-statistic :value="audit.totalRows" /></div><div class="positive"><span>结构有效</span><el-statistic :value="audit.validRows" /></div><div class="attention"><span>待处理记录</span><el-statistic :value="audit.invalidRows" /></div><div><span>精确重复</span><el-statistic :value="audit.duplicateRows" /></div></div>
-      <div v-if="currentRun" class="run-status" aria-live="polite"><div class="section-heading"><strong>{{ currentRun.action === 'AUDIT' ? '数据质量评估' : '数据清洗' }}</strong><el-tag :type="currentRun.status === 'FAILED' ? 'danger' : currentRun.status === 'COMPLETED' ? 'success' : 'info'">{{ statusName[currentRun.status] ?? currentRun.status }}</el-tag></div><el-progress v-if="latestProgress" :percentage="percent" /><p v-if="currentRun.error" class="error-text">{{ currentRun.error }}</p><el-button v-if="active" @click="cancelCurrent">取消任务</el-button></div>
+      <div v-if="currentRun" class="run-status" aria-live="polite"><div class="section-heading"><strong>{{ currentRun.action === 'AUDIT' ? '数据质量评估' : currentRun.action === 'COMPOSE' ? '数据集组合' : '数据清洗' }}</strong><el-tag :type="currentRun.status === 'FAILED' ? 'danger' : currentRun.status === 'COMPLETED' ? 'success' : 'info'">{{ statusName[currentRun.status] ?? currentRun.status }}</el-tag></div><el-progress v-if="latestProgress" :percentage="percent" /><p v-if="currentRun.error" class="error-text">{{ currentRun.error }}</p><el-button v-if="active" @click="cancelCurrent">取消任务</el-button></div>
       <el-tabs>
-        <el-tab-pane label="质量与清洗"><DatasetCharts v-if="audit" :audit="audit" :cleaning="cleaning" :events="events" /><el-empty v-else description="等待质量评估结果" /><div v-if="cleaning" class="clean-summary"><strong>清洗保留 {{ cleaning.outputRows.toLocaleString() }} 条</strong><span>重复合并 {{ cleaning.duplicateRows }} 条</span><span>隔离 {{ cleaning.inputRows - cleaning.outputRows - cleaning.duplicateRows }} 条</span></div></el-tab-pane>
+        <el-tab-pane label="质量与清洗"><p v-if="sourceList" class="muted">当前为组合来源清单；处理完成后选择清洗版本查看质量与样本。</p><DatasetCharts v-else-if="audit" :audit="audit" :cleaning="cleaning" :events="events" /><el-empty v-else description="等待质量评估结果" /><div v-if="cleaning" class="clean-summary"><strong>清洗保留 {{ cleaning.outputRows.toLocaleString() }} 条</strong><span>重复合并 {{ cleaning.duplicateRows }} 条</span><span>隔离 {{ cleaning.inputRows - cleaning.outputRows - cleaning.duplicateRows }} 条</span></div></el-tab-pane>
         <el-tab-pane label="字段与规则"><el-form label-position="top"><div class="mapping-grid"><el-form-item v-for="field in fields" :key="field" :label="fieldName[field]"><el-select v-model="mapping[field]" clearable placeholder="自动识别"><el-option v-for="column in columns" :key="column" :label="column" :value="column" /></el-select></el-form-item></div><el-checkbox v-model="options.strip_html">提取HTML正文</el-checkbox><el-checkbox v-model="options.normalize_whitespace">规范空白</el-checkbox><el-checkbox v-model="options.remove_duplicates">合并精确重复</el-checkbox><div class="length-options"><label>最小正文长度 <el-input-number v-model="options.min_text_length" :min="1" :max="1000000" /></label><label>最大正文长度 <el-input-number v-model="options.max_text_length" :min="options.min_text_length" :max="1000000" /></label></div></el-form></el-tab-pane>
         <el-tab-pane label="样本预览"><el-table :data="samples" max-height="420"><el-table-column v-if="detail.kind === 'NEWS'" prop="title" label="标题" min-width="110" /><el-table-column :prop="detail.kind === 'NEWS' ? 'text' : 'sentence1'" :label="detail.kind === 'NEWS' ? '正文' : '原句'" min-width="220" show-overflow-tooltip /><el-table-column v-if="detail.kind === 'PAIRS'" prop="sentence2" label="改写句" min-width="180" show-overflow-tooltip /><el-table-column v-if="detail.kind === 'NEWS'" prop="source_institution" label="来源学校" width="110" /><el-table-column v-else prop="label" label="标签" width="70" /></el-table><el-pagination v-if="cleanVersion" v-model:current-page="samplePage" :page-size="10" :total="sampleTotal" layout="total, prev, pager, next" @current-change="readSamples" /></el-tab-pane>
-        <el-tab-pane label="任务与版本"><el-table :data="detail.runs"><el-table-column label="任务"><template #default="{ row }">{{ row.action === 'AUDIT' ? '质量评估' : '清洗' }}</template></el-table-column><el-table-column label="状态"><template #default="{ row }">{{ statusName[row.status] ?? row.status }}</template></el-table-column><el-table-column prop="createdAt" label="创建时间" min-width="170" /></el-table><ol class="event-list"><li v-for="event in events" :key="event.sequence">{{ statusName[event.data.stage] ?? event.data.stage }}<span v-if="event.data.total !== undefined"> · {{ event.data.processed }}/{{ event.data.total }}</span></li></ol></el-tab-pane>
+        <el-tab-pane label="任务与版本"><el-table :data="detail.runs"><el-table-column label="任务"><template #default="{ row }">{{ row.action === 'AUDIT' ? '质量评估' : row.action === 'COMPOSE' ? '组合' : '清洗' }}</template></el-table-column><el-table-column label="状态"><template #default="{ row }">{{ statusName[row.status] ?? row.status }}</template></el-table-column><el-table-column prop="createdAt" label="创建时间" min-width="170" /></el-table><ol class="event-list"><li v-for="event in events" :key="event.sequence">{{ statusName[event.data.stage] ?? event.data.stage }}<span v-if="event.data.total !== undefined"> · {{ event.data.processed }}/{{ event.data.total }}</span></li></ol></el-tab-pane>
       </el-tabs>
-      <div class="dataset-actions"><el-button :disabled="!!active || detail.archived" :loading="busy" @click="start('AUDIT')">重新评估</el-button><el-button type="primary" :disabled="!!active || detail.archived" :loading="busy" @click="start('CLEAN')">生成清洗版本</el-button><el-button v-if="audit" @click="download('dataset-quality.json', JSON.stringify({ audit, cleaning }, null, 2), 'application/json')">导出指标</el-button><a v-if="inputVersion" :href="api.downloadUrl(detail.datasetId, inputVersion, detail.versions.find(v => v.versionId === inputVersion)?.stage === 'RAW' ? 'source' : 'corpus.jsonl')">下载输入</a><template v-if="cleanVersion"><a :href="api.downloadUrl(detail.datasetId, cleanVersion.versionId, 'corpus.jsonl')">清洗数据</a><a :href="api.downloadUrl(detail.datasetId, cleanVersion.versionId, 'quarantine.jsonl')">隔离明细</a><a :href="api.downloadUrl(detail.datasetId, cleanVersion.versionId, 'changes.jsonl')">清洗记录</a></template></div>
+      <div class="dataset-actions"><el-button :disabled="!!active || detail.archived || sourceList" :loading="busy" @click="start('AUDIT')">重新评估</el-button><el-button type="primary" :disabled="!!active || detail.archived || sourceList" :loading="busy" @click="start('CLEAN')">生成清洗版本</el-button><el-button v-if="audit" @click="download('dataset-quality.json', JSON.stringify({ audit, cleaning }, null, 2), 'application/json')">导出指标</el-button><a v-if="inputVersion" :href="api.downloadUrl(detail.datasetId, inputVersion, detail.versions.find(v => v.versionId === inputVersion)?.stage === 'RAW' ? 'source' : 'corpus.jsonl')">下载输入</a><template v-if="cleanVersion"><a :href="api.downloadUrl(detail.datasetId, cleanVersion.versionId, 'corpus.jsonl')">清洗数据</a><a :href="api.downloadUrl(detail.datasetId, cleanVersion.versionId, 'quarantine.jsonl')">隔离明细</a><a :href="api.downloadUrl(detail.datasetId, cleanVersion.versionId, 'changes.jsonl')">清洗记录</a></template></div>
     </section>
     <el-empty v-else class="dataset-welcome" description="选择数据集，查看质量与处理记录" />
   </div>

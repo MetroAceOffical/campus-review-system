@@ -43,14 +43,14 @@ public class WorkbenchWorker {
                 // is executing a claim here. Recover abandoned claims on every
                 // poll, including those left by a transient DB failure.
                 data.transactions.executeWithoutResult(tx->{
-                        var stale=data.db.queryForList("SELECT id,output_version_id FROM ml_run WHERE status='RUNNING' AND action IN ('AUDIT','CLEAN')");
+                        var stale=data.db.queryForList("SELECT id,output_version_id FROM ml_run WHERE status='RUNNING' AND action IN ('AUDIT','CLEAN','COMPOSE')");
                         for(var row:stale){
                             data.db.update("UPDATE ml_run SET status='INTERRUPTED',error_message='任务已中断，请重新运行',finished_at=UTC_TIMESTAMP(3) WHERE id=? AND status='RUNNING'",row.get("id"));
                             if(row.get("output_version_id")!=null)data.db.update("UPDATE ml_dataset_version SET status='INTERRUPTED' WHERE id=? AND status='PROCESSING'",row.get("output_version_id"));
                             data.event(row.get("id").toString(),Map.of("stage","INTERRUPTED"));
                         }
                 });
-                var jobs=data.db.queryForList("SELECT * FROM ml_run WHERE status='QUEUED' AND action IN ('AUDIT','CLEAN') ORDER BY created_at,id LIMIT 1");
+                var jobs=data.db.queryForList("SELECT * FROM ml_run WHERE status='QUEUED' AND action IN ('AUDIT','CLEAN','COMPOSE') ORDER BY created_at,id LIMIT 1");
                 if(jobs.isEmpty())return;var job=jobs.getFirst();String id=job.get("id").toString();
                 var claimed=data.transactions.execute(tx->{
                     if(data.db.update("UPDATE ml_run SET status='RUNNING',owner_id=?,started_at=UTC_TIMESTAMP(3) WHERE id=? AND status='QUEUED'",owner,id)!=1)return false;
@@ -73,7 +73,7 @@ public class WorkbenchWorker {
         var configFile=logs.resolve(id+".json");Files.writeString(configFile,config.toString(),StandardOpenOption.CREATE_NEW);
         var args=new ArrayList<>(List.of(data.settings.python().toString(),"-B",data.settings.root().resolve("app/scripts/workbench.py").toString(),action.toLowerCase(Locale.ROOT),"--input",file.toString(),"--kind",kind,"--config-file",configFile.toString()));
         Path output=null;
-        if("CLEAN".equals(action)){output=data.directory(datasetId,job.get("output_version_id").toString());args.addAll(List.of("--output",output.toString()));}
+        if(Set.of("CLEAN","COMPOSE").contains(action)){output=data.directory(datasetId,job.get("output_version_id").toString());args.addAll(List.of("--output",output.toString()));}
         var process=new ProcessBuilder(args).directory(data.settings.root().toFile()).redirectError(logs.resolve(id+".log").toFile()).start();
         data.processes.put(id,process);var timeout=watchdog.schedule(process::destroyForcibly,300,TimeUnit.SECONDS);
         JsonNode result=null;String failure=null;JsonNode failureDetails=null;
@@ -92,18 +92,18 @@ public class WorkbenchWorker {
             }
             if(process.waitFor()!=0 || result==null)throw new DatasetFailure(failure==null?"数据任务失败或超时，请查看文件与参数":failure,failureDetails);
         }finally{timeout.cancel(false);data.processes.remove(id,process);if(process.isAlive())process.destroyForcibly();}
-        if("CLEAN".equals(action)){
+        if(Set.of("CLEAN","COMPOSE").contains(action)){
             var manifest=data.json.readTree(Files.readString(output.resolve("manifest.json")));
             if(!manifest.equals(result) || !"COMPLETED".equals(manifest.path("status").asText()) || !manifest.path("inputSha256").asText().equals(input.get("sha256")))throw new IOException("数据版本身份校验失败");
             var fields=manifest.path("artifacts").fields();int artifacts=0;
-            while(fields.hasNext()){var artifact=fields.next();if(!Set.of("corpus.jsonl","quarantine.jsonl","changes.jsonl","audit.json","cleaning.json","events.jsonl").contains(artifact.getKey()) || !sha(output.resolve(artifact.getKey())).equals(artifact.getValue().asText()))throw new IOException("数据产物校验失败");artifacts++;}
-            if(artifacts!=6)throw new IOException("数据版本产物不完整");
+            while(fields.hasNext()){var artifact=fields.next();if(!("COMPOSE".equals(action)?Set.of("corpus.jsonl","quarantine.jsonl","changes.jsonl","audit.json","cleaning.json","events.jsonl","composition.json","lineage.jsonl"):Set.of("corpus.jsonl","quarantine.jsonl","changes.jsonl","audit.json","cleaning.json","events.jsonl")).contains(artifact.getKey()) || !sha(output.resolve(artifact.getKey())).equals(artifact.getValue().asText()))throw new IOException("数据产物校验失败");artifacts++;}
+            if(artifacts!=("COMPOSE".equals(action)?8:6))throw new IOException("数据版本产物不完整");
         }else if(!result.path("sourceSha256").asText().equals(input.get("sha256")))throw new IOException("数据质量报告身份不一致");
         JsonNode finalResult=result;
         data.transactions.executeWithoutResult(tx->{
             var state=data.db.queryForObject("SELECT status FROM ml_run WHERE id=? FOR UPDATE",String.class,id);
             if(!"RUNNING".equals(state))return;
-            if("CLEAN".equals(action))data.db.update("UPDATE ml_dataset_version SET status='READY',sha256=?,row_count=? WHERE id=?",finalResult.path("artifacts").path("corpus.jsonl").asText(),finalResult.path("outputRows").asLong(),job.get("output_version_id"));
+            if(Set.of("CLEAN","COMPOSE").contains(action))data.db.update("UPDATE ml_dataset_version SET status='READY',sha256=?,row_count=? WHERE id=?",finalResult.path("artifacts").path("corpus.jsonl").asText(),finalResult.path("outputRows").asLong(),job.get("output_version_id"));
             else data.db.update("UPDATE ml_dataset_version SET row_count=?,mapping_json=? WHERE id=?",finalResult.path("audit").path("totalRows").asLong(),job.get("mapping_json").toString(),input.get("id"));
             data.db.update("UPDATE ml_run SET status='COMPLETED',result_json=?,finished_at=UTC_TIMESTAMP(3) WHERE id=?",finalResult.toString(),id);
             data.db.update("UPDATE ml_dataset SET updated_at=UTC_TIMESTAMP(3) WHERE id=?",datasetId);

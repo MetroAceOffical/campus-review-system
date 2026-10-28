@@ -1,5 +1,15 @@
 # 期末离线数据与训练
 
+## 10月28日数据集组合（阶段15）
+
+数据中心“组合多个数据集”选择2—10个同类型、不同数据集的清洗版本，创建独立目标数据集；对应`POST /api/workbench/datasets/compose`，请求包含organizationId/name/sources[{datasetId,versionId}]。源版本不覆盖，组合任务进入CPU数据队列，完成后产生新的CLEAN版本，继续现有分组/样本/训练或新闻参考入库。自动连续执行整条流水线仍为下一阶段。
+
+来源RAW登记为sources.json清单（固定ID/版本/名称/SHA），不能作为普通CSV重新清洗。新增`composition.py`执行实际来源校验与组合，复用原清洗器；正文不再次抽取或规范化，行ID增加数据集前缀，来源/事件/分区编号保持，跨来源相同原文或句对去重，标签/分区/分组冲突隔离。分组编号仍按原值保守连通，不增加独立原作/事件计数。每个数据集限选一个版本，总输入最多100,000行和512MiB。
+
+COMPOSE输出保留原六个数据工件，新增composition.json和lineage.jsonl，共8个逐项SHA核验；manifest最后保存。composition报告逐源输入/保留/重复/隔离数量，lineage记录每条原始输入的源数据集/版本/行、组合ID及去向。重复代表按所选来源顺序保留第一条，其余来源留在_provenance和lineage中。源版本归档不删除已有文件；组合不是修改标签或重新混排已有留出区的入口。
+
+实际功能检查复用既有217与3,021篇Web清洗材料，3,238输入合并为3,021行，217重复、0隔离，8工件与全部来源映射通过；保存于runtime/workbench-implementation/stage15-real-composition-check.json，没有更换正式训练原料或创建新的训练成绩。已完成源码/必要检查，尚未部署和HTTP联调。
+
 ## 10月28日模型比较与文件预测（阶段14）
 
 模型管理支持选择2—6个已有模型，按`inputSha256 + preparationSha256 + validationRows`分组展示验证指标/训练耗时；不同划分不合成统一排名。模型任务通过`runs?modelId=...`后端分页查询。

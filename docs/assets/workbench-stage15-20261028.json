@@ -1,0 +1,112 @@
+{
+  "stage": "dataset-composition",
+  "date": "2026-10-28",
+  "snapshotAt": "2026-10-28T15:09:33.421383+08:00",
+  "state": "SOURCE_AND_FOCUSED_CHECKS_COMPLETE_NOT_DEPLOYED",
+  "roles": [
+    "ADMIN",
+    "REVIEWER"
+  ],
+  "kindPolicy": "SAME_KIND_CLEAN_READY_VERSIONS",
+  "limits": {
+    "sourcesMinimum": 2,
+    "sourcesMaximum": 10,
+    "oneVersionPerDataset": true,
+    "inputRows": 100000,
+    "inputBytes": 536870912
+  },
+  "implementation": [
+    "CPU data queue COMPOSE action",
+    "immutable source descriptor and hash verification",
+    "independent CLEAN output with eight verified artifacts",
+    "original grouping and split preservation with conflict quarantine",
+    "cross-source exact deduplication and row ID namespaces",
+    "per-source summary and complete row lineage"
+  ],
+  "actualExistingMaterialCheck": {
+    "state": "REAL_EXISTING_WEB_DATA_COMPOSITION_CHECK_COMPLETE",
+    "observedAt": "2026-10-28T15:05:55.329904+08:00",
+    "sourceRows": [
+      217,
+      3021
+    ],
+    "inputRows": 3238,
+    "outputRows": 3021,
+    "duplicates": 217,
+    "quarantined": 0,
+    "artifactsVerified": 8,
+    "lineageRows": 3238,
+    "sourceVersionsUnchanged": true,
+    "outputDatasetDirectory": "febe6617-1531-47d9-89ed-4db6c2f75ce7",
+    "outputVersionDirectory": "e26baade-0beb-4fb0-93a3-f72452e8537f",
+    "databaseRegistered": false,
+    "newCorpusAcquired": false,
+    "formalTrainingInputChanged": false,
+    "newTrainingPerformed": false
+  },
+  "checks": {
+    "pythonFocusedPassed": 3,
+    "javaFocusedPassed": 2,
+    "backendCompile": true,
+    "frontendTypeBuild": true,
+    "sourceArtifactsVerified": 8,
+    "formalBoundAlgorithmsUnchanged": 18,
+    "heldoutAlgorithmsUnchanged": 5,
+    "trainSha256Unchanged": true,
+    "fullRegressionRun": false,
+    "realHttpVerified": false,
+    "browserVerified": false
+  },
+  "backgroundGeneration": {
+    "state": "GENERATING_TRAIN_MATERIAL",
+    "segmentCounts": {
+      "ACCEPTED": 862,
+      "PENDING": 15783,
+      "QUARANTINED": 128
+    },
+    "selectedOriginals": 3684,
+    "elapsedSeconds": 4422.828000000001,
+    "device": "cuda",
+    "promptVersion": "3",
+    "reusedSegments": 440,
+    "estimatedRemainingSeconds": 126919.08058909094,
+    "semanticCorrectnessCertified": false,
+    "modelLoadSeconds": 9.06199999999808,
+    "hostRssBytes": 543191040,
+    "cudaPeakAllocatedBytes": 6301956608
+  },
+  "sourceVersionsModified": false,
+  "productionDatabaseMutated": false,
+  "deployed": false,
+  "serviceRestarted": false,
+  "newDependenciesInstalled": false,
+  "chartImageExportAdded": false,
+  "formalTrainingInputChanged": false,
+  "newTrainingPerformed": false,
+  "newAccuracyGrade": false,
+  "dataScaleReduced": false,
+  "generationOriginals": 3684,
+  "generationSegments": 16773,
+  "epochsEach": 2,
+  "productActivated": false,
+  "qualityAccepted": false,
+  "remaining": [
+    "one-click end-to-end pipeline orchestration",
+    "Web neural checkpoint continuation",
+    "unified deployment and API/browser verification",
+    "image/OCR improvement production integration",
+    "real formal training/calibration and heldout evaluations",
+    "independent grammar/image-text quality and final reports"
+  ],
+  "estimateHours": {
+    "nextOrchestrationAndWebResumeEngineering": [
+      6,
+      12
+    ],
+    "deploymentAndFocusedQA": [
+      3,
+      6
+    ],
+    "completeProjectEstimateAvailable": false
+  }
+}

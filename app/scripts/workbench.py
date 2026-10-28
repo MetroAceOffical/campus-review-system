@@ -15,7 +15,7 @@ def send(kind, value):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description='数据集质量评估与清洗')
-    parser.add_argument('action', choices=('audit', 'clean'))
+    parser.add_argument('action', choices=('audit', 'clean','compose'))
     parser.add_argument('--input', type=Path, required=True)
     parser.add_argument('--kind', choices=('NEWS', 'PAIRS'), required=True)
     parser.add_argument('--output', type=Path)
@@ -23,7 +23,7 @@ def main(argv=None):
     parser.add_argument('--options-json', default='{}')
     parser.add_argument('--config-file', type=Path)
     args = parser.parse_args(argv)
-    if args.action == 'clean' and args.output is None:
+    if args.action in ('clean','compose') and args.output is None:
         parser.error('clean需要--output新版本目录')
     mapping, options = json.loads(args.mapping_json), json.loads(args.options_json)
     internal = False
@@ -37,7 +37,10 @@ def main(argv=None):
             raise ValueError('INVALID_CONFIG: 任务配置无效')
         mapping, options = config.get('mapping', {}), config.get('options', {})
         internal = config.get('internalVersion', False)
-    if args.action == 'audit':
+    if args.action == 'compose':
+        from campus_workbench.composition import compose
+        send('result',compose(args.input,args.output,args.kind,lambda value:send('event',value)))
+    elif args.action == 'audit':
         data = read_dataset(args.input, args.kind, mapping=mapping, internal=internal)
         send('result', {'sourceSha256': data['sourceSha256'], 'columns': data['columns'],
                         'mapping': data['mapping'], 'audit': audit_dataset(data),
