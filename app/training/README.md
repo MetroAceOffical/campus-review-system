@@ -1,5 +1,15 @@
 # 期末离线数据与训练
 
+## 10月28日正式训练Web进度（阶段13）
+
+`app/config/formal-pipeline.json`只读登记当前正式配方及7个阶段目录。新增`GET /api/workbench/training/formal-progress`，仅审核员/管理员读取；模型训练页每5秒更新真实工件。原Web数据选择、样本准备和六模型运行仍读取各自的ml_run事件，不将校级后台任务混入部门实验。
+
+当前registry指向corrected-material-stage-v1、campus-generation-v4、campus-training-stage-v2、retriever-campus-v2、correspondence-campus-v2、heldout-generation-v2和text-evaluation-corrected-20261028-v3。后续创建新不可变版本时须明确更新registry，后台训练本身不受该文件控制。接口不接受用户路径、不返回原稿和自由stdout，不启动/取消训练；单个状态文件最多512KiB，历史只读最后256KiB/500个真实记录。写入中的JSON或日志半行不会成为伪完成记录，持续写入阶段超过15分钟无更新会提示进度待更新。
+
+生成折线是本次打开页面后观察到的实际计数，训练损失/验证与资源曲线来自现有history.jsonl尾部；没有正式训练日志时显示空态。评价区域展示的是材料构造数量和本校查询数，不能当成已完成预测或效果。BGE/M3当前尚未启动，计划各2epoch、有效batch32、≥20,000对应对和≥1,000检索查询组保持。
+
+本阶段源码及聚焦检查完成，尚未部署或重启运行服务；部署后可在“模型训练”页面查看此区。实际只读响应保存在runtime/workbench-implementation/stage13-formal-progress-sample.json，聚合检查证据见docs/assets/workbench-stage13-20261028.json。浏览器及真实HTTP联调随统一部署进行。
+
 ## 10月28日正式模型发布接入（阶段12）
 
 `prepare_service_profile.py`新增`snapshot/prepare/verify/list`。实际业务库18的385个来源字段已逐项冻结到`runtime/delivery/business-references-18-20261028-v1`，包括原始来源编号、字段、正文及顺序；原索引未改写。6,311篇离线评价库不等于该业务库，不能修改SHA将二者混用。

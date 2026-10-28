@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "title": "校级正式模型训练",
+  "recipe": "runtime/experiments/final-training-20261028/corrected-formal-recipe-v1.json",
+  "stages": [
+    {"key": "material", "title": "正式材料流程", "directory": "runtime/experiments/final-training-20261028/corrected-material-stage-v1", "statusFile": "status.json"},
+    {"key": "generation", "title": "新闻训练样本准备", "directory": "runtime/experiments/final-training-20261028/campus-generation-v4", "statusFile": "status.json"},
+    {"key": "training", "title": "训练与导出流程", "directory": "runtime/experiments/final-training-20261028/campus-training-stage-v2", "statusFile": "status.json"},
+    {"key": "bge", "title": "校园BGE检索训练", "directory": "runtime/experiments/final-training-20261028/retriever-campus-v2", "statusFile": "status.json", "historyFile": "history.jsonl"},
+    {"key": "m3", "title": "M3内容对应训练", "directory": "runtime/experiments/final-training-20261028/correspondence-campus-v2", "statusFile": "status.json", "historyFile": "history.jsonl"},
+    {"key": "heldout", "title": "独立评价材料构造", "directory": "runtime/experiments/final-training-20261028/heldout-generation-v2", "statusFile": "status.json"},
+    {"key": "protocol", "title": "校准与独立评价集", "directory": "runtime/datasets/text-evaluation-corrected-20261028-v3", "statusFile": "manifest.json"}
+  ]
+}

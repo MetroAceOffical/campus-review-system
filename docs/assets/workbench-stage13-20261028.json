@@ -1,0 +1,282 @@
+{
+  "stage": "formal-training-live-progress-bridge",
+  "date": "2026-10-28",
+  "snapshotAt": "2026-10-28T14:26:53.038746+08:00",
+  "state": "SOURCE_AND_FOCUSED_CHECKS_COMPLETE_NOT_DEPLOYED",
+  "endpoint": "/api/workbench/training/formal-progress",
+  "authorizedRoles": [
+    "ADMIN",
+    "REVIEWER"
+  ],
+  "stageCount": 7,
+  "refreshSeconds": 5,
+  "observedResponse": {
+    "observedAt": "2026-10-28T06:25:42.564244800Z",
+    "stages": [
+      {
+        "key": "material",
+        "title": "正式材料流程",
+        "state": "RUNNING_CHILD",
+        "availability": "AVAILABLE",
+        "metrics": {
+          "qualityAccepted": false,
+          "productActivated": false
+        },
+        "latest": {},
+        "history": [],
+        "splits": [],
+        "updatedAt": "2026-10-28T05:55:22.385885500Z",
+        "stale": false
+      },
+      {
+        "key": "generation",
+        "title": "新闻训练样本准备",
+        "state": "GENERATING_TRAIN_MATERIAL",
+        "availability": "AVAILABLE",
+        "metrics": {
+          "elapsedSeconds": 1792.8280000000013,
+          "estimatedRemainingSeconds": 133773.18924074084,
+          "selectedOriginals": 3684,
+          "cudaPeakAllocatedBytes": 6295241728,
+          "reusedSegments": 440,
+          "modelLoadSeconds": 9.06199999999808,
+          "hostRssBytes": 950685696,
+          "quarantined": 56,
+          "pending": 16117,
+          "accepted": 600,
+          "reused": 440
+        },
+        "latest": {},
+        "history": [],
+        "splits": [],
+        "updatedAt": "2026-10-28T06:25:37.225450400Z",
+        "stale": false,
+        "progress": {
+          "processed": 656,
+          "total": 16773,
+          "percent": 3.9110475168425447
+        }
+      },
+      {
+        "key": "training",
+        "title": "训练与导出流程",
+        "state": "NOT_STARTED",
+        "availability": "PENDING",
+        "metrics": {},
+        "latest": {},
+        "history": [],
+        "splits": []
+      },
+      {
+        "key": "bge",
+        "title": "校园BGE检索训练",
+        "state": "NOT_STARTED",
+        "availability": "PENDING",
+        "metrics": {},
+        "latest": {},
+        "history": [],
+        "splits": []
+      },
+      {
+        "key": "m3",
+        "title": "M3内容对应训练",
+        "state": "NOT_STARTED",
+        "availability": "PENDING",
+        "metrics": {},
+        "latest": {},
+        "history": [],
+        "splits": []
+      },
+      {
+        "key": "heldout",
+        "title": "独立评价材料构造",
+        "state": "WAITING_CAMPUS_TRAINING_COMPLETION",
+        "availability": "AVAILABLE",
+        "metrics": {
+          "modelEvaluationStarted": false,
+          "neuralTrainingStarted": false
+        },
+        "latest": {},
+        "history": [],
+        "splits": [],
+        "updatedAt": "2026-10-28T06:25:39.715428600Z",
+        "stale": false
+      },
+      {
+        "key": "protocol",
+        "title": "校准与独立评价集",
+        "state": "QUERY_CONSTRUCTION_PLAN_AND_EXACT_CONTROLS_FROZEN",
+        "availability": "AVAILABLE",
+        "metrics": {
+          "generatedParaphraseQueries": 0,
+          "globallySupportedNormalQueries": 0,
+          "referenceFields": 6311,
+          "constructedQueries": 340,
+          "requestedQuerySlots": 1800,
+          "plannedSlots": 1800,
+          "pendingSlots": 1460,
+          "neuralTrainingPerformed": false,
+          "qualityAccepted": false,
+          "fullQuerySetReady": false,
+          "finalProtocolExecuted": false
+        },
+        "latest": {},
+        "history": [],
+        "splits": [
+          {
+            "split": "calibration",
+            "pending": 160,
+            "constructed": 40,
+            "target": 200,
+            "constructedHomePrimaryQueries": 11,
+            "plannedHomePrimaryQueries": 54,
+            "homeTargetMetForPlan": false
+          },
+          {
+            "split": "dev",
+            "pending": 325,
+            "constructed": 75,
+            "target": 400,
+            "constructedHomePrimaryQueries": 23,
+            "plannedHomePrimaryQueries": 134,
+            "homeTargetMetForPlan": false
+          },
+          {
+            "split": "final",
+            "pending": 975,
+            "constructed": 225,
+            "target": 1200,
+            "constructedHomePrimaryQueries": 83,
+            "plannedHomePrimaryQueries": 418,
+            "homeTargetMetForPlan": false
+          }
+        ],
+        "updatedAt": "2026-10-28T05:10:15.020662200Z",
+        "stale": false,
+        "progress": {
+          "processed": 340,
+          "total": 1800,
+          "percent": 18.88888888888889
+        }
+      }
+    ],
+    "title": "校级正式模型训练",
+    "configured": true,
+    "recipe": {
+      "generationOriginals": 3684,
+      "generationSegments": 16773,
+      "epochsBge": 2,
+      "epochsM3": 2,
+      "effectiveBatch": 32,
+      "minimumPairs": 20000,
+      "minimumRetrievalGroups": 1000,
+      "training": {
+        "bge": {
+          "explicitNegatives": 4,
+          "epochs": 2,
+          "effectiveQueries": 32,
+          "microbatch": 1,
+          "maxTokensPerSide": 512,
+          "learningRate": 2e-05
+        },
+        "m3": {
+          "dropout": 0.05,
+          "adapterLearningRate": 0.0001,
+          "loraAlpha": 32,
+          "epochs": 2,
+          "effectivePairs": 32,
+          "maxJointTokens": 512,
+          "microbatch": 1,
+          "loraR": 16,
+          "headLearningRate": 5e-05
+        }
+      }
+    }
+  },
+  "backgroundGeneration": {
+    "state": "GENERATING_TRAIN_MATERIAL",
+    "segmentCounts": {
+      "ACCEPTED": 606,
+      "PENDING": 16108,
+      "QUARANTINED": 59
+    },
+    "selectedOriginals": 3684,
+    "elapsedSeconds": 1866.938000000002,
+    "device": "cuda",
+    "promptVersion": "3",
+    "reusedSegments": 440,
+    "estimatedRemainingSeconds": 133656.16579555572,
+    "semanticCorrectnessCertified": false,
+    "modelLoadSeconds": 9.06199999999808,
+    "hostRssBytes": 951160832,
+    "cudaPeakAllocatedBytes": 6295241728
+  },
+  "limits": {
+    "stateFileBytes": 524288,
+    "historyTailBytes": 262144,
+    "historyPoints": 500,
+    "staleAfterSeconds": 900,
+    "generationObservationPointsInBrowser": 600
+  },
+  "checks": {
+    "backendCompile": true,
+    "backendFocusedPassed": 3,
+    "frontendTypeBuild": true,
+    "frontendFocusedPassed": 1,
+    "dynamicCountsAndPendingCurvesChecked": true,
+    "pollingStoppedAfterUnmountChecked": true,
+    "partialStatusAndTailChecked": true,
+    "backgroundAlgorithmsUnchanged": 18,
+    "heldoutAlgorithmsUnchanged": 5,
+    "originalTrainSha256Unchanged": true,
+    "fullRegressionRun": false,
+    "browserVerified": false,
+    "realHttpVerified": false
+  },
+  "initialCheckIssues": [
+    "Maven existing cache argument corrected without installation",
+    "Mockito attach fixture removed in favor of actual role method; no environment changes",
+    "Frontend Element Plus test stubs registered; targeted check then passed"
+  ],
+  "productionTextMethod": "text-v2",
+  "campusBgeM3TrainingComplete": false,
+  "accuracyImprovementVerified": false,
+  "productActivated": false,
+  "qualityAccepted": false,
+  "serviceRestarted": false,
+  "deployed": false,
+  "newDependenciesInstalled": false,
+  "chartImageExportAdded": false,
+  "dataScaleReduced": false,
+  "generationOriginals": 3684,
+  "generationSegments": 16773,
+  "epochsEach": 2,
+  "remaining": [
+    "real campus training and reload",
+    "complete heldout truth and home-campus coverage",
+    "real calibration/development/five-way final evaluation",
+    "business bank deployment and runtime integration",
+    "independent grammar/image-text quality",
+    "whole-system acceptance and documentation"
+  ],
+  "estimateHours": {
+    "remainingEngineeringAndFocusedQA": [
+      4,
+      8
+    ],
+    "formalGeneration": [
+      40,
+      80
+    ],
+    "campusTraining": [
+      4,
+      12
+    ],
+    "heldoutGeneration": [
+      10,
+      20
+    ],
+    "fullEvaluationComputeMeasured": false,
+    "publicSourceCompletionKnown": false
+  }
+}

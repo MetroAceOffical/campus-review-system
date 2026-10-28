@@ -8,6 +8,7 @@ import type { Dataset, Detail } from '../api/workbench'
 import TrainingProgress from '../components/workbench/TrainingProgress.vue'
 import ExperimentChart from '../components/experiments/ExperimentChart.vue'
 import NewsSampleReport from '../components/workbench/NewsSampleReport.vue'
+import FormalTrainingProgress from '../components/workbench/FormalTrainingProgress.vue'
 import '../styles/workbench.css'
 const route = useRoute(), router = useRouter(), error = ref(''), busy = ref(false), q = ref(''), dataPage = ref(1), dataTotal = ref(0), dataItems = ref<Dataset[]>([])
 const datasetId = ref(''), versionId = ref(''), detail = ref<Detail | null>(null), preparationId = ref(''), current = ref<ComputeRun | null>(null), events = ref<ComputeEvent[]>([])
@@ -82,6 +83,7 @@ onBeforeUnmount(() => { alive = false; generation++; stop() })
 </script>
 <template>
   <p v-if="error" role="alert" class="work-error">{{ error }}</p>
+  <FormalTrainingProgress />
   <section class="work-panel"><div class="work-heading"><div><h2>选择训练数据</h2><span class="muted">选定清洗版本，先准备样本，再配置模型。</span></div><RouterLink to="/datasets">上传与清洗数据</RouterLink></div>
     <div class="work-search"><el-input v-model="q" placeholder="搜索数据集" aria-label="搜索训练数据集" @change="dataPage = 1; perform(loadData)" /><el-button @click="perform(loadData)">搜索</el-button><el-pagination small layout="prev, next" :page-size="12" :total="dataTotal" v-model:current-page="dataPage" @current-change="perform(loadData)" /></div>
     <el-form label-position="top"><div class="work-grid"><el-form-item label="数据集"><el-select v-model="datasetId" aria-label="训练数据集" @change="perform(chooseDataset)"><el-option v-for="item in dataItems" :key="item.datasetId" :label="`${item.name} · ${item.kind === 'NEWS' ? '新闻' : '句对'}`" :value="item.datasetId" /><el-option v-if="detail && !dataItems.some(d => d.datasetId === detail!.datasetId)" :label="detail.name" :value="detail.datasetId" /></el-select></el-form-item><el-form-item label="清洗版本"><el-select v-model="versionId" aria-label="训练清洗版本" @change="chooseVersion"><el-option v-for="version in cleanVersions" :key="version.versionId" :label="`${version.versionId.slice(0, 8)} · ${version.rowCount?.toLocaleString()}条`" :value="version.versionId" /></el-select></el-form-item><el-form-item label="随机种子"><el-input-number v-model="partition.seed" :min="0" :max="2147483647" :precision="0" /></el-form-item></div>
