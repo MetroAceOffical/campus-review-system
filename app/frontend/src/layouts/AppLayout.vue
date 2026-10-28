@@ -8,7 +8,7 @@ const route = useRoute(), router = useRouter(), theme = reactive(readTheme())
 const workspaceLink = (panel: string) => /^\/manuscripts\/\d+\/edit$/.test(route.path) ? `${route.path}?panel=${panel}` : `/workspace/${panel}`
 const links = computed(() => [
   { to: '/home', label: '首页' },
-  ...(session.user?.role === 'REVIEWER' || session.user?.role === 'ADMIN' ? [{ to: '/datasets', label: '数据中心' }, { to: '/training', label: '模型训练' }, { to: '/models', label: '模型管理与预测' }] : []),
+  ...(session.user?.role === 'REVIEWER' || session.user?.role === 'ADMIN' ? [{ to: '/datasets', label: '数据中心' }, { to: '/training', label: '模型训练' }, { to: '/models', label: '模型管理与预测' }, { to: '/releases', label: '模型发布与回退' }, { to: '/reference-imports', label: '批量参考入库' }] : []),
   ...(session.user?.role === 'MEMBER' ? [{ to: '/manuscripts', label: '组织稿件' }, { to: '/manuscripts/new', label: '新建稿件' }] : []),
   ...(session.user?.role === 'MEMBER' ? [{ to: workspaceLink('content'), label: '内容审核' }, { to: workspaceLink('grammar'), label: '语法检查' }, { to: workspaceLink('image'), label: '图文一致性' }] : []),
   ...(session.user?.role === 'REVIEWER' ? [{ to: '/reviews', label: '审核工作台' }] : []),

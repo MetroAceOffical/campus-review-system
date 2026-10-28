@@ -22,7 +22,8 @@ public class InspectionWorker {
     private final ExecutorService executor=Executors.newSingleThreadExecutor(r->{var t=new Thread(r,"manuscript-checks");t.setDaemon(true);return t;});
     private final ScheduledExecutorService monitor=Executors.newSingleThreadScheduledExecutor(r->{var t=new Thread(r,"check-monitor");t.setDaemon(true);return t;});
     private final AtomicBoolean busy=new AtomicBoolean();private volatile boolean ready;
-    public InspectionWorker(InspectionService checks,DetectorClient detector,LibraryGenerationService libraries){this.checks=checks;this.detector=detector;this.libraries=libraries;}
+    private final local.campus.review.workbench.ReleaseService releases;
+    public InspectionWorker(InspectionService checks,DetectorClient detector,LibraryGenerationService libraries,local.campus.review.workbench.ReleaseService releases){this.checks=checks;this.detector=detector;this.libraries=libraries;this.releases=releases;}
     @EventListener(ApplicationReadyEvent.class) public void ready(){checks.db.update("UPDATE document_check SET status='INTERRUPTED',error_message='检查已中断，请重新检查',finished_at=UTC_TIMESTAMP(3) WHERE status='RUNNING'");ready=true;}
     @Scheduled(fixedDelay=750) public void poll(){if(!ready || !busy.compareAndSet(false,true))return;executor.submit(()->{try{runOne();}catch(Exception e){org.slf4j.LoggerFactory.getLogger(getClass()).warn("Document checks unavailable ({})",e.getClass().getSimpleName());}finally{busy.set(false);}});}
     private void runOne()throws Exception{
@@ -53,8 +54,9 @@ public class InspectionWorker {
         var health=detector.health(false);String generation=libraries.currentId();
         if(!health.path("ready").asBoolean() || health.path("busy").asBoolean() || generation==null){checks.db.update("UPDATE document_check SET status='WAITING_SERVICE',error_message='等待内容检测服务',retry_after=DATE_ADD(UTC_TIMESTAMP(3),INTERVAL 30 SECOND) WHERE id=? AND status='RUNNING'",id);checks.event(id,Map.of("stage","WAITING_SERVICE"));return null;}
         String libraryHash=checks.db.queryForObject("SELECT manifest_sha256 FROM library_generation WHERE id=?",String.class,generation);
+        String org=checks.db.queryForObject("SELECT organization_id FROM manuscript WHERE id=?",String.class,payload.path("manuscriptId").asText());var selected=releases.textSelection(org,health.path("configs").path("textConfig"));
         var request=checks.json.createObjectNode().put("taskId",id).put("attemptId",id).put("scene","PRECHECK").put("versionId",id).put("inputSnapshotKey","check:"+id).put("inputSha256",payload.path("inputHash").asText()).put("libraryGenerationId",generation).put("libraryManifestSha256",libraryHash).put("excludeManuscriptId",payload.path("manuscriptId").asText()).put("text",payload.path("plainText").asText()).put("configId",health.path("configs").path("textConfig").path("configId").asText());
-        var output=(ObjectNode)detector.call(false,"/detect/text",request,"text");output.put("inputHash",payload.path("inputHash").asText());
+        request.put("configId",selected.path("textConfig").path("configId").asText());var output=(ObjectNode)detector.call(false,"/detect/text",request,"text");output.put("inputHash",payload.path("inputHash").asText());if(selected.has("releaseId"))output.set("releaseId",selected.get("releaseId"));
         var document=checks.json.convertValue(payload.path("document"),DocumentModels.DocumentInput.class);checks.citations.annotate(output.path("evidence"),checks.codec.validateAndExtract(document));
         var images=output.putArray("imageResults");for(var image:payload.path("images")){var input=request.deepCopy();input.remove("text");input.put("fileId",image.path("fileId").asText()).put("fileSha256",image.path("sha256").asText()).put("path",image.path("path").asText()).put("configId",health.path("configs").path("imageConfig").path("configId").asText());var result=(ObjectNode)detector.call(false,"/detect/image",input,"image");result.put("nodeId",image.path("nodeId").asText());images.add(result);}
         return output;

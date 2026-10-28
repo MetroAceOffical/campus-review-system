@@ -1,0 +1,97 @@
+{
+  "stage": "model-release-rollback-and-bulk-reference",
+  "date": "2026-10-28",
+  "status": "feature_integrated_real_core_verified",
+  "release": {
+    "scopes": "department or school default; department override preferred",
+    "scenes": [
+      "TEXT_REUSE supported frozen configs",
+      "PAIR_PREDICTION evaluated workbench models"
+    ],
+    "verification": true,
+    "checks": [
+      "model/evaluation artifact SHA",
+      "independent evaluation belongs to selected model",
+      "3 saved predictions reloaded on CPU",
+      "native threshold and score type recorded",
+      "text feature space matches active index",
+      "expected current pointer CAS",
+      "active model archive protected"
+    ],
+    "realRollbackCASAndReset": true,
+    "productionPrediction": {
+      "predictionId": "5bcdb841-f6e9-430c-a3a9-cc274d9c94a3",
+      "releaseId": "f7442ec3-9128-4ddd-b0cc-318b711ad931",
+      "score": 0.5952708234154921
+    },
+    "predictionDevice": "CPU independent of sample generation queue",
+    "oldSnapshotsUnchanged": true,
+    "textConsumers": [
+      "formal batch first pin",
+      "draft content inspection"
+    ],
+    "textConsumerGPUJointRecheck": "pending final resource-coexistence acceptance; existing detector intentionally off for generator",
+    "thresholds": "SVM native0; other workbench families native0.5; no new campus threshold-calibration claim"
+  },
+  "bulkReference": {
+    "approval": "REVIEWER requests; ADMIN approves; ADMIN may explicitly start shared import",
+    "realInput": "217 NCUC train-domain originals, existing clean version",
+    "result": {
+      "id": "14545fa9-30c0-49a1-a77e-7950b9862842",
+      "datasetId": "2bdab7e3-7fcb-43ee-8caf-06d0d75fe225",
+      "versionId": "a83ded4c-ea51-4891-aa66-bdc62c5745b6",
+      "name": "南京传媒学院训练原稿·217篇",
+      "status": "COMPLETED",
+      "processed": 217,
+      "inserted": 137,
+      "duplicates": 80,
+      "rejected": 0,
+      "generationId": "18",
+      "error": null
+    },
+    "index": {
+      "oldGeneration": "17",
+      "newGeneration": "18",
+      "oldImages": 57,
+      "preservedImages": 57,
+      "newDocuments": 385,
+      "indexedSourceRetrievedTop10": "210"
+    },
+    "lineage": "immutable dataset/version and source ID per row, metadata provenance retained",
+    "recovery": "committed rows retained; retry skips settled rows",
+    "progress": "actual processed/inserted/duplicate/rejected counts every25 rows and completion",
+    "indexActivation": "one CPU generation after whole batch; READY/hash and expected-current CAS",
+    "failurePolicy": "old active index retained; failed/interrupted imports retryable"
+  },
+  "access": "MEMBER denied workbench; REVIEWER may read and request reference import but cannot publish/approve; ADMIN controls active changes",
+  "verification": [
+    "frontend vue-tsc/Vite PASS",
+    "backend compile/package PASS",
+    "real release registration3/CAS/rollback/default reset PASS",
+    "real released LR CPU prediction PASS",
+    "real217 news batch completed PASS",
+    "57 old image features preserved and new source in TF-IDF Top10 PASS",
+    "existing report hashes unchanged PASS",
+    "archive guard/evaluation selector actual HTTP PASS"
+  ],
+  "startupFix": "transactional proxy field access replaced with direct dependency injection; fixed before successful delivery",
+  "background": {
+    "oldRunId": "b0c7b3dc-3472-4a7e-8113-5128b54dcdfc",
+    "newRunId": "69ce0f98-93cb-4c63-aedd-840c32b33f34",
+    "settledPreserved": 642,
+    "windows": 1394,
+    "originals": 217,
+    "parametersUnchanged": true,
+    "status": "RUNNING"
+  },
+  "remaining": [
+    "original-scale campus BGE/M3 training and compatible new audit configuration",
+    "formal code/environment freeze and campus threshold calibration",
+    "grammar/image-text independent evaluation",
+    "full browser visual/keyboard/resource-coexistence and final regression/report",
+    "new delivery types in system-wide task summary"
+  ],
+  "newDependencies": false,
+  "squareStyle": true,
+  "chartImageExport": false
+}

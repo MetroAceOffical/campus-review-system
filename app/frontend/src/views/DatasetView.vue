@@ -110,7 +110,7 @@ function template() { download(`${form.kind.toLowerCase()}-template.csv`, '\uFEF
 onMounted(initialize); onBeforeUnmount(() => { alive = false; generation++; stop() })
 </script>
 
-<template>
+<template><RouterLink v-if="detail && cleanVersion && detail.kind === 'NEWS'" :to="`/reference-imports?dataset=${detail.datasetId}&version=${cleanVersion.versionId}`">批量参考入库 →</RouterLink>
   <section class="dataset-upload">
     <span class="dataset-eyebrow">DATA WORKSPACE</span><h2>批量导入，逐步处理</h2><p class="muted">选择CSV或JSONL，上传后自动评估数据质量。</p>
     <el-form label-position="top" class="upload-form" @submit.prevent="upload">

@@ -18,7 +18,8 @@ public class JobWorker {
     private final DetectorClient client;private final DetectionService detection;private final AttemptRepository attempts;
     private final LibraryGenerationService libraries;private final ReferenceProcessor references;
     private final String owner=UUID.randomUUID().toString();private final RecoveryService recovery;
-    public JobWorker(JdbcTemplate db,DataSource source,ObjectMapper json,DetectorClient client,DetectionService detection,AttemptRepository attempts,LibraryGenerationService libraries,ReferenceProcessor references,RecoveryService recovery){this.db=db;this.source=source;this.json=json;this.client=client;this.detection=detection;this.attempts=attempts;this.libraries=libraries;this.references=references;this.recovery=recovery;}
+    private final local.campus.review.workbench.ReleaseService releases;
+    public JobWorker(JdbcTemplate db,DataSource source,ObjectMapper json,DetectorClient client,DetectionService detection,AttemptRepository attempts,LibraryGenerationService libraries,ReferenceProcessor references,RecoveryService recovery,local.campus.review.workbench.ReleaseService releases){this.db=db;this.source=source;this.json=json;this.client=client;this.detection=detection;this.attempts=attempts;this.libraries=libraries;this.references=references;this.recovery=recovery;this.releases=releases;}
     @Scheduled(fixedDelay=2000) public void poll(){if("true".equalsIgnoreCase(System.getenv("CAMPUS_WORKER_ENABLED")))runOne();}
     public boolean claim(String id,String run){return db.update("UPDATE background_job SET status='RUNNING',owner_run_id=?,started_at=UTC_TIMESTAMP(3),error_code=NULL WHERE id=? AND status IN ('QUEUED','WAITING_SERVICE')",run,id)==1;}
     public JobOutcome runOne(){
@@ -63,7 +64,7 @@ public class JobWorker {
         JsonNode pipeline;
         if(batch.get("pipeline_manifest_json")==null){
             String generation=libraries.currentId();if(generation==null)throw new DetectorClient.DetectorFailure("LIBRARY_UNAVAILABLE");
-            var pin=json.createObjectNode();pin.set("textConfig",main.path("configs").path("textConfig"));pin.set("imageConfig",main.path("configs").path("imageConfig"));pin.set("ocrConfig",client.frozenOcrConfig());pin.put("libraryGenerationId",generation);
+            String org=db.queryForObject("SELECT organization_id FROM manuscript WHERE id=?",String.class,batch.get("manuscript_id"));var pin=releases.textSelection(org,main.path("configs").path("textConfig"));pin.set("imageConfig",main.path("configs").path("imageConfig"));pin.set("ocrConfig",client.frozenOcrConfig());pin.put("libraryGenerationId",generation);
             var library=db.queryForMap("SELECT manifest_sha256 FROM library_generation WHERE id=?",generation);pin.put("libraryManifestSha256",library.get("manifest_sha256").toString());
             pipeline=detection.pin(batchId,generation,pin);
         }else pipeline=JsonSupport.parse(json,batch.get("pipeline_manifest_json").toString());

@@ -56,3 +56,11 @@ runtime\environments\final-training\Scripts\python.exe -B app\scripts\workbench_
 Chinese-CLIP使用经授权下载的官方`OFA-Sys/chinese-clip-vit-base-patch16`固定revision `36e679e65c2a2fead755ae21162091293ad37834`。`app/scripts/acquire_chinese_clip.py`复用既有下载器写入项目模型目录及SHA清单。图文结果给出真实余弦相似度与关联段落；OCR日期/显式地点/主办单位只与图注和邻近正文比较，证据不足返回对应状态。原始相似度不换算成未经校准的类别或准确率。
 
 核心接入记录见`docs/assets/workbench-stage5-20261028.json`。正式语法评价、图文任务阈值及独立测试尚待后续阶段，不修改历史正式评价数据。
+
+## 发布与批量参考交付
+
+`#/releases`按部门/校级和正文审核/句对预测两个场景登记版本，后台CPU核验后由管理员CAS切换或回退。正文使用现有冻结配置，新检测批次锁定releaseId与配置；旧快照不重写。新工作台模型需匹配独立EVALUATE结果、校验工件并重算3条保存预测，发布句对预测通过固定CPU执行器消费指针，保存发布ID、输入SHA及真实结果，不挤占GPU生成队列。在用模型不能直接归档。
+
+`#/reference-imports`读取选择的CLEAN NEWS版本。审核员申请，管理员批准进入校内共享参考库。逐行结果、来源/版本和计数持久化，正文精确去重；失败或中断可从已提交行继续。整批准备后复用已有图片特征缓存，使用同一索引内核在CPU构建一次新代，经READY/SHA核验及CAS再切换；缺图片特征或构建失败继续保留旧代。旧图片失败部分保持失败状态，不把缺失特征当作新成功。CPU执行器为`app/scripts/delivery.py`，不接受客户端任意脚本/路径。
+
+现阶段没有把PAWS句对模型直接作为新闻检索器；校园BGE/M3的新审核配置和正式效果评价仍按原规模继续。证据见`docs/assets/workbench-stage7-20261028.json`。

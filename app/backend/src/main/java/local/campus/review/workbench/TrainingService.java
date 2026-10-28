@@ -134,10 +134,8 @@ public class TrainingService {
         result.set("manifest",JsonSupport.parse(data.json,row.get("manifest_json").toString()));return result;
     }
     public JsonNode updateModel(CurrentUser user,String id,String name,Boolean archived){
-        model(user,id);if(name==null && archived==null)throw invalid("请填写修改内容");
-        if(name!=null)data.db.update("UPDATE ml_model SET name=? WHERE id=?",DatasetService.name(name),id);
-        if(archived!=null)data.db.update("UPDATE ml_model SET archived=? WHERE id=?",archived,id);
-        return modelJson(model(user,id));
+        model(user,id);if(name==null && archived==null)throw invalid("请填写修改内容");String label=name==null?null:DatasetService.name(name);
+        data.transactions.executeWithoutResult(tx->{data.db.queryForObject("SELECT id FROM ml_model WHERE id=? FOR UPDATE",String.class,id);if(Boolean.TRUE.equals(archived)&&data.db.queryForObject("SELECT COUNT(*) FROM model_release_pointer p JOIN model_release r ON r.id=p.release_id WHERE r.model_id=?",Integer.class,id)>0)throw new ApiException(409,"MODEL_IN_USE","该模型正在发布使用，请先回退或撤销发布");if(label!=null)data.db.update("UPDATE ml_model SET name=? WHERE id=?",label,id);if(archived!=null)data.db.update("UPDATE ml_model SET archived=? WHERE id=?",archived,id);});return modelJson(model(user,id));
     }
     public Path artifact(CurrentUser user,String run,String name){
         var task=data.runRow(user,run);

@@ -67,7 +67,8 @@ public class ReferenceProcessor {
         if(db.queryForObject("SELECT COUNT(*) FROM background_job WHERE kind='REFRESH_LIBRARY' AND status IN ('QUEUED','WAITING_SERVICE')",Integer.class)==0)
             db.update("INSERT INTO background_job(kind,status,payload_json,created_at) VALUES('REFRESH_LIBRARY','QUEUED','{}',UTC_TIMESTAMP(3))");
     }
-    public void refresh(){
+    public void refresh(){refresh(false);}
+    public void refresh(boolean cpu){
         String expected=libraries.currentId();String generation=libraries.reserve();
         try{
             var manifest=json.createObjectNode().put("generationId",generation);var documents=manifest.putArray("documents");var pictures=manifest.putArray("images");
@@ -80,7 +81,7 @@ public class ReferenceProcessor {
                 if(!artifacts.path("plainText").asText().isBlank())documents.add(base.deepCopy().put("sourceKey",id+":BODY").put("sourceKind","BODY").put("text",artifacts.path("plainText").asText()));
                 var images=db.queryForList("SELECT f.*,b.node_id FROM stored_file f JOIN file_binding b ON b.file_id=f.id WHERE b.reference_revision_id=? AND b.purpose='BODY_IMAGE' ORDER BY b.id",id);
                 for(var image:images){
-                    String node=image.get("node_id").toString();var entry=base.deepCopy();entry.setAll(file(image));entry.put("nodeId",node);pictures.add(entry);
+                    String node=image.get("node_id").toString();if(cpu){String state=artifacts.path("parts").path("IMAGE:"+node).path("status").asText();if(!Set.of("AVAILABLE","FAILED").contains(state))throw new DetectorClient.DetectorFailure("IMAGE_FEATURE_PENDING");if(state.equals("AVAILABLE")){var entry=base.deepCopy();entry.setAll(file(image));entry.put("nodeId",node);pictures.add(entry);}}else{var entry=base.deepCopy();entry.setAll(file(image));entry.put("nodeId",node);pictures.add(entry);}
                     var recognized=artifacts.path("parts").path("OCR:"+node).path("result");
                     if(!recognized.path("combinedText").asText().isBlank()){
                         var text=base.deepCopy().put("sourceKey",id+":OCR:"+node).put("sourceKind","IMAGE_OCR").put("text",recognized.path("combinedText").asText());
@@ -89,7 +90,7 @@ public class ReferenceProcessor {
                 }
             }
             Path input=settings.runtime().resolve("indexes").resolve(generation).resolve("input-manifest.json");write(input,manifest);
-            var response=client.call(false,"/library/build",json.createObjectNode().put("manifestPath",input.toString()).put("manifestSha256",sha(input)),"library");
+            var response=cpu?ProjectPython.delivery(settings,json,input.getParent().resolve("cpu-build"),json.createObjectNode().put("action","INDEX").put("input",input.toString())):client.call(false,"/library/build",json.createObjectNode().put("manifestPath",input.toString()).put("manifestSha256",sha(input)),"library");
             if(!generation.equals(response.path("generationId").asText()))throw new DetectorClient.DetectorFailure("RESULT_IDENTITY_MISMATCH");
             for(var part:response.path("partResults")){
                 String revision=part.path("sourceRevisionId").asText();if(!part.path("key").asText().startsWith("IMAGE:"))continue;

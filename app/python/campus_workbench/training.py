@@ -329,10 +329,12 @@ def load_model(folder):
     return manifest
 
 
-def predict(folder, rows, emit):
+def predict(folder, rows, emit, device_override=None):
     import numpy as np
     folder = Path(folder); manifest = load_model(folder)
-    family, cfg = manifest['family'], manifest['parameters']
+    family, cfg = manifest['family'], dict(manifest['parameters'])
+    if device_override is not None:
+        cfg['device'] = device_override
     if not rows or len(rows) > 100000 or any(not isinstance(row.get(k), str) or not row[k].strip() or len(row[k]) > 1000000 for row in rows for k in ('sentence1', 'sentence2')):
         raise ValueError('请提供有效的待预测句对，最多100000条')
     if family in ('lr', 'svm', 'rf'):
