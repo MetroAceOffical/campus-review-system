@@ -15,13 +15,24 @@ from campus_detection.image import detect_image
 
 
 class Runtime:
-    def __init__(self,index_root,token):
+    def __init__(self,index_root,token,v3_profile=None):
         self.index_root=Path(index_root).resolve()
         if not self.index_root.is_relative_to(ROOT/'runtime'):raise ValueError('Index root must stay inside project runtime')
-        self.token=token;self.run_id=str(uuid.uuid4());self.models=None;self.load_error=None
+        self.token=token;self.run_id=str(uuid.uuid4());self.models=None;self.load_error=None;self.v3_profile=v3_profile
         self.compute=threading.Lock();self.active_attempt=None;self.libraries={}
     def load(self):
-        try:self.models=load_models()
+        try:
+            models=load_models()
+            if self.v3_profile:
+                from campus_detection.v3_runtime import controlled,read,verify_files,load_bundle,attach_runtime
+                from campus_detection.retrieval import load_dense_index
+                profile=read(controlled(self.v3_profile));calibration_folder=controlled(profile['calibration']);verify_files(calibration_folder)
+                calibration=read(calibration_folder/'calibration.json')
+                if calibration.get('operatingPointFrozen') is not True:raise ValueError('Require a frozen operating point for service activation')
+                session=load_bundle(controlled(profile['bundle']),device='cuda',precision='BF16')
+                index=load_dense_index(controlled(profile['index']),session['retriever']['identity'])
+                models=attach_runtime(models,session,index,calibration)
+            self.models=models
         except Exception as error:self.load_error=getattr(error,'code',type(error).__name__)
     def health(self):
         return {'ready':self.models is not None,'runId':self.run_id,'busy':self.compute.locked(),
@@ -101,10 +112,11 @@ def make_server(runtime,port=18081):
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--port',type=int,default=18081)
     parser.add_argument('--index-root',type=Path,default=ROOT/'runtime/indexes')
+    parser.add_argument('--v3-profile',type=Path,help='Explicit verified bundle/index/calibration profile; default v2 remains available')
     args=parser.parse_args()
     token_path=ROOT/'runtime/private-config/internal-token'
     if not token_path.is_file():raise RuntimeError('Run project initialization to create its private internal token')
-    runtime=Runtime(args.index_root,token_path.read_text().strip())
+    runtime=Runtime(args.index_root,token_path.read_text().strip(),args.v3_profile)
     server=make_server(runtime,args.port)
     threading.Thread(target=runtime.load,daemon=True).start()
     print(json.dumps({'event':'listening','port':server.server_port,'runId':runtime.run_id,'ready':False}),flush=True)

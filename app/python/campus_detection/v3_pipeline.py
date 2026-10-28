@@ -58,7 +58,19 @@ def _template_intervals(text,templates):
     return rows
 
 
-def analyze_correspondence(text,index,documents,retriever,reranker,*,literal_hits=(),exclude_manuscript_id=None,policy=None,calibrator=None,thresholds=None):
+def configuration_for(index,reranker,policy=None):
+    policy=_policy(policy);manifest=index['manifest']
+    configuration={'schemaVersion':'v3-correspondence-policy-v1','denseFeatureSpaceId':manifest['featureSpaceId'],
+                   'taskModelConfigId':reranker['configuration']['configId'],'policy':policy,
+                   'templatePolicy':{'gramCodepoints':16,'minimumSourceRevisions':3,'sourceRevisionRatio':.1},
+                   'algorithmSha256':{name:retrieval._sha(Path(module.__file__)) for name,module in
+                                      [('retrieval',retrieval),('alignment',alignment),('aggregation',aggregation)]},
+                   'pipelineAlgorithmSha256':retrieval._sha(Path(__file__))}
+    config_id='v3-'+retrieval._digest(configuration)
+    return configuration,config_id,{'modelConfigId':config_id,'pairScoreThreshold':policy['pairScoreThreshold']}
+
+
+def analyze_correspondence(text,index,documents,retriever,reranker,*,literal_hits=(),exclude_manuscript_id=None,exclude_source_revision_ids=(),policy=None,calibrator=None,thresholds=None):
     started=time.perf_counter();policy=_policy(policy)
     if not isinstance(text,str) or not text.strip() or len(text)>10000:raise ValueError('Require 1..10000 original query codepoints')
     if calibrator is not None and thresholds is None:raise ValueError('A formal calibrator requires frozen operating thresholds')
@@ -67,17 +79,13 @@ def analyze_correspondence(text,index,documents,retriever,reranker,*,literal_hit
     if manifest['configuration']['encoder']!=retriever['identity']:raise ValueError('Query encoder and dense-index feature identities differ')
     if chunk!={'tokens':192,'overlap':48,'coordinates':'ORIGINAL_CODEPOINTS'}:raise ValueError('Require the fixed v3 index chunk policy')
     fields,source_lengths,templates=_reference_context(index,documents)
-    configuration={'schemaVersion':'v3-correspondence-policy-v1','denseFeatureSpaceId':manifest['featureSpaceId'],
-                   'taskModelConfigId':reranker['configuration']['configId'],'policy':policy,
-                   'templatePolicy':{'gramCodepoints':16,'minimumSourceRevisions':3,'sourceRevisionRatio':.1},
-                   'algorithmSha256':{name:retrieval._sha(Path(module.__file__)) for name,module in
-                                      [('retrieval',retrieval),('alignment',alignment),('aggregation',aggregation)]},
-                   'pipelineAlgorithmSha256':retrieval._sha(Path(__file__))}
-    config_id='v3-'+retrieval._digest(configuration)
-    feature_config={'modelConfigId':config_id,'pairScoreThreshold':policy['pairScoreThreshold']}
+    configuration,config_id,feature_config=configuration_for(index,reranker,policy)
     if calibrator is not None:aggregation.validate_calibrator(calibrator,feature_config,thresholds)
     all_revisions={str(document['sourceRevisionId']) for document in documents}
     excluded={str(document['sourceRevisionId']) for document in documents if exclude_manuscript_id is not None and document.get('manuscriptId') is not None and str(document['manuscriptId'])==str(exclude_manuscript_id)}
+    explicit_exclusions={str(value) for value in exclude_source_revision_ids}
+    if not explicit_exclusions<=all_revisions:raise ValueError('Excluded sources are absent from the frozen bank')
+    excluded.update(explicit_exclusions)
     allowed=all_revisions-excluded
     literal=[];seen_literal=set()
     for hit in literal_hits:

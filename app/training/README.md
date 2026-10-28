@@ -1,5 +1,31 @@
 # 期末离线数据与训练
 
+## 10月28日模型接入与自动评价准备（阶段9）
+
+`v3_workflow.py`已有`status/register/index/predict/calibrate/freeze-point`命令。当前只完成接入代码和协议准备，新校园BGE/M3还未完成训练；不要把可执行入口或被冻结的构造槽位记成新模型成绩。
+
+当前状态命令（CMD，从项目根目录执行，不加载模型或占GPU）：
+
+```cmd
+runtime\environments\final-training\Scripts\python.exe -B app\training\v3_workflow.py status --recipe runtime/experiments/final-training-20261028/corrected-formal-recipe-v1.json --protocol runtime/datasets/text-evaluation-corrected-20261028-v2 --output runtime/workbench-implementation/v3-readiness.json
+runtime\environments\final-training\Scripts\python.exe -B app\training\v3_workflow.py --help
+```
+
+当前新协议保留6,281参考原稿和200/400/1,200目标，但只有40/75/225条控制查询，其余待新版本补齐，不能直接运行正式预测。`prepare_corrected_evaluation.py`只从已修正分区和可重新核验的原页恢复自然关系，旧协议不改。正常稿需有覆盖整个参考库的排除/负范围依据，未知关系不补0标签；最终本校60%覆盖不足会被新入口拒绝。
+
+完整材料和权重就绪后的执行顺序：
+
+1. `register`显式指定`--retriever-run --correspondence-run --export --references --output`，核对校园BGE≥1,000组、M3≥20,000对、各2epoch和实际重载；输出只读bundle。不会把公共辅助checkpoint当校园模型。
+2. `index --bundle ... --output ...`用固定BGE构建新的192/48密集索引，支持`--device cpu/cuda`；模型参数和索引实际精度/批量要一致。构建只需要BGE，预测会再加载M3及原v2模型。
+3. `predict --split calibration --bundle ... --index ... --protocol <完整协议> --output ...`执行全部200校准查询并保留实际来源特征。随后`calibrate --features ... --protocol ... --partitions ... --output ...`拟合，支持`--whole-threshold/--local-threshold`。拟合默认工作点0.5/0.5，尚未视为最终冻结；只允许校准事件，训练/dev/final事件拒绝。
+4. `predict --split dev --calibration ...`必须完整400条，保存逐条预测后自动调用现有evaluate_final输出独立metrics目录。`--diagnostic-controls`仅供开发控制诊断，不能用它冻结最终工作点。
+5. `freeze-point --calibration ... --development-predictions ... --development-run <完整dev metrics> --output ...`在新目录冻结同一实际工作点，绑定完整开发证据。修改真实阈值会改变方法ID，必须重新完成相应开发评价。
+6. `predict --split final --calibration <冻结包> --development-run <同一dev metrics>`才可执行全部1,200最终查询并自动评分。最终控制诊断、模型/参考库/查询/算法不一致或未冻结工作点均拒绝。
+
+预测`--resume`要求未完成目录的run身份完全一致，SQLite每条提交；已READY导出不再改写，直接用evaluate_final重算评分。所有失败留在分母，不补虚假零分。当前完整联合预测使用既有CUDA环境并持有Web共享计算锁；CPU只提供索引构建，不偷偷改旧BERT执行环境。五组消融的完整导出仍待后续接线/执行。
+
+服务接入使用`campus_detection.http_service --v3-profile <项目runtime中的profile.json>`显式选择；profile为`bundle/index/calibration`三个路径。必须选实际已完成并冻结的校准工作点。profile的参考文稿字典必须与该业务库代完全一致；6,281篇离线评价库不能直接冒充当前线上参考库。新索引/校准包不匹配就拒绝执行，旧v2默认服务和历史配置继续保留。当前阶段未部署/切换，也未在发布页开放未训练版本。
+
 ## 10月28日当前作业：修正语料与正式材料队列
 
 当前采用新版本 `runtime/datasets/campus-quality-20261028-v1`（6,281原稿，train3,802），旧分区/报告/生成配置保留。下文旧1,200篇、旧v3、旧训练等待命令均为历史记录，**不要恢复旧材料来替代本轮修正版本，也不要重复启动正在运行的新作业**。

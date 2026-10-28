@@ -29,6 +29,9 @@ def detect_text(request,library,models):
     text=request.get('text')
     if not isinstance(text,str) or len(text)>10000:raise ContractError('INVALID_TEXT','Text must contain at most 10000 Unicode code points')
     if not text.strip():output.update(status='NOT_APPLICABLE',elapsedMs=(time.perf_counter()-start)*1000);return output
+    if config.get('schemaVersion')=='text-v3':
+        from campus_detection.v3_runtime import detect
+        return detect(request,library,models)
     documents=[item for item in library.get('documents',[]) if item.get('text','').strip() and not (request.get('excludeManuscriptId') is not None and item.get('manuscriptId') is not None and str(item['manuscriptId'])==request['excludeManuscriptId'])]
     if not documents:output.update(qualityFlags=['EMPTY_LIBRARY'],elapsedMs=(time.perf_counter()-start)*1000);return output
     import numpy as np
@@ -61,7 +64,7 @@ def detect_text(request,library,models):
         accepted=summary['matched_characters']>=params['min_chars'] and (summary['query_character_coverage']>=params['min_coverage'] or summary['longest_match']>=2*params['min_chars'])
         item={'evidenceId':evidence_id(request['attemptId'],'text',sid),'evidenceType':'TEXT_SIMILARITY',
               'sourceScope':'LIBRARY','sourceKind':source.get('sourceKind','BODY'),'sourceWorkId':str(source['sourceWorkId']),
-              'sourceRevisionId':str(source['sourceRevisionId']),'sourceTitle':source['title'],'sourceUrl':source.get('url'),'sourceMetadata':source.get('sourceMetadata',{}),
+              'sourceRevisionId':str(source['sourceRevisionId']),'sourceKey':source.get('sourceKey','BODY'),'sourceTitle':source['title'],'sourceUrl':source.get('url'),'sourceMetadata':source.get('sourceMetadata',{}),
               'tfidfScore':scores[sid],'acceptedCandidate':bool(accepted),'literalSummary':summary,'matches':[],'semanticWindows':[]}
         for match in merged:
             query_piece=text[match['q_start']:match['q_end']];source_piece=source['text'][match['s_start']:match['s_end']]

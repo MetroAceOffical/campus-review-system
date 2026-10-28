@@ -1,0 +1,214 @@
+{
+  "stage": "v3-model-integration-and-automatic-evaluation-preparation",
+  "date": "2026-10-28",
+  "snapshotAt": "2026-10-28T04:43:21.170955+00:00",
+  "state": "ADAPTER_AND_WORKFLOW_IMPLEMENTED_PROTOCOL_PREPARED_MODELS_PENDING",
+  "integration": {
+    "explicitVerifiedModelBundle": true,
+    "realCompletedCampusTrainingRequired": true,
+    "checkpointAndMergedExportHashesRequired": true,
+    "optionalServiceProfileImplemented": true,
+    "defaultV2Changed": false,
+    "literalAcceptancePreserved": true,
+    "reportTaskScoresAndCoverageTyped": true,
+    "profileProductionActivation": false,
+    "webV3ReleaseRegistration": "pending actual completed models/evaluation and current-bank-compatible profile",
+    "current8080PackageUpdated": false,
+    "serviceChecksActual400DevelopmentHashes": true
+  },
+  "workflow": {
+    "commands": [
+      "status",
+      "register",
+      "index",
+      "predict",
+      "calibrate",
+      "freeze-point"
+    ],
+    "realPredictionExport": "SQLite committed per query, identity-bound explicit resume, immutable READY and automatic evaluate_final",
+    "failedPredictionsKept": true,
+    "literalAndDenseSelfExclusionBeforeTopK": true,
+    "featureIdentityBound": true,
+    "finalRequiresFull400DevelopmentAndFrozenOperatingPoint": true,
+    "metadataFreezeDoesNotChangeMethodIdentity": true,
+    "thresholdChangeChangesMethodIdentity": true,
+    "diagnosticFinalControlsRefused": true,
+    "allFiveAblationExportsImplemented": false
+  },
+  "protocol": {
+    "requestedQuerySlots": 1800,
+    "constructedQueries": 340,
+    "pendingSlots": 1460,
+    "splitCounts": {
+      "calibration": {
+        "target": 200,
+        "constructed": 40,
+        "pending": 160,
+        "constructedByCategory": {
+          "copy_control": 20,
+          "whole_reordered": 20
+        },
+        "plannedHomePrimaryQueries": 54,
+        "constructedHomePrimaryQueries": 11,
+        "homeTargetMetForPlan": false,
+        "naturalUniqueQueries": 5,
+        "naturalRelations": 5,
+        "constructionStatuses": {
+          "CONSTRUCTED": 40,
+          "WAITING_HELDOUT_GENERATION": 120,
+          "NEEDS_SUPPORTED_NEGATIVE_SCOPE": 40
+        }
+      },
+      "dev": {
+        "target": 400,
+        "constructed": 75,
+        "pending": 325,
+        "constructedByCategory": {
+          "copy_control": 33,
+          "whole_reordered": 42
+        },
+        "plannedHomePrimaryQueries": 126,
+        "constructedHomePrimaryQueries": 21,
+        "homeTargetMetForPlan": false,
+        "naturalUniqueQueries": 10,
+        "naturalRelations": 11,
+        "constructionStatuses": {
+          "CONSTRUCTED": 75,
+          "WAITING_HELDOUT_GENERATION": 225,
+          "NEEDS_SUPPORTED_NEGATIVE_SCOPE": 100
+        }
+      },
+      "final": {
+        "target": 1200,
+        "constructed": 225,
+        "pending": 975,
+        "constructedByCategory": {
+          "copy_control": 100,
+          "whole_reordered": 125
+        },
+        "plannedHomePrimaryQueries": 410,
+        "constructedHomePrimaryQueries": 81,
+        "homeTargetMetForPlan": false,
+        "naturalUniqueQueries": 16,
+        "naturalRelations": 18,
+        "constructionStatuses": {
+          "CONSTRUCTED": 225,
+          "WAITING_HELDOUT_GENERATION": 675,
+          "NEEDS_SUPPORTED_NEGATIVE_SCOPE": 300
+        }
+      }
+    },
+    "fullQuerySetReady": false,
+    "referenceFields": 6281,
+    "naturalRelationsRevalidated": 84,
+    "naturalRelationsExcluded": 8,
+    "maximumPlannedQueriesPerEvent": 2
+  },
+  "actualCoreChecks": {
+    "newProtocolReadyFilesVerified": 6,
+    "oldProtocolReadyFilesUnchanged": 4,
+    "queriesSourceReconstructed": 340,
+    "referenceFields": 6281,
+    "plannedQueries": 1800,
+    "maximumQueriesPerEvent": 2,
+    "crossSplitGroups": 0,
+    "formalGuards": {
+      "calibration": "Calibration requires the full200 constructed queries, including supported negative truth",
+      "dev": "Requested protocol split is incomplete; construction plans/READY are not a complete evaluation set",
+      "final": "Final NCUC coverage has not met the unchanged60% plan; add heldout sources",
+      "publicAuxiliaryAsCampusModel": "Campus BGE training/reload not complete; auxiliary weights are not a campus model"
+    },
+    "devDiagnosticControls": 75,
+    "calibrationFreezeKeepsMethodIdentity": true,
+    "thresholdChangeChangesIdentity": true,
+    "syntaxFilesValid": 9,
+    "backgroundBoundAlgorithmsUnchanged": 18,
+    "neuralPredictionExecuted": false,
+    "defaultV2AndImageConfigIdenticalToIndex18": true
+  },
+  "checks": {
+    "focusedAdapterChecksPassed": 2,
+    "focusedKernelChecksPassed": 6,
+    "frontendVueTscAndVite": "PASS",
+    "fullRegressionRun": false,
+    "initialKernelSandboxTempPermissionFailure": "resolved by rerunning same focused checks with normal host temp permissions; no environment install"
+  },
+  "background": {
+    "candidateMiningComplete": true,
+    "windowCount": 18937,
+    "candidateCount": 539022,
+    "candidateLabelsCreated": 0,
+    "materialPipeline": {
+      "state": "WAITING_WEB_OR_GPU_RESOURCE",
+      "productActivated": false,
+      "qualityAccepted": false,
+      "reason": "其他模型任务正在计算",
+      "plannedOriginals": 3684,
+      "plannedSegments": 16773,
+      "neuralTrainingStarted": false
+    },
+    "webRunId": "69ce0f98-93cb-4c63-aedd-840c32b33f34",
+    "webCounts": {
+      "ACCEPTED": 390,
+      "PENDING": 416,
+      "QUARANTINED": 588
+    },
+    "webParametersUnchanged": true,
+    "serviceRestarted": false,
+    "boundTrainingAlgorithmsUnchanged": true,
+    "correctedNegativeAudit": {
+      "state": "RULE_SUPPORTED_NEGATIVES_NOT_HUMAN_GOLD",
+      "candidatesChecked": 539022,
+      "supportedPairs": 8393,
+      "querySourceParents": 1504,
+      "humanGold": false
+    }
+  },
+  "modelReadiness": {
+    "bge": {
+      "state": "NOT_STARTED",
+      "epochs": null,
+      "reloadVerified": false,
+      "completed": false
+    },
+    "m3": {
+      "state": "NOT_STARTED",
+      "epochs": null,
+      "reloadVerified": false,
+      "completed": false
+    }
+  },
+  "mergedCampusExportVerified": false,
+  "neuralCampusTrainingComplete": false,
+  "formalModelEvaluationExecuted": false,
+  "qualityAccepted": false,
+  "newDependenciesInstalled": false,
+  "chartImageExportAdded": false,
+  "squareStylePreserved": true,
+  "remaining": [
+    "full heldout generation and supported normal-query truth",
+    "additional NCUC heldout sources to meet60% home coverage",
+    "actual BGE/M3 training/export/reload",
+    "real calibration/development/final predictions and five ablation exports",
+    "current reference-bank-compatible v3 index/calibration and Web release registration",
+    "independent grammar/image-text evaluation and whole-system QA/reports"
+  ],
+  "estimate": {
+    "remainingMaterialAndIntegrationEngineeringHours": [
+      8,
+      16
+    ],
+    "generationHoursPriorHardwareEstimate": [
+      40,
+      80
+    ],
+    "bgeM3TrainingHoursProvisional": [
+      4,
+      12
+    ],
+    "canParallelizeEngineering": true,
+    "updateWithActualThroughput": true,
+    "dataOrEpochsReduced": false
+  },
+  "backgroundUpdatedAt": "2026-10-28T04:45:54.718035+00:00"
+}

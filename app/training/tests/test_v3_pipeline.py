@@ -116,5 +116,11 @@ class V3PipelineTests(unittest.TestCase):
         self.assertEqual(result['aggregation']['allSourceQueryCoverage'],0.)
         self.assertTrue(all(row['features']['informativeQueryCoverage']==0. for row in result['aggregation']['sources']))
 
+    def test_protocol_excluded_sources_never_enter_topk_or_reranking(self):
+        with tempfile.TemporaryDirectory() as folder:
+            result=self.run_pipeline(Path(folder)/'index',exclude_source_revision_ids={'a'})
+        self.assertEqual(set(self.called),{'b','c'})
+        self.assertEqual({r['sourceRevisionId'] for r in result['candidateSources']},{'b','c'})
+
 
 if __name__=='__main__':unittest.main()

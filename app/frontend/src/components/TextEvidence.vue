@@ -21,6 +21,7 @@ const citationStates = (item: TextEvidenceItem, start: number, end: number) => A
     <a v-if="item.sourceUrl" :href="item.sourceUrl" target="_blank" rel="noopener noreferrer">{{ item.sourceUrl }}</a>
     <p v-else-if="item.sourceMetadata?.description">{{ item.sourceMetadata.description }}</p>
     <p>字面匹配{{ item.literalSummary.matched_characters }}个字符 · 查询字面覆盖{{ (item.literalSummary.query_character_coverage * 100).toFixed(1) }}% · 最长片段{{ item.literalSummary.longest_match }}字</p>
+    <p v-if="item.semanticSummary?.queryCoverage !== undefined" class="muted">语义证据覆盖：本稿 <strong>{{ (item.semanticSummary.queryCoverage * 100).toFixed(1) }}%</strong> · 来源 <strong>{{ ((item.semanticSummary.sourceCoverage ?? 0) * 100).toFixed(1) }}%</strong></p>
     <p v-if="item.semanticSummary?.status === 'EVALUATED'" :class="{ unsaved: item.semanticSummary.suspectedReuse && !item.fullyCited }">
       {{ item.fullyCited ? '对应片段已标注站内引用。' : item.semanticSummary.suspectedReuse ? '发现多处语义相近片段。' : '语义比对已完成。' }}
       支持片段{{ item.semanticSummary.supportingPairs }}组，涉及本稿{{ item.semanticSummary.matchedQueryCharacters }}个字符。
@@ -35,7 +36,7 @@ const citationStates = (item: TextEvidenceItem, start: number, end: number) => A
         <p v-if="item.semanticSummary" class="muted">按语义分数展示前{{ Math.min(6, item.semanticWindows.length) }}组片段。</p>
         <div v-for="(window, index) in item.semanticWindows.slice(0, 6)" :key="index" class="semantic-window">
           <el-tag v-for="status in citationStates(item,window.queryStart,window.queryEnd)" :key="status" :type="status==='CITED'?'success':'info'" size="small">{{citationLabels[status]}}</el-tag>
-          <p>BERT分数 {{ window.score.toFixed(4) }}</p>
+          <p>{{ window.scoreType === 'CONTENT_CORRESPONDENCE_SCORE' ? 'M3对应分数' : 'BERT分数' }} {{ window.score.toFixed(4) }}</p>
           <div class="match-pair"><p>{{ window.queryText }}</p><p>{{ window.sourceText }}</p></div>
           <el-button v-if="allowLocate" size="small" @click="$emit('locate', window.queryStart, window.queryEnd)">定位语义片段</el-button>
         </div>
