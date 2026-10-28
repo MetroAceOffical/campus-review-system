@@ -131,22 +131,23 @@ def image_text(config, emit):
                 text = value.text_embeds / value.text_embeds.norm(dim=-1, keepdim=True)
                 scores = (image @ text.T)[0].tolist()
         ranked = sorted([dict(item, score=float(score)) for item, score in zip(candidates, scores)], key=lambda x: -x['score'])
-        recognized = ''; ocr_status = 'UNAVAILABLE'; error = ''
+        recognized = ''; ocr_status = 'UNAVAILABLE'; error = ''; ocr_result = None
         try:
-            frozen = json.loads((ROOT / 'app/config/frozen-ocr.json').read_text(encoding='utf-8'))
+            frozen = config.get('ocrConfig') or json.loads((ROOT / 'app/config/frozen-ocr.json').read_text(encoding='utf-8'))
             body = {'taskId': config['checkId'], 'attemptId': config['checkId'] + ':' + picture['nodeId'], 'fileId': picture['fileId'], 'fileSha256': picture['sha256'], 'path': str(path), 'configId': frozen['configId']}
             request = urllib.request.Request('http://127.0.0.1:18082/recognize', data=json.dumps(body).encode(), headers={'Content-Type': 'application/json', 'X-Internal-Token': token})
             with urllib.request.urlopen(request, timeout=120) as response:
                 ocr = json.loads(response.read())
-            if ocr.get('fileSha256') != picture['sha256']:
+            if any(ocr.get(key)!=body[key] for key in ('taskId','attemptId','fileId','fileSha256')) or ocr.get('actualConfig')!=frozen:
                 raise ValueError('OCR图片身份不一致')
             recognized = '\n'.join(line['text'] for line in ocr.get('recognitionLines', []) if line['confidence'] >= .8)
-            ocr_status = 'COMPLETED'
+            ocr_status = ocr.get('ocrStatus','COMPLETED'); ocr_result = ocr
         except Exception:
             error = '图片文字识别暂不可用'
         # Only local caption/adjacent text may establish a concrete fact conflict.
         # A remote paragraph with a higher semantic score cannot supply a date.
         facts = compare_fields(recognized, picture['factContext'])
         results.append({'nodeId': picture['nodeId'], 'fileId': picture['fileId'], 'caption': picture['caption'], 'matches': ranked[:5], 'ocrStatus': ocr_status, 'ocrText': recognized, 'ocrError': error, 'fields': facts, 'factStatus': 'CONFLICT' if any(row['status'] == 'CONFLICT' for row in facts) else 'MATCH' if any(row['status'] == 'MATCH' for row in facts) else 'INSUFFICIENT'})
+        if ocr_result is not None:results[-1]['ocr']=ocr_result
         emit({'stage': 'IMAGE_TEXT_CHECKING', 'processed': index + 1, 'total': len(config['images'])})
     return {'status': 'COMPLETED', 'kind': 'IMAGE_TEXT', 'images': results, 'model': 'Chinese-CLIP ViT-B/16 / CPU', 'modelRevision': CLIP.name}

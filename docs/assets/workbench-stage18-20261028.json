@@ -1,0 +1,214 @@
+{
+  "stage": 18,
+  "date": "2026-10-28",
+  "snapshotAt": "2026-10-28T17:17:35.125631+08:00",
+  "state": "IMAGE_OCR_INTEGRATED_CPU_AND_WORKSPACE_VERIFIED",
+  "deployment": {
+    "jarSha256": "c6e60d18dd3413bd92505ee76252026c7160ad57961bcad45d1a29bf248a0e48",
+    "staticFilesVerified": 42,
+    "servedIndexMatches": true,
+    "protectedAlgorithmsUnchanged": 23,
+    "formalTrainAndRecipeUnchanged": true,
+    "oldAndNewOcrConfigsAvailable": true,
+    "activeOcrProfile": "adaptive",
+    "imageEnhancementPreset": true,
+    "gpuDetectorStarted": false,
+    "index18Sha256": "e63c6c8b7f18dab04e99e6904bee07624bf30d0b90eba558520a982edc3609db",
+    "index18Unchanged": true,
+    "oldJarAndConfigBackupVerified": true,
+    "referenceGeneration": "18",
+    "releasePointers": "1:TEXT_REUSE\tNULL\n2:PAIR_PREDICTION\tf7442ec3-9128-4ddd-b0cc-318b711ad931"
+  },
+  "imageEnhancement": {
+    "schema": "image-v2",
+    "dinoCandidateK": 20,
+    "maximumVerifiedCandidates": 40,
+    "maximumHashScans": 500,
+    "featureSpaceReused": true,
+    "sourceManifestHashVerified": true,
+    "immutableIndexRewritten": false,
+    "oldSchemaAvailable": "image-v1",
+    "actualDinoDevice": "cpu",
+    "actualHttpRequests": [
+      {
+        "query": "original",
+        "elapsedSeconds": 13.9269071000017,
+        "accepted": true,
+        "scope": "WHOLE_IMAGE",
+        "inliers": 0,
+        "matches": 0,
+        "querySpatialCoverage": 1.0,
+        "sourceSpatialCoverage": 1.0,
+        "candidateRoutes": [
+          "DINO_TOP20",
+          "FILE_SHA256"
+        ]
+      },
+      {
+        "query": "compressed",
+        "elapsedSeconds": 9.14671300000191,
+        "accepted": true,
+        "scope": "WHOLE_IMAGE",
+        "inliers": 1866,
+        "matches": 1878,
+        "querySpatialCoverage": 0.7969035009748834,
+        "sourceSpatialCoverage": 0.7968384646467701,
+        "candidateRoutes": [
+          "DINO_TOP20",
+          "PHASH"
+        ]
+      },
+      {
+        "query": "crop",
+        "elapsedSeconds": 8.417474800000491,
+        "accepted": true,
+        "scope": "LOCAL_REGION",
+        "inliers": 432,
+        "matches": 464,
+        "querySpatialCoverage": 0.7100518594238033,
+        "sourceSpatialCoverage": 0.39917781286593607,
+        "candidateRoutes": [
+          "DINO_TOP20"
+        ]
+      }
+    ],
+    "actualLegacyReplay": {
+      "accepted": true,
+      "sameImageSimilarity": 1.0
+    },
+    "gpuFormalReviewVerified": false,
+    "classificationQualityGrade": false
+  },
+  "ocrEnhancement": {
+    "schema": "ocr-v2",
+    "baselinePreserved": true,
+    "oldAndNewServiceConfigsAvailable": true,
+    "actualRequests": [
+      {
+        "name": "baseline",
+        "lines": 5,
+        "strategy": null,
+        "fallbackUsed": null,
+        "coverage": null,
+        "elapsedMs": 1584.0674999999464
+      },
+      {
+        "name": "adaptive",
+        "lines": 5,
+        "strategy": [
+          "mobile960",
+          "mobile1600"
+        ],
+        "fallbackUsed": true,
+        "coverage": "COMPLETE",
+        "elapsedMs": 4854.591499999515
+      }
+    ],
+    "contentBasedSuffixDecodeVerified": true,
+    "coordinatesWithinOriginalFrame": true,
+    "unknownConfigRejected": true,
+    "newIdentityIncludesSoftwareAndAdapter": true,
+    "actualJavaConfigAndCacheIdentityPassed": 1,
+    "formalCERGrade": false
+  },
+  "imageTextWorkflow": {
+    "checkId": "970bf2b9-4b75-4614-83aa-a290396dbccb",
+    "manuscriptId": "66",
+    "status": "COMPLETED",
+    "model": "Chinese-CLIP ViT-B/16 / CPU",
+    "ocrConfigId": "ocr-3d4ac8fb3be0dbfde616587b73eb70a82638caf736634d5d0f8a92fa9a1de29f",
+    "ocrFallback": true,
+    "ocrStrategy": [
+      "mobile960",
+      "mobile1600"
+    ],
+    "matchedContexts": 3,
+    "formalQualityGrade": false
+  },
+  "browser": {
+    "checkedAt": "2026-10-28T09:04:39.471Z",
+    "role": "MEMBER",
+    "actualImageTextReportObserved": true,
+    "adaptiveStrategyObserved": true,
+    "ocrPolygonsAndLinesObserved": true,
+    "unsavedTitlePersistsAcrossPanels": true,
+    "manuscriptImageCount": 1,
+    "panelManuscriptId": "66",
+    "screenshot": "runtime/workbench-implementation/stage18-browser.jpg",
+    "errors": [],
+    "administratorRestored": true,
+    "finalUrl": "http://127.0.0.1:8080/#/home"
+  },
+  "temporaryDraftCleanup": {
+    "temporaryDraftDeleted": "66",
+    "checkAndArtifactsRetained": true,
+    "submitted": false,
+    "published": false
+  },
+  "checks": {
+    "pythonVisionFocusedPassed": 2,
+    "pythonProcessIdentityPassed": 2,
+    "frontendEvidenceFocusedPassed": 1,
+    "javaActualOcrPassed": 1,
+    "frontendBuild": true,
+    "backendBuild": true,
+    "staticFilesVerified": 42,
+    "frozenFormalFilesUnchanged": 18,
+    "heldoutFilesUnchanged": 5,
+    "formalTrainAndRecipeUnchanged": true,
+    "fullRegressionRun": false
+  },
+  "backgroundGeneration": {
+    "state": "GENERATING_TRAIN_MATERIAL",
+    "segmentCounts": {
+      "ACCEPTED": 1631,
+      "PENDING": 14811,
+      "QUARANTINED": 331
+    },
+    "selectedOriginals": 3684,
+    "elapsedSeconds": 12108.171999999999,
+    "device": "cuda",
+    "promptVersion": "3",
+    "reusedSegments": 440,
+    "estimatedRemainingSeconds": 117827.94710381076,
+    "semanticCorrectnessCertified": false,
+    "modelLoadSeconds": 9.06199999999808,
+    "hostRssBytes": 207347712,
+    "cudaPeakAllocatedBytes": 6313416192
+  },
+  "generationOriginals": 3684,
+  "generationWindows": 16773,
+  "epochsBge": 2,
+  "epochsM3": 2,
+  "formalScaleReduced": false,
+  "formalEpochsReduced": false,
+  "gpuDetectorStarted": false,
+  "referenceLibraryActivatedOrRebuilt": false,
+  "productionModelPointerChanged": false,
+  "newDependenciesInstalled": false,
+  "chartImageExportAdded": false,
+  "qualityAccepted": false,
+  "remaining": [
+    "GPU-dependent full formal-review integration when resources are free",
+    "complete formal material and BGE/M3 training/calibration",
+    "independent image/text/grammar/image-text quality and full five-variant evaluation",
+    "normal-negative truth and home heldout coverage",
+    "final report and later frontend interaction refinement"
+  ],
+  "estimateHours": {
+    "nextIndependentMaterialAndEvaluationEngineering": [
+      6,
+      12
+    ],
+    "currentGenerationRemainingPoint": 32.7,
+    "formalTwoModelTraining": [
+      4,
+      12
+    ],
+    "heldoutGeneration": [
+      10,
+      20
+    ],
+    "completeProjectEstimateAvailable": false
+  }
+}

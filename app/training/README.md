@@ -310,3 +310,6 @@ run位于runtime/experiments/final-training-20261026/campus-training-stage-v1。
 
 
 阶段17已将上述入口部署到8080，并实际通过CPU自动流程、CNN取消/续训与模型评价。网页CLI的CPU计算改用runtime/web-cpu/workbench/compute.lock单独串行；GPU继续沿用原共享锁及既有GPU消费者排他检查，正式训练核心不变。这样后台正式GPU生成不会使CPU网页训练永久等待。1项真实CLI锁占用检查通过，另有真实HTTP/浏览器工程证据；这些小型CPU检查不计校园正式训练或新检出率。部署工件、迁移与剩余GPU接入事项见阶段17摘要。
+
+
+阶段18接入image-v2及OCR服务双配置：image_enhanced.py复用DINO向量和经摘要核验的原索引输入清单，返回SHA/几何整图或局部区域证据；旧image-v1保留。campus_ocr/service_profiles.py把现有fallback适配到实际服务，新配置额外绑定服务和归一化源码。Java任务/缓存与图文工作区使用完整配置身份。当前已完成CPU实际图片HTTP、双OCR服务、Java缓存和Chinese-CLIP/OCR工作区检查，没有新的正式训练或整体图片/CER/图文准确率结论。GPU正式送审仍待空闲，正式生成规模和两模型各2轮不变，详见阶段18证据。

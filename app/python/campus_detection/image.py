@@ -11,7 +11,7 @@ def encode_images(paths,models):
             with Image.open(path) as source:
                 image=source.convert('RGB')
                 try:
-                    inputs={key:value.cuda() for key,value in models['processor'](images=[image],return_tensors='pt').items()}
+                    inputs={key:value.to(models['dino'].device) for key,value in models['processor'](images=[image],return_tensors='pt').items()}
                     vector=torch.nn.functional.normalize(models['dino'](**inputs).last_hidden_state[:,0],dim=-1).cpu().numpy()[0]
                 finally:image.close()
             if vector.shape!=(384,) or not np.isfinite(vector).all():raise ContractError('INVALID_IMAGE_FEATURE','DINO produced an invalid vector')
@@ -19,7 +19,12 @@ def encode_images(paths,models):
     return np.asarray(vectors,dtype=np.float32)
 
 def detect_image(request,library,models):
-    start=time.perf_counter();config=models['imageConfig'];validate_request(request,config,library)
+    start=time.perf_counter();config=models.get('imageConfigs',{models['imageConfig']['configId']:models['imageConfig']}).get(request.get('configId'))
+    if config is None:raise ContractError('CONFIG_UNAVAILABLE','Requested image configuration is unavailable')
+    if config.get('schemaVersion')=='image-v2':
+        from .image_enhanced import detect
+        return detect(request,library,models,config)
+    validate_request(request,config,library)
     output=result_header(request,config)
     path=controlled_file(request.get('path',''),request.get('fileSha256'),models['allowedRoots'])
     entries=[entry for entry in library.get('images',[]) if not (request.get('excludeManuscriptId') is not None and entry.get('manuscriptId') is not None and str(entry['manuscriptId'])==request['excludeManuscriptId'])]

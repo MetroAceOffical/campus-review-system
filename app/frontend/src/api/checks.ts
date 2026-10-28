@@ -1,9 +1,9 @@
 import { request } from './http'
 import type { DocumentInput } from '../types/document'
 import type { PositionMap } from '../editor/positions'
-import type { TextEvidenceItem, ImageEvidenceItem } from './review'
+import type { TextEvidenceItem, ImageEvidenceItem, RecognitionResult } from './review'
 export interface GrammarIssue { id: string; field: 'TITLE' | 'BODY'; start: number; end: number; original: string; replacement: string; category: string; engine: string }
-export interface ImageCheck { nodeId: string; fileId: string; caption: string; matches: Array<{ field: string; text: string; label: string; start?: number; end?: number; score: number }>; fields: Array<{ field: string; imageValues: string[]; textValues: string[]; status: string }>; factStatus: string; ocrStatus: string; ocrText: string; ocrError: string }
+export interface ImageCheck { nodeId: string; fileId: string; caption: string; matches: Array<{ field: string; text: string; label: string; start?: number; end?: number; score: number }>; fields: Array<{ field: string; imageValues: string[]; textValues: string[]; status: string }>; factStatus: string; ocrStatus: string; ocrText: string; ocrError: string; ocr?: RecognitionResult }
 export interface Check { checkId: string; kind: string; status: string; inputHash: string; error: string; document: DocumentInput; positionMap: PositionMap[]; feedback?: Record<string, string>; result?: { model?: string; issues?: GrammarIssue[]; categoryCounts?: Record<string, number>; protectedSuggestions?: number; images?: ImageCheck[]; evidence?: TextEvidenceItem[]; imageResults?: Array<{ nodeId: string; evidence: ImageEvidenceItem[] }> } }
 export const start = (manuscriptId: string, submissionId: string | undefined, kind: string, document: DocumentInput) => request<Check>(submissionId ? `/api/submissions/${submissionId}/checks` : `/api/manuscripts/${manuscriptId}/checks`, { method: 'POST', body: JSON.stringify({ kind, document }) })
 export const list = (manuscript: string, submission?: string) => request<Check[]>(submission ? `/api/submissions/${submission}/checks` : `/api/manuscripts/${manuscript}/checks`)

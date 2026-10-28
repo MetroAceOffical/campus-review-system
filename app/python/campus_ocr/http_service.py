@@ -4,16 +4,19 @@ from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
 import json
 import threading
 import uuid
-from campus_ocr.recognizer import ROOT,load_pipeline,recognize
+from campus_ocr.recognizer import ROOT,load_pipeline
+from campus_ocr.service_profiles import configurations,recognize
 from campus_shared.contracts import ContractError
 
 class Runtime:
     def __init__(self,token):
-        self.token=token;self.run_id=str(uuid.uuid4());self.config=None;self.error=None;self.compute=threading.Lock();self.active_attempt=None
+        self.token=token;self.run_id=str(uuid.uuid4());self.config=None;self.configs={};self.error=None;self.compute=threading.Lock();self.active_attempt=None
     def load(self):
-        try:_,self.config=load_pipeline()
+        try:
+            _,config=load_pipeline();configs=configurations(config)
+            self.configs=configs;self.config=config
         except Exception as error:self.error=getattr(error,'code',type(error).__name__)
-    def health(self):return {'ready':self.config is not None,'runId':self.run_id,'busy':self.compute.locked(),'activeAttemptId':self.active_attempt,'errorCode':self.error,'config':self.config}
+    def health(self):return {'ready':self.config is not None,'runId':self.run_id,'busy':self.compute.locked(),'activeAttemptId':self.active_attempt,'errorCode':self.error,'config':self.config,'availableConfigs':list(self.configs.values())}
 
 def make_server(runtime,port=18082):
     class Handler(BaseHTTPRequestHandler):
@@ -37,7 +40,9 @@ def make_server(runtime,port=18082):
                 length=int(self.headers.get('Content-Length','0'))
                 if not 0<length<=65536:raise ContractError('INVALID_REQUEST_SIZE','Invalid request size')
                 image=json.loads(self.rfile.read(length));runtime.active_attempt=image.get('attemptId')
-                result=recognize(image,runtime.config);result['processRunId']=runtime.run_id
+                selected=runtime.configs.get(image.get('configId',runtime.config['configId']))
+                if selected is None:raise ContractError('CONFIG_UNAVAILABLE','Requested OCR configuration is unavailable')
+                result=recognize(image,selected);result['processRunId']=runtime.run_id
                 self.reply(200,result)
             except (ContractError,ValueError,KeyError,FileNotFoundError) as error:
                 self.reply(400,{'status':'FAILED','errorCode':getattr(error,'code','INVALID_REQUEST'),'message':str(error)[:200],'runId':runtime.run_id})

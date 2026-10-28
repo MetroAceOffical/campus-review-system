@@ -48,8 +48,20 @@ def configurations(*, legacy=False):
     image['configId']='image-'+digest_json(image)
     return text,image
 
+def load_image_models(device='cuda',enhanced=False):
+    from transformers import AutoImageProcessor,AutoModel
+    _,image=configurations();source=ROOT/'validation/remaining/image/models/dinov2-small'
+    if file_sha256(source/'model.safetensors')!=image['weightSha256']:raise ContractError('MODEL_HASH_MISMATCH','DINO weight hash changed')
+    processor=AutoImageProcessor.from_pretrained(source,local_files_only=True,use_fast=False)
+    dino=AutoModel.from_pretrained(source,local_files_only=True).eval().to(device)
+    configs={image['configId']:image}
+    if enhanced:
+        from .image_enhanced import configuration
+        image=configuration(image);configs[image['configId']]=image
+    return {'imageConfig':image,'imageConfigs':configs,'dino':dino,'processor':processor,'allowedRoots':[ROOT/'runtime',ROOT/'validation']}
+
 @functools.lru_cache(maxsize=1)
-def load_models():
+def load_models(enhanced_images=False):
     os.environ.setdefault('HF_HUB_OFFLINE','1')
     os.environ.setdefault('TRANSFORMERS_OFFLINE','1')
     import torch
@@ -62,15 +74,11 @@ def load_models():
     import round2
     choice,bert,_,tokenizer=round2.load_selected('bert')
     tokenizer.model_max_length=10**8
-    image_path=ROOT/'validation/remaining/image/models/dinov2-small'
-    if file_sha256(image_path/'model.safetensors')!=image['weightSha256']:raise ContractError('MODEL_HASH_MISMATCH','DINO weight hash changed')
-    processor=AutoImageProcessor.from_pretrained(image_path,local_files_only=True,use_fast=False)
-    dino=AutoModel.from_pretrained(image_path,local_files_only=True).eval().cuda()
+    image_models=load_image_models(enhanced=enhanced_images)
     def predict(pairs):
         if not pairs:return []
         scores,_=round2.predict_rows('bert',bert,pairs,tokenizer=tokenizer,batch=8)
         return scores.tolist()
     return {'textConfig':text,'legacyTextConfig':old_text,'textConfigs':{text['configId']:text,old_text['configId']:old_text},
-            'imageConfig':image,'tokenizer':tokenizer,'bert':bert,'predictBert':predict,
-            'dino':dino,'processor':processor,'allowedRoots':[ROOT/'runtime',ROOT/'validation'],
+            **image_models,'tokenizer':tokenizer,'bert':bert,'predictBert':predict,
             'loadedWeights':{'bert':text['weightSha256'],'dino':image['weightSha256']}}

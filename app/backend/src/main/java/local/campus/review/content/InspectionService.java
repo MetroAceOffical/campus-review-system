@@ -39,6 +39,7 @@ public class InspectionService {
         var active=db.queryForList("SELECT id FROM document_check WHERE manuscript_id=? AND kind=? AND input_sha256=? AND status IN ('QUEUED','RUNNING','WAITING_SERVICE','WAITING_RESOURCE') ORDER BY created_at DESC LIMIT 1",manuscript,kind,document.contentHash());if(!active.isEmpty())return get(user,active.getFirst().get("id").toString());
         String id=UUID.randomUUID().toString();
         var payload=json.createObjectNode().put("checkId",id).put("kind",kind).put("inputHash",document.contentHash()).put("title",input.title()).put("plainText",document.plainText()).put("manuscriptId",manuscript).put("runtime",settings.runtime().toString());
+        if("IMAGE_TEXT".equals(kind))payload.set("ocrConfig",json.readTree(Files.readString(settings.ocrConfiguration())));
         payload.set("document",json.valueToTree(document.document()));payload.set("positionMap",json.valueToTree(document.positionMap()));payload.set("citations",json.valueToTree(document.citations()));
         var blocks=new ArrayList<JsonNode>();collect(document.document().content(),blocks);var images=payload.putArray("images");
         for(var picture:document.images()){

@@ -15,11 +15,11 @@ from campus_detection.image import detect_image
 
 
 class Runtime:
-    def __init__(self,index_root,token,v3_profile=None):
+    def __init__(self,index_root,token,v3_profile=None,enhanced_images=False):
         self.index_root=Path(index_root).resolve()
         if not self.index_root.is_relative_to(ROOT/'runtime'):raise ValueError('Index root must stay inside project runtime')
         self.token=token;self.run_id=str(uuid.uuid4());self.models=None;self.load_error=None;self.v3_profile=v3_profile
-        self.compute=threading.Lock();self.active_attempt=None;self.libraries={};self.loaded_profile_id=None
+        self.compute=threading.Lock();self.active_attempt=None;self.libraries={};self.loaded_profile_id=None;self.enhanced_images=enhanced_images
     def load(self):
         try:
             profile=None
@@ -28,7 +28,7 @@ class Runtime:
                 location=Path(self.v3_profile).resolve()
                 if location!=profile_directory(location.parent.name)/'profile.json':raise ValueError('Select a prepared production service profile')
                 profile=verify_profile(location.parent.name)
-            models=load_models()
+            models=load_models(enhanced_images=True) if self.enhanced_images else load_models()
             if profile:
                 from campus_detection.v3_runtime import controlled,read,verify_files,load_bundle,attach_runtime
                 from campus_detection.retrieval import load_dense_index
@@ -48,6 +48,7 @@ class Runtime:
                 'availableTextConfigs':[] if self.models is None else [
                     {'configId':key,'profileId':self.loaded_profile_id if value.get('schemaVersion')=='text-v3' else None}
                     for key,value in self.models['textConfigs'].items()],
+                'availableImageConfigs':[] if self.models is None else list(self.models.get('imageConfigs',{}).values()),
                 'configs':None if self.models is None else {name:self.models[name] for name in ('textConfig','imageConfig')}}
     def library(self,request):
         generation=request.get('libraryGenerationId')
@@ -69,6 +70,10 @@ class Runtime:
             descriptor=value['textIndex'];index=directory/descriptor['file']
             if index.parent!=directory or not index.is_file() or file_sha256(index)!=descriptor['sha256']:raise ContractError('INDEX_CORRUPT','Text index checksum differs')
             value['_textIndex']=joblib.load(index)
+        if self.enhanced_images:
+            from campus_detection.image_enhanced import attach_sources
+            try:attach_sources(value,directory)
+            except (ValueError,KeyError,OSError):pass
         value['_manifestSha256']=checksum;self.libraries[generation]=value
         return value
 
@@ -124,10 +129,11 @@ def main():
     parser=argparse.ArgumentParser();parser.add_argument('--port',type=int,default=18081)
     parser.add_argument('--index-root',type=Path,default=ROOT/'runtime/indexes')
     parser.add_argument('--v3-profile',type=Path,help='Explicit verified bundle/index/calibration profile; default v2 remains available')
+    parser.add_argument('--enhanced-images',action='store_true')
     args=parser.parse_args()
     token_path=ROOT/'runtime/private-config/internal-token'
     if not token_path.is_file():raise RuntimeError('Run project initialization to create its private internal token')
-    runtime=Runtime(args.index_root,token_path.read_text().strip(),args.v3_profile)
+    runtime=Runtime(args.index_root,token_path.read_text().strip(),args.v3_profile,args.enhanced_images)
     server=make_server(runtime,args.port)
     threading.Thread(target=runtime.load,daemon=True).start()
     print(json.dumps({'event':'listening','port':server.server_port,'runId':runtime.run_id,'ready':False}),flush=True)

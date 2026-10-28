@@ -38,7 +38,8 @@ public class ReferenceProcessor {
             }
         }catch(Exception ignored){/* A damaged cache is rebuilt; it is never a successful OCR result. */}
         if(!health.path("ready").asBoolean())throw new DetectorClient.DetectorFailure("OCR_SERVICE_UNAVAILABLE");
-        if(!config.path("configId").equals(health.path("config").path("configId")))throw new DetectorClient.DetectorFailure("CONFIG_UNAVAILABLE");
+        boolean available=config.equals(health.path("config"));for(var choice:health.path("availableConfigs"))if(config.equals(choice))available=true;
+        if(!available)throw new DetectorClient.DetectorFailure("CONFIG_UNAVAILABLE");
         var request=input.deepCopy();request.put("configId",config.path("configId").asText());
         var result=client.call(true,"/recognize",request,"ocrAndText");
         if(!result.path("actualConfig").equals(config))throw new DetectorClient.DetectorFailure("RESULT_CONFIG_MISMATCH");

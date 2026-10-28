@@ -20,7 +20,7 @@ public class DetectorClient {
     public DetectorClient(RuntimeSettings settings,ObjectMapper json){this.settings=settings;this.json=json;}
     public AutoCloseable budget(String name){deadline.set(System.nanoTime()+Duration.ofSeconds(settings.timeout(name)).toNanos());return ()->deadline.remove();}
     public JsonNode health(boolean ocr){try{return exchange(ocr,"/health",null,5);}catch(RuntimeException e){return json.createObjectNode().put("ready",false).put("busy",false).put("errorCode","SERVICE_UNAVAILABLE");}}
-    public JsonNode frozenOcrConfig(){try{return json.readTree(Files.readString(settings.root().resolve("app/config/frozen-ocr.json")));}catch(Exception e){throw new DetectorFailure("CONFIG_UNAVAILABLE");}}
+    public JsonNode frozenOcrConfig(){try{return json.readTree(Files.readString(settings.ocrConfiguration()));}catch(Exception e){throw new DetectorFailure("CONFIG_UNAVAILABLE");}}
     public JsonNode call(boolean ocr,String endpoint,JsonNode input,String timeout){
         var result=exchange(ocr,endpoint,input,settings.timeout(timeout));
         if(!endpoint.equals("/library/build")){

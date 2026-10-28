@@ -46,7 +46,9 @@ def health(config,runtime,component):
     try:
         with urllib.request.urlopen(urllib.request.Request(f'http://127.0.0.1:{port}{path}',headers=headers),timeout=3) as response:value=json.load(response)
         if component=='java':return {'ready':value.get('code')=='OK','busy':False}
-        return {key:value.get(key) for key in ('ready','busy','runId','activeAttemptId','errorCode','availableTextConfigs')}
+        result={key:value.get(key) for key in ('ready','busy','runId','activeAttemptId','errorCode','availableTextConfigs')}
+        if component=='detector':result['imageSchema']=(value.get('configs') or {}).get('imageConfig',{}).get('schemaVersion')
+        return result
     except Exception:return {'ready':False,'busy':None,'errorCode':'SERVICE_UNAVAILABLE'}
 
 def registry(runtime,component):return runtime/'processes'/f'{component}.json'
@@ -71,6 +73,7 @@ def detector_profile(config,runtime):
 
 def start(config,runtime,component):
     profile=detector_profile(config,runtime) if component=='detector' else None
+    enhanced=config.get('imageEnhancement',False) is True
     old=read_record(runtime,component)
     if old and verified_members(old):
         state=health(config,runtime,component)
@@ -78,6 +81,7 @@ def start(config,runtime,component):
         if not state.get('ready'):raise RuntimeError('Existing owned process is not ready; inspect status/logs; no duplicate launched')
         loaded={item.get('profileId') for item in (state.get('availableTextConfigs') or []) if item.get('profileId')}
         if component=='detector' and loaded!=({profile.parent.name} if profile else set()):raise RuntimeError('Running detector uses another profile; stop it explicitly when idle before starting the selected profile')
+        if component=='detector' and state.get('imageSchema','image-v1')!=('image-v2' if enhanced else 'image-v1'):raise RuntimeError('Running detector uses another image policy; stop it explicitly when idle before changing it')
         print(json.dumps({'component':component,'status':'ALREADY_RUNNING',**state}));return
     if listening(config['ports'][component]):raise RuntimeError(f'{component} port occupied without a verified project handle; leaving it untouched')
     env=dict(os.environ,CAMPUS_ROOT=ROOT.as_posix(),PYTHONPATH=str(ROOT/'app/python'),PYTHONDONTWRITEBYTECODE='1',PYTHONUTF8='1',HF_HUB_OFFLINE='1',TRANSFORMERS_OFFLINE='1')
@@ -90,10 +94,12 @@ def start(config,runtime,component):
     else:
         args=[str(ROOT/config['python' if component=='detector' else 'ocrPython']),'-B',str(ROOT/'app/python/run_service.py'),component,'--port',str(config['ports'][component])]
         if component=='detector':args+=['--index-root',str(runtime/'indexes')]
-        if profile:
+        if profile or component=='detector' and enhanced:
             interpreter=runtime/'environments/final-training/Scripts/python.exe'
             if not interpreter.is_file():raise RuntimeError('Approved project training environment is missing; no environment is installed at startup')
-            args[0]=str(interpreter);args+=['--v3-profile',str(profile)]
+            args[0]=str(interpreter)
+            if profile:args+=['--v3-profile',str(profile)]
+        if component=='detector' and enhanced:args+=['--enhanced-images']
     (runtime/'logs').mkdir(parents=True,exist_ok=True)
     with (runtime/'logs'/f'{component}.log').open('ab') as log:
         child=subprocess.Popen(args,cwd=ROOT,env=env,stdout=log,stderr=log,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))

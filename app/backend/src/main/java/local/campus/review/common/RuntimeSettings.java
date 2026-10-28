@@ -17,6 +17,7 @@ public class RuntimeSettings {
         if(runtime.equals(root) || !runtime.startsWith(root))throw new IllegalStateException("Runtime must stay within this project");
     }
     public Path root(){return root;}
+    public Path ocrConfiguration(){String name=switch(config.path("ocrProfile").asText("baseline")){case "baseline"->"frozen-ocr.json";case "adaptive"->"frozen-ocr-v2.json";default->throw new IllegalStateException("Unknown OCR profile");};return root.resolve("app/config/"+name);}
     public Path runtime(){return runtime;}
     public Path experiments(){return root.resolve(config.path("runtimeRoot").asText()).normalize().resolve("experiments");}
     public Path python(){return root.resolve(config.path("python").asText()).normalize();}
