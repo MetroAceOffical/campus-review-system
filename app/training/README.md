@@ -300,3 +300,10 @@ run位于runtime/experiments/final-training-20261026/campus-training-stage-v1。
 预测目录run须声明实际消融variant：frozen-v2、untrained-dense、trained-dense-unadapted-reranker、full-v3或semantic-disabled；绑定protocolReadySha256、splitQueriesSha256、referenceManifestSha256、methodConfigId、split、diagnosticControls。full-v3还要求真实两项校园训练完成和正式校准冻结，实际状态仍须由子run/权重核验支撑。每条预测绑定queryId/querySha256/methodConfigId/referenceManifestSha256，保留coverageStatus、candidateSources、sourceDecisions、pairs及原始elapsedMs；语义pairs支持阈值必须来自冻结featureConfig，不能拿余弦值当任务证据。
 
 本阶段实际只做了协议构造、6296映射完整性核验和正式评分拒绝检查，文字模型预测0、正式评价0。完整离线111项通过，合成测试预测仅在单元测试夹具中，不是项目模型结果。准备/构造脚本不在当前训练控制器8项依赖内，不会因新增评价代码打断已授权训练等待。
+
+
+## 网页一键流程和神经检查点（10月28日阶段16）
+
+网页训练扩展`campus_workbench/training_resume.py`由`workbench_training.py`仅为CNN/BiLSTM/BERT调用；不修改正式控制器绑定的training.py/preparation.py。元数据resume.json指向两个原子检查点槽之一，包含实际模型/优化器/随机状态/顺序游标/历史和最佳权重身份。新运行必须原划分、参数（含总轮数）、代码与软件版本一致，读取前重新核验SHA；旧last-checkpoint.pt不具新身份时不能续训。CPU中断恢复机制已对照连续训练；CUDA及真实浏览器续训留待部署联调，不计正式校园适配完成。
+
+后端AutomaticPipelineService持久衔接CLEAN/PREPARE/GENERATE/TRAIN/EVALUATE，标签句对跳过GENERATE，多个所选模型串行，并可选择自动测试集评价。新增008迁移只在独立测试库实际验证，正式启动时按既有MigrationRunner执行。流程状态/子任务创建同事务；重启读取原任务ID，权限每次派发重查；取消/失败后重试有可核验检查点才续接，否则按原完整参数新建阶段。不会自动发布生产审核模型，也不改变已在后台运行的正式配方。详细进度与工程证据见docs/当前进度.md和docs/assets/workbench-stage16-20261028.json。

@@ -72,6 +72,7 @@ public class TrainingWorker {
         if(options.has("family"))config.put("family",options.path("family").asText());
         if(options.has("preparationId"))config.put("preparation",training.directory(options.path("preparationId").asText()).resolve("output").toString());
         if(options.has("resumeRunId"))config.put("resume",training.directory(options.path("resumeRunId").asText()).toString());
+        if(action.equals("TRAIN")&&options.has("resumeRunId"))config.set("resumeTraining",data.json.createObjectNode().put("folder",training.directory(options.path("resumeRunId").asText()).resolve("output").toString()).put("metadataSha256",options.path("resumeMetadataSha256").asText()));
         if(action.equals("GENERATE")){
             var caches=config.putArray("caches");
             for(var previous:data.db.queryForList("SELECT id FROM ml_run WHERE dataset_id=? AND input_version_id=? AND action='GENERATE' AND id<>? AND status IN ('COMPLETED','CANCELLED','INTERRUPTED','FAILED') ORDER BY created_at DESC LIMIT 20",dataset,source.get("id"),id)){

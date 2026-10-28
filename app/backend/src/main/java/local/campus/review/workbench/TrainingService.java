@@ -91,6 +91,12 @@ public class TrainingService {
                 if(request.action().equals("TRAIN")){
                     if(request.family()==null)throw invalid("请选择模型");
                     options.put("family",request.family());options.set("parameters",parameters(request.family(),request.parameters()));
+                    if(request.resumeRunId()!=null){
+                        var previous=data.runRow(user,request.resumeRunId());var saved=JsonSupport.parse(data.json,previous.get("options_json").toString());
+                        if(!request.datasetId().equals(previous.get("dataset_id"))||!request.versionId().equals(previous.get("input_version_id"))||!saved.path("family").equals(options.path("family"))||!saved.path("parameters").equals(options.path("parameters"))||!saved.path("preparationId").asText().equals(request.preparationId()))throw invalid("续训须使用原数据、划分、模型及参数");
+                        var checkpoint=TrainingCheckpoints.inspect(data,previous);if(!checkpoint.path("available").asBoolean())throw invalid("该运行没有可核验的续训检查点，请复制参数新建训练");
+                        options.put("resumeRunId",request.resumeRunId()).put("resumeMetadataSha256",checkpoint.path("metadataSha256").asText());
+                    }
                 }else bindModel(user,request.modelId(),dataset,options);
             }
             case "PREDICT" -> {
@@ -129,7 +135,7 @@ public class TrainingService {
         }
         var result=data.json.createObjectNode().put("total",data.db.queryForObject("SELECT COUNT(*)"+from,Long.class,args.toArray()));
         args.add((page-1L)*20);var items=result.putArray("items");
-        for(var row:data.db.queryForList("SELECT r.*,d.name AS dataset_name"+from+" ORDER BY r.created_at DESC,r.id LIMIT 20 OFFSET ?",args.toArray())){var item=(ObjectNode)data.runJson(row);item.put("datasetName",row.get("dataset_name").toString());items.add(item);}
+        for(var row:data.db.queryForList("SELECT r.*,d.name AS dataset_name"+from+" ORDER BY r.created_at DESC,r.id LIMIT 20 OFFSET ?",args.toArray())){var item=(ObjectNode)data.runJson(row);item.put("datasetName",row.get("dataset_name").toString());item.set("checkpoint",TrainingCheckpoints.inspect(data,row));items.add(item);}
         return result;
     }
     public JsonNode models(CurrentUser user,int page,String q,boolean archived){

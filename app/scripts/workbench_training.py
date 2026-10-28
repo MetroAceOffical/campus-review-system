@@ -34,7 +34,10 @@ def main():
             if action == 'GENERATE':
                 result = generate(config['preparation'], config['output'], config.get('parameters', {}), emit, resume=config.get('resume'), caches=config.get('caches', []))
             elif action == 'TRAIN':
-                result = train(config['preparation'], config['output'], config['family'], config.get('parameters', {}), emit)
+                if config['family'] in ('cnn','bilstm','bert'):
+                    from campus_workbench.training_resume import train as neural_train
+                    result = neural_train(config['preparation'], config['output'], config['family'], config.get('parameters', {}), emit,config.get('resumeTraining'))
+                else:result = train(config['preparation'], config['output'], config['family'], config.get('parameters', {}), emit)
             elif action == 'EVALUATE':
                 result = evaluate(config['model'], config['preparation'], config['output'], emit)
             elif action == 'PREDICT':

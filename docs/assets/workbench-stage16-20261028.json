@@ -1,0 +1,148 @@
+{
+  "stage": 16,
+  "date": "2026-10-28",
+  "snapshotAt": "2026-10-28T15:51:16.785173+08:00",
+  "state": "SOURCE_IMPLEMENTED_FOCUSED_CHECKS_PASSED",
+  "roles": [
+    "REVIEWER",
+    "ADMIN"
+  ],
+  "oneClick": {
+    "stagesNews": [
+      "CLEAN",
+      "PREPARE",
+      "GENERATE",
+      "TRAIN",
+      "EVALUATE"
+    ],
+    "pairsSkipGeneration": true,
+    "immutableInputAndParameterSnapshots": true,
+    "maxModels": 6,
+    "durableChildRunIds": true,
+    "atomicDispatchAndStateCommit": true,
+    "cancelRetry": true,
+    "reauthorizationBeforeDispatch": true,
+    "autoFollowStageProgress": true,
+    "automaticProductionActivation": false
+  },
+  "webNeuralResume": {
+    "families": [
+      "cnn",
+      "bilstm",
+      "bert"
+    ],
+    "optimizerBoundary": true,
+    "state": [
+      "model",
+      "optimizer",
+      "RNG",
+      "sampleOrder",
+      "sampleCursor",
+      "validationHistory",
+      "bestWeights"
+    ],
+    "atomicCheckpointSlots": 2,
+    "exactDataParameterCodeEnvironmentBinding": true,
+    "originalRunPreserved": true,
+    "legacyCheckpointsWithoutMetadataResumable": false,
+    "gpuResumeVerified": false
+  },
+  "actualCpuPipeline": {
+    "pipelineId": "c1930cd4-0321-45d3-9c01-903ca20ed401",
+    "datasetId": "b570943e-91d7-47ac-ace0-c8af5e1af55a",
+    "status": "COMPLETED",
+    "device": "cpu",
+    "formalTraining": false,
+    "dispatcherRestartAfterEveryStage": true,
+    "duplicateDispatch": false,
+    "cancelRetryCreatesNewJob": true,
+    "reauthorizationBeforeDispatch": true
+  },
+  "actualResumeComparison": {
+    "family": "cnn",
+    "device": "cpu",
+    "epochs": 2,
+    "trainRows": 16,
+    "validationRows": 8,
+    "testRows": 8,
+    "interruptedCursor": 8,
+    "remainingMiniBatches": 6,
+    "continuousVsResumedBestWeightsAllcloseAtol": 1e-07,
+    "changedEpochsRejected": true,
+    "formalCampusTraining": false
+  },
+  "checks": {
+    "javaFocusedPassed": 3,
+    "pythonFocusedPassed": 1,
+    "vueFocusedPassed": 1,
+    "backendCompile": true,
+    "frontendTypeBuild": true,
+    "formalAlgorithmsUnchanged": 18,
+    "heldoutAlgorithmsUnchanged": 5,
+    "trainSha256Unchanged": true,
+    "recipeSha256Unchanged": true,
+    "fullRegressionRun": false,
+    "realHttpVerified": false,
+    "browserVerified": false
+  },
+  "backgroundGeneration": {
+    "state": "GENERATING_TRAIN_MATERIAL",
+    "segmentCounts": {
+      "ACCEPTED": 1108,
+      "PENDING": 15468,
+      "QUARANTINED": 197
+    },
+    "selectedOriginals": 3684,
+    "elapsedSeconds": 6931.110000000001,
+    "device": "cuda",
+    "promptVersion": "3",
+    "reusedSegments": 440,
+    "estimatedRemainingSeconds": 123942.66991907515,
+    "semanticCorrectnessCertified": false,
+    "modelLoadSeconds": 9.06199999999808,
+    "hostRssBytes": 254308352,
+    "cudaPeakAllocatedBytes": 6301956608
+  },
+  "dataScaleReduced": false,
+  "generationOriginals": 3684,
+  "generationSegments": 16773,
+  "epochsBge": 2,
+  "epochsM3": 2,
+  "formalTrainingInputChanged": false,
+  "productionDatabaseMutated": false,
+  "testDatabaseMigrations": [
+    "007",
+    "008"
+  ],
+  "deployed": false,
+  "serviceRestarted": false,
+  "newDependenciesInstalled": false,
+  "chartImageExportAdded": false,
+  "newFormalCampusTrainingPerformed": false,
+  "newAccuracyGrade": false,
+  "productActivated": false,
+  "qualityAccepted": false,
+  "remaining": [
+    "unified deployment and API/browser verification",
+    "image/OCR improvement production integration",
+    "complete material preparation and formal BGE/M3 training",
+    "calibration and complete heldout/five-variant evaluation",
+    "grammar/image-text independent quality and final reports"
+  ],
+  "estimateHours": {
+    "deploymentAndFocusedQA": [
+      3,
+      6
+    ],
+    "generationRemainingPoint": 34.4,
+    "formalTwoModelTraining": [
+      4,
+      12
+    ],
+    "heldoutGeneration": [
+      10,
+      20
+    ],
+    "completeProjectEstimateAvailable": false
+  }
+}
