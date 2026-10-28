@@ -60,6 +60,15 @@ class FormalTrainingServiceTest {
             assertEquals(1,evaluation.path("metrics").path("enhancedAccepted").asInt(-1));
             assertEquals(1,evaluation.path("metrics").path("failedQueries").asInt(-1));
             assertFalse(evaluation.toString().contains("privatePath"));
+            Files.writeString(folder.resolve("status.json"),"""
+                {"state":"WAITING_HOST_MEMORY","processed":0,"total":500,
+                 "truePositive":300,"falseNegative":80,"correctFields":150,"falseConflicts":0,
+                 "availableMemoryBytes":3000000000,"requiredMemoryBytes":10737418240}
+                """);
+            var document=FormalTrainingService.read(root,runtime,json,registry).path("stages").get(0);
+            assertEquals(300,document.path("metrics").path("truePositive").asInt(-1));
+            assertEquals(150,document.path("metrics").path("correctFields").asInt(-1));
+            assertEquals(10737418240L,document.path("metrics").path("requiredMemoryBytes").asLong(-1));
             Files.writeString(folder.resolve("status.json"),"{writing");
             var changed=FormalTrainingService.read(root,runtime,json,registry);
             assertEquals("READ_ERROR",changed.path("stages").get(0).path("availability").asText());

@@ -10,6 +10,11 @@
     {"key": "m3", "title": "M3内容对应训练", "directory": "runtime/experiments/final-training-20261028/correspondence-campus-v2", "statusFile": "status.json", "historyFile": "history.jsonl"},
     {"key": "heldout", "title": "独立评价材料构造", "directory": "runtime/experiments/final-training-20261028/heldout-generation-v2", "statusFile": "status.json"},
     {"key": "protocol", "title": "校准与独立评价集", "directory": "runtime/datasets/text-evaluation-corrected-20261028-v3", "statusFile": "manifest.json"},
-    {"key": "image_evaluation", "title": "图片开发区评价", "directory": "runtime/experiments/final-training-20261028/image-development-pipeline-v1", "statusFile": "status.json"}
+    {"key": "image_evaluation", "title": "图片开发区评价", "directory": "runtime/experiments/final-training-20261028/image-development-pipeline-v1", "statusFile": "status.json"},
+    {"key": "grammar_rules", "title": "语法规则开发评价", "directory": "runtime/experiments/final-training-20261028/grammar-rules-development-v2", "statusFile": "status.json"},
+    {"key": "grammar_model", "title": "语法模型开发评价", "directory": "runtime/experiments/final-training-20261028/grammar-model-development-v1", "statusFile": "status.json"},
+    {"key": "image_fields_before", "title": "旧图文字段诊断", "directory": "runtime/experiments/final-training-20261028/image-fields-development-v1", "statusFile": "status.json"},
+    {"key": "image_fields", "title": "图文字段开发诊断", "directory": "runtime/experiments/final-training-20261028/image-fields-development-v3", "statusFile": "status.json"},
+    {"key": "image_text_evaluation", "title": "完整图文检查开发评价", "directory": "runtime/experiments/final-training-20261028/image-text-development-v1", "statusFile": "status.json"}
   ]
 }

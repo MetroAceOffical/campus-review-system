@@ -4,6 +4,8 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import unicodedata
+from datetime import date
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -79,9 +81,16 @@ def grammar(config, emit, enhanced=False):
 
 
 def fields(text):
+    text = unicodedata.normalize('NFKC', text)
     values = {'日期': set(), '地点': set(), '主办单位': set()}
-    for match in re.finditer(r'(?:(\d{4})年)?(\d{1,2})月(\d{1,2})日', text):
-        values['日期'].add(f'{int(match[1]) if match[1] else ""}/{int(match[2])}/{int(match[3])}')
+    for pattern in (r'(?:(\d{4})年)?(\d{1,2})月(\d{1,2})日', r'(?<!\d)(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?!\d)'):
+        for match in re.finditer(pattern, text):
+            year, month, day = int(match[1]) if match[1] else None, int(match[2]), int(match[3])
+            try:
+                date(year if year is not None else 2000, month, day)
+            except ValueError:
+                continue
+            values['日期'].add(f'{year if year is not None else ""}/{month}/{day}')
     for key in ('地点', '主办单位'):
         values[key].update(m.group(1).strip() for m in re.finditer(key + r'[：:]\s*([^\n，。；]{2,40})', text))
     return values
@@ -98,7 +107,7 @@ def compare_fields(ocr, context):
                 xa, ya = x.split('/'), y.split('/')
                 status = 'MATCH' if xa[-2:] == ya[-2:] and (not xa[0] or not ya[0] or xa[0] == ya[0]) else 'CONFLICT'
             else:
-                status = 'MATCH' if x == y else 'CONFLICT'
+                status = 'MATCH' if ''.join(x.split()) == ''.join(y.split()) else 'CONFLICT'
         rows.append({'field': key, 'imageValues': sorted(a), 'textValues': sorted(b), 'status': status})
     return rows
 

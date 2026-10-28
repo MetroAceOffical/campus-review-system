@@ -32,8 +32,16 @@ test('refreshes real counters, leaves pending model curves empty and stops polli
     expect(wrapper.text()).toContain('图片开发区评价')
     const imageChart = wrapper.findAllComponents({ name: 'ExperimentChart' }).find(c => c.props('title') === '正确来源检出数量')!
     expect(imageChart.props('option').series[0].data).toEqual([2, 3, 1, 1])
+    response.stages.push({ key: 'grammar_rules', title: '语法规则开发评价', state: 'DOCUMENT_EVALUATION_COMPLETE', availability: 'AVAILABLE', metrics: { processed: 500, total: 500, truePositive: 300, falsePositive: 0, falseNegative: 80 }, latest: {}, history: [] })
+    response.stages.push({ key: 'image_fields_before', title: '旧字段解析', state: 'DOCUMENT_EVALUATION_COMPLETE', availability: 'AVAILABLE', metrics: { processed: 100, correctFields: 77, falseConflicts: 37 }, latest: {}, history: [] })
+    response.stages.push({ key: 'image_fields', title: '新字段解析', state: 'DOCUMENT_EVALUATION_COMPLETE', availability: 'AVAILABLE', metrics: { processed: 100, correctFields: 150, falseConflicts: 0, assessableFields: 150 }, latest: {}, history: [] })
+    await vi.advanceTimersByTimeAsync(5000); await flushPromises()
+    const grammarChart = wrapper.findAllComponents({ name: 'ExperimentChart' }).find(c => c.props('title') === '语法规则开发评价编辑计数')!
+    expect(grammarChart.props('option').series[0].data).toEqual([300, 0, 80])
+    const fields = wrapper.findAllComponents({ name: 'ExperimentChart' }).find(c => c.props('title') === '图文字段开发诊断')!
+    expect(fields.props('option').series[0].data).toEqual([77, 150])
     wrapper.unmount()
     await vi.advanceTimersByTimeAsync(10000)
-    expect(api.formalProgress).toHaveBeenCalledTimes(3)
+    expect(api.formalProgress).toHaveBeenCalledTimes(4)
   } finally { if (wrapper.exists()) wrapper.unmount() }
 })

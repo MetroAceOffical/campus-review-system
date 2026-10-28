@@ -16,13 +16,16 @@ import java.util.*;
 public class FormalTrainingService {
     private static final long JSON_BYTES=512*1024,TAIL_BYTES=256*1024;
     private static final int HISTORY_POINTS=500;
-    private static final Set<String> LIVE_STATES=Set.of("TRAINING","CORRESPONDENCE_TRAINING","GENERATING_TRAIN_MATERIAL","GENERATING_HELDOUT_QUERIES","WAITING_CAMPUS_TRAINING_COMPLETION","WAITING_GPU_RESOURCE","WAITING_OTHER_GPU_CONSUMER","WAITING_WEB_OR_GPU_RESOURCE","LOADING_IMAGE_EVALUATION","RUNNING_IMAGE_DEVELOPMENT_EVALUATION");
+    private static final Set<String> LIVE_STATES=Set.of("TRAINING","CORRESPONDENCE_TRAINING","GENERATING_TRAIN_MATERIAL","GENERATING_HELDOUT_QUERIES","WAITING_CAMPUS_TRAINING_COMPLETION","WAITING_GPU_RESOURCE","WAITING_OTHER_GPU_CONSUMER","WAITING_WEB_OR_GPU_RESOURCE","LOADING_IMAGE_EVALUATION","RUNNING_IMAGE_DEVELOPMENT_EVALUATION","WAITING_HOST_MEMORY","WAITING_CPU_EVALUATOR","RUNNING_DOCUMENT_EVALUATION");
     private static final Set<String> METRICS=Set.of("selectedOriginals","elapsedSeconds","estimatedRemainingSeconds","reusedSegments",
         "hostRssBytes","cudaPeakAllocatedBytes","cudaPeakBytes","modelLoadSeconds","processed","total","queries","steps","epochs",
         "plannedSlots","requestedQuerySlots","constructedQueries","pendingSlots","generatedParaphraseQueries","globallySupportedNormalQueries",
         "referenceFields","scheduledSegments","generatedSegments","acceptedSegments","pendingSegments","quarantinedSegments",
         "dinoTop10Retrieved","dinoTop20Retrieved","baselineAccepted","top20Accepted","enhancedAccepted","scopeCorrect",
-        "failedQueries","partialQueries","unknownAcceptedSources","finalQueriesEvaluated","realHardNegativeTruthCount");
+        "failedQueries","partialQueries","unknownAcceptedSources","finalQueriesEvaluated","realHardNegativeTruthCount",
+        "truePositive","falsePositive","falseNegative","invalidSuggestions","assessableFields","correctFields","unresolvedFields",
+        "conflictFields","detectedConflicts","falseConflicts","insufficientControls","correctInsufficient","knownContextQueries",
+        "relatedTop1","relatedTop3","realRuntimeQueries","realRuntimeCompleted","availableMemoryBytes","requiredMemoryBytes","totalSteps");
     private static final Set<String> FLAGS=Set.of("reloadVerified","qualityAccepted","productActivated","fullQuerySetReady",
         "neuralTrainingStarted","modelEvaluationStarted","neuralTrainingPerformed","modelPredictionsProduced","finalProtocolExecuted");
     private static final Set<String> RECORD=Set.of("step","epoch","loss","validationLoss","baselineValidationLoss","gradientNorm",
