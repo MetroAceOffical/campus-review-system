@@ -27,8 +27,13 @@ test('refreshes real counters, leaves pending model curves empty and stops polli
     expect(wrapper.text()).toContain('570')
     const chart = wrapper.findComponent({ name: 'ExperimentChart' })
     expect(chart.props('option').series[0].data).toEqual([560, 570])
+    response.stages.push({ key: 'image_evaluation', title: '图片开发区评价', state: 'RUNNING_IMAGE_DEVELOPMENT_EVALUATION', availability: 'AVAILABLE', metrics: { processed: 3, total: 1064, baselineAccepted: 2, top20Accepted: 3, enhancedAccepted: 1, scopeCorrect: 1, failedQueries: 1 }, latest: {}, history: [] })
+    await vi.advanceTimersByTimeAsync(5000); await flushPromises()
+    expect(wrapper.text()).toContain('图片开发区评价')
+    const imageChart = wrapper.findAllComponents({ name: 'ExperimentChart' }).find(c => c.props('title') === '正确来源检出数量')!
+    expect(imageChart.props('option').series[0].data).toEqual([2, 3, 1, 1])
     wrapper.unmount()
     await vi.advanceTimersByTimeAsync(10000)
-    expect(api.formalProgress).toHaveBeenCalledTimes(2)
+    expect(api.formalProgress).toHaveBeenCalledTimes(3)
   } finally { if (wrapper.exists()) wrapper.unmount() }
 })

@@ -1,0 +1,160 @@
+{
+  "stage": 19,
+  "date": "2026-10-28",
+  "snapshotAt": "2026-10-28T17:49:40.575661+08:00",
+  "state": "FULL_IMAGE_DEVELOPMENT_EVALUATION_RUNNING_AND_VISIBLE",
+  "split": {
+    "developmentOriginals": 152,
+    "developmentQueries": 1064,
+    "finalOriginals": 148,
+    "finalQueries": 1036,
+    "finalQueriesEvaluated": 0
+  },
+  "imageEvaluation": {
+    "state": "RUNNING_IMAGE_DEVELOPMENT_EVALUATION",
+    "processed": 52,
+    "total": 1064,
+    "runId": "92b1aea7ee002bef928ed79d2a1c4b37340b9fd47099831656024a60caa6c459",
+    "elapsedSeconds": 507.8014156999998,
+    "queries": 52,
+    "failedQueries": 0,
+    "partialQueries": 0,
+    "unknownAcceptedSources": 0,
+    "dinoTop10Retrieved": 52,
+    "dinoTop20Retrieved": 52,
+    "baselineAccepted": 50,
+    "top20Accepted": 50,
+    "enhancedAccepted": 44,
+    "scopeCorrect": 44,
+    "finalQueriesEvaluated": 0,
+    "realHardNegativeTruthCount": 0,
+    "qualityAccepted": false,
+    "productActivated": false,
+    "estimatedRemainingSeconds": 9882.596782469227
+  },
+  "backgroundGeneration": {
+    "state": "GENERATING_TRAIN_MATERIAL",
+    "segmentCounts": {
+      "ACCEPTED": 1818,
+      "PENDING": 14575,
+      "QUARANTINED": 380
+    },
+    "selectedOriginals": 3684,
+    "elapsedSeconds": 14035.563000000002,
+    "device": "cuda",
+    "promptVersion": "3",
+    "reusedSegments": 440,
+    "estimatedRemainingSeconds": 116364.23818259386,
+    "semanticCorrectnessCertified": false,
+    "modelLoadSeconds": 9.06199999999808,
+    "hostRssBytes": 206286848,
+    "cudaPeakAllocatedBytes": 6313416192
+  },
+  "device": "cpu",
+  "torchThreads": 2,
+  "opencvThreads": 2,
+  "gpuDetectorStarted": false,
+  "comparisons": [
+    "DINO_TOP10_FROZEN_THRESHOLD",
+    "DINO_TOP20_THRESHOLD_DIAGNOSTIC",
+    "IMAGE_V2_GEOMETRIC_CORRESPONDENCE"
+  ],
+  "scoring": {
+    "correctSourceIdentityRequired": true,
+    "failuresRemainInDenominator": true,
+    "extraAcceptedSourcesUnknown": true,
+    "realHardNegativeTruthCount": 0,
+    "falsePositiveRate": null,
+    "bootstrapUnit": "automaticImageFamily",
+    "bootstrapResamples": 1000
+  },
+  "resume": {
+    "explicitSameIdentityRequired": true,
+    "queryOrderAndShaChecked": true,
+    "outputProcessLock": true,
+    "codeGuardFiles": 8,
+    "statusAtomic": true,
+    "perQueryPredictionsFlushed": true,
+    "actualInterruptedResumeTested": false
+  },
+  "http": {
+    "adminAndReviewerRead": true,
+    "memberDenied": true,
+    "before": 32,
+    "after": 33,
+    "total": 1064,
+    "realHttpProgressAdvanced": true,
+    "evaluationAlgorithmsUnchanged": 8,
+    "device": "cpu",
+    "finalQueriesEvaluated": 0,
+    "evaluationComplete": false
+  },
+  "deployment": {
+    "jarSha256": "31b0fe761f720774e55a962ead5c34fd10337c1ada949483a84ea6c85668aab3",
+    "staticFilesVerified": 42,
+    "servedIndexMatches": true,
+    "protectedAlgorithmsUnchanged": 23,
+    "formalTrainAndRecipeUnchanged": true,
+    "oldAndNewOcrConfigsAvailable": true,
+    "activeOcrProfile": "adaptive",
+    "imageEnhancementPreset": true,
+    "gpuDetectorStarted": false,
+    "index18Sha256": "e63c6c8b7f18dab04e99e6904bee07624bf30d0b90eba558520a982edc3609db",
+    "index18Unchanged": true,
+    "oldJarAndConfigBackupVerified": true,
+    "referenceGeneration": "18",
+    "releasePointers": "1:TEXT_REUSE\tNULL\n2:PAIR_PREDICTION\tf7442ec3-9128-4ddd-b0cc-318b711ad931"
+  },
+  "browser": {
+    "actualMetricsAndBarChartObserved": true,
+    "liveRefreshObserved": true,
+    "squareStylePreserved": true,
+    "consoleErrors": [],
+    "screenshot": "runtime/workbench-implementation/stage19-browser.jpg"
+  },
+  "checks": {
+    "pythonMetricAndResumeChecks": 2,
+    "javaProgressAndRoleChecks": 2,
+    "vuePollingAndChartChecks": 1,
+    "frontendBuild": true,
+    "backendBuild": true,
+    "fullRegressionRun": false
+  },
+  "generationOriginals": 3684,
+  "generationWindows": 16773,
+  "epochsBge": 2,
+  "epochsM3": 2,
+  "scaleReduced": false,
+  "epochsReduced": false,
+  "newDependenciesInstalled": false,
+  "qualityAccepted": false,
+  "formalCampusTrainingCompleted": false,
+  "findings": [
+    "Early correct-source geometric rejections remain in predictions; do not infer an improvement before full development evaluation."
+  ],
+  "remaining": [
+    "complete image development evaluation and error analysis",
+    "natural hard-negative truth and final image evaluation",
+    "formal material/BGE/M3 training and calibration",
+    "heldout text construction and full five-way evaluation",
+    "independent grammar/image-text quality and remaining GPU workflow",
+    "final report and later frontend interaction refinement"
+  ],
+  "estimateHours": {
+    "imageDevelopmentRemaining": 2.7451657729081185,
+    "generationRemaining": 32.32339949516496,
+    "nextIndependentQualityMaterialEngineering": [
+      6,
+      12
+    ],
+    "formalTwoModelTraining": [
+      4,
+      12
+    ],
+    "heldoutGeneration": [
+      10,
+      20
+    ],
+    "wholeProjectEstimateAvailable": false
+  }
+}

@@ -23,9 +23,12 @@ const names: Record<string, string> = {
   GENERATION_FAILED: '样本准备失败', LOADING_HELDOUT_GENERATOR: '加载评价材料生成器',
   GENERATING_HELDOUT_QUERIES: '构造独立评价材料', HELDOUT_SEGMENT_GENERATION_FINISHED: '评价改写段已生成',
   HELDOUT_GENERATION_STOPPED: '评价材料流程已停止', HELDOUT_QUERY_MATERIAL_ASSEMBLED: '评价材料已组装', OBSERVED: '已读取',
+  LOADING_IMAGE_EVALUATION: '加载图片评价模型', RUNNING_IMAGE_DEVELOPMENT_EVALUATION: '图片开发区评价中',
+  IMAGE_DEVELOPMENT_EVALUATION_COMPLETE: '图片开发区评价完成', IMAGE_EVALUATION_STOPPED: '图片评价已停止',
 }
 const generation = computed(() => data.value?.stages.find(s => s.key === 'generation'))
 const protocol = computed(() => data.value?.stages.find(s => s.key === 'protocol'))
+const imageEvaluation = computed(() => data.value?.stages.find(s => s.key === 'image_evaluation'))
 const models = computed(() => data.value?.stages.filter(s => ['bge', 'm3'].includes(s.key)) ?? [])
 const finite = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value)
 const count = (value: unknown) => finite(value) ? value.toLocaleString() : '—'
@@ -58,6 +61,7 @@ const samples = computed(() => ({ ...chart, legend: { data: ['合格段落', '�
   { name: '隔离段落', type: 'line', showSymbol: observations.value.length === 1, data: observations.value.map(p => p.quarantined) },
 ] }))
 const partitions = computed(() => ({ ...chart, legend: { data: ['已构造', '待补充'] }, xAxis: { type: 'category', data: protocol.value?.splits?.map(s => splitNames[s.split] ?? s.split) ?? [] }, yAxis: { type: 'value' }, series: ['constructed', 'pending'].map(key => ({ name: key === 'constructed' ? '已构造' : '待补充', type: 'bar', stack: 'queries', data: protocol.value?.splits?.map(s => s[key as 'constructed' | 'pending']) ?? [] })) }))
+const imageCounts = computed(() => ({ ...chart, xAxis: { type: 'category', data: ['DINO Top10', 'DINO Top20', '组合检出', '区域类型正确'] }, yAxis: { type: 'value', minInterval: 1 }, series: [{ name: '正确来源数量', type: 'bar', data: ['baselineAccepted', 'top20Accepted', 'enhancedAccepted', 'scopeCorrect'].map(key => metric(imageEvaluation.value, key) ?? null) }] }))
 function loss(stage: FormalStage) {
   const training = points(stage), validation = stage.history.filter(p => finite(p.step) && finite(p.validationLoss))
   return { ...chart, legend: { data: ['训练损失', '验证损失'] }, xAxis: { type: 'value', name: 'Step', minInterval: 1 }, yAxis: { type: 'value', name: 'Loss', scale: true }, series: [
@@ -90,6 +94,7 @@ onBeforeUnmount(() => { alive = false; if (timer) clearInterval(timer) })
       </template>
       <div v-for="model in models" :key="model.key" class="formal-model"><h3>{{ model.title }}</h3><div class="work-stats"><div><span>实际轮数 / Step</span><strong>{{ count(latest(model).epoch ?? metric(model, 'epochs')) }} <small>/ {{ count(latest(model).step ?? metric(model, 'steps')) }}</small></strong></div><div><span>最新训练损失</span><strong class="stage-value">{{ number(latest(model).loss) }}</strong></div><div><span>执行状态</span><strong class="stage-value">{{ state(model) }}</strong></div></div><div class="experiment-grid" v-if="points(model).length"><ExperimentChart :title="`${model.title}损失`" :option="loss(model) as any" /><ExperimentChart :title="`${model.title}资源`" :option="resources(model) as any" /></div><p v-else class="muted">训练开始后显示实际损失与资源记录。</p></div>
       <template v-if="protocol?.splits?.length"><h3>独立评价材料</h3><ExperimentChart title="评价查询构造进度" :option="partitions as any" /><el-table :data="protocol.splits" aria-label="评价分区准备"><el-table-column label="分区"><template #default="{ row }">{{ splitNames[row.split] || row.split }}</template></el-table-column><el-table-column prop="target" label="目标数量" /><el-table-column prop="constructed" label="已构造" /><el-table-column prop="pending" label="待补充" /><el-table-column prop="constructedHomePrimaryQueries" label="已构造本校查询" /></el-table></template>
+      <template v-if="imageEvaluation"><h3>图片开发区评价</h3><div class="work-stats"><div><span>已处理 / 总查询</span><strong>{{ count(metric(imageEvaluation, 'processed')) }} <small>/ {{ count(metric(imageEvaluation, 'total')) }}</small></strong></div><div><span>组合检出 / DINO Top10</span><strong>{{ count(metric(imageEvaluation, 'enhancedAccepted')) }} <small>/ {{ count(metric(imageEvaluation, 'baselineAccepted')) }}</small></strong></div><div><span>执行失败 / 覆盖不完整</span><strong>{{ count(metric(imageEvaluation, 'failedQueries')) }} <small>/ {{ count(metric(imageEvaluation, 'partialQueries')) }}</small></strong></div></div><p class="muted">{{ state(imageEvaluation) }} · 已用时 {{ duration(metric(imageEvaluation, 'elapsedSeconds')) }} · 预计剩余 {{ duration(metric(imageEvaluation, 'estimatedRemainingSeconds')) }} · 按正确原图统计</p><ExperimentChart v-if="finite(metric(imageEvaluation, 'processed')) && (metric(imageEvaluation, 'processed') as number) > 0" title="正确来源检出数量" :option="imageCounts as any" /></template>
     </template>
   </section>
 </template>

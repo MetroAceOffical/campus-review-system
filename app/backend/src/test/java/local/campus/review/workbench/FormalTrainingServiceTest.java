@@ -49,6 +49,17 @@ class FormalTrainingServiceTest {
             Files.writeString(folder.resolve("status.json"),"{\"state\":\"TRAIN_CONSTRUCTION_FINISHED\",\"counts\":{\"ACCEPTED\":12}}");
             var finished=FormalTrainingService.read(root,runtime,json,registry).path("stages").get(0);
             assertEquals(0,finished.path("metrics").path("pending").asInt(-1));assertEquals(100,finished.path("progress").path("percent").asDouble());
+            Files.writeString(folder.resolve("status.json"),"""
+                {"state":"RUNNING_IMAGE_DEVELOPMENT_EVALUATION","processed":3,"total":1064,
+                 "baselineAccepted":2,"top20Accepted":3,"enhancedAccepted":1,"scopeCorrect":1,
+                 "dinoTop20Retrieved":3,"failedQueries":1,"unknownAcceptedSources":2,
+                 "finalQueriesEvaluated":0,"realHardNegativeTruthCount":0,"privatePath":"hidden"}
+                """);
+            var evaluation=FormalTrainingService.read(root,runtime,json,registry).path("stages").get(0);
+            assertEquals(3,evaluation.path("progress").path("processed").asInt());
+            assertEquals(1,evaluation.path("metrics").path("enhancedAccepted").asInt(-1));
+            assertEquals(1,evaluation.path("metrics").path("failedQueries").asInt(-1));
+            assertFalse(evaluation.toString().contains("privatePath"));
             Files.writeString(folder.resolve("status.json"),"{writing");
             var changed=FormalTrainingService.read(root,runtime,json,registry);
             assertEquals("READ_ERROR",changed.path("stages").get(0).path("availability").asText());
