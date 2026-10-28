@@ -1,0 +1,278 @@
+{
+  "stage": "heldout-query-construction-public-source-recovery-and-legacy-baselines",
+  "date": "2026-10-28",
+  "snapshotAt": "2026-10-28T05:40:27.381920+00:00",
+  "state": "CPU_PREPARATION_AND_LITERAL_DIAGNOSTIC_COMPLETE_BACKGROUND_WORKERS_RUNNING",
+  "cacheRecovery": {
+    "rawUniqueCachedArticles": 208,
+    "alreadyRepresentedUrls": 174,
+    "newCandidateBodies": 32,
+    "eligibleHeldoutCandidates": 30,
+    "quarantinedTrainingRelated": 2,
+    "newNetworkDownloads": 0,
+    "eligibleBySplit": {
+      "final": 21,
+      "dev": 8,
+      "calibration": 1
+    },
+    "executedRecoveryV2CodeSha256": "a780516c199ed177243e70f23ace8353a70173df77dcbbbb3909cf1105ca1922",
+    "executedSourceSnapshot": "runtime/source-checkpoints/home-cache-recovery-v2-code.py",
+    "subsequentChange": "added raw-root support for future fully frozen public acquisition caches; recovery artifacts not rewritten"
+  },
+  "extendedEvaluationSources": {
+    "sourceCount": 6311,
+    "sourceCounts": {
+      "train": 3802,
+      "calibration": 431,
+      "dev": 654,
+      "final": 1424
+    },
+    "homeCampusCounts": {
+      "dev": 74,
+      "final": 249,
+      "train": 209,
+      "calibration": 28
+    },
+    "addedHeldoutSources": 30,
+    "sourceTrainSha256": "d238ba76c76fe455f68cc0ad2a4466117f607f18c8abaa18da623bdb3c5eb70f",
+    "originalTrainSha256": "d238ba76c76fe455f68cc0ad2a4466117f607f18c8abaa18da623bdb3c5eb70f",
+    "trainingPlanChanged": false
+  },
+  "protocol": {
+    "referenceFields": 6311,
+    "targetSlots": 1800,
+    "constructedControls": 340,
+    "pendingSlots": 1460,
+    "splitCounts": {
+      "calibration": {
+        "target": 200,
+        "constructed": 40,
+        "pending": 160,
+        "constructedByCategory": {
+          "copy_control": 20,
+          "whole_reordered": 20
+        },
+        "plannedHomePrimaryQueries": 54,
+        "constructedHomePrimaryQueries": 11,
+        "homeTargetMetForPlan": false,
+        "naturalUniqueQueries": 5,
+        "naturalRelations": 5,
+        "constructionStatuses": {
+          "CONSTRUCTED": 40,
+          "WAITING_HELDOUT_GENERATION": 120,
+          "NEEDS_SUPPORTED_NEGATIVE_SCOPE": 40
+        }
+      },
+      "dev": {
+        "target": 400,
+        "constructed": 75,
+        "pending": 325,
+        "constructedByCategory": {
+          "copy_control": 33,
+          "whole_reordered": 42
+        },
+        "plannedHomePrimaryQueries": 134,
+        "constructedHomePrimaryQueries": 23,
+        "homeTargetMetForPlan": false,
+        "naturalUniqueQueries": 10,
+        "naturalRelations": 11,
+        "constructionStatuses": {
+          "CONSTRUCTED": 75,
+          "WAITING_HELDOUT_GENERATION": 225,
+          "NEEDS_SUPPORTED_NEGATIVE_SCOPE": 100
+        }
+      },
+      "final": {
+        "target": 1200,
+        "constructed": 225,
+        "pending": 975,
+        "constructedByCategory": {
+          "copy_control": 100,
+          "whole_reordered": 125
+        },
+        "plannedHomePrimaryQueries": 418,
+        "constructedHomePrimaryQueries": 83,
+        "homeTargetMetForPlan": false,
+        "naturalUniqueQueries": 16,
+        "naturalRelations": 18,
+        "constructionStatuses": {
+          "CONSTRUCTED": 225,
+          "WAITING_HELDOUT_GENERATION": 675,
+          "NEEDS_SUPPORTED_NEGATIVE_SCOPE": 300
+        }
+      }
+    },
+    "fullQuerySetReady": false,
+    "homeFinalPlannedQueries": 418,
+    "homeFinalTargetQueries": 720
+  },
+  "construction": {
+    "plannedPositiveQueries": 1020,
+    "uniqueOriginalSegments": 3085,
+    "exactShortTailControls": 48,
+    "actualNeuralGeneratedSegments": 0,
+    "pendingGenerationSegments": 3037,
+    "maximumQueriesPerEvent": 2,
+    "localContext": "actual same-split original, original ranges retained, excluded before candidate ranking; never described as original authorship",
+    "maximumUpstreamResourceWaitHours": 96,
+    "upstreamPriority": "campus training/export first; no interruption",
+    "state": "WAITING_CAMPUS_TRAINING_COMPLETION",
+    "purpose": "HELDOUT_QUERY_CONSTRUCTION_NOT_TRAINING_OR_FINAL_MODEL_EVALUATION",
+    "workVersion": "heldout-generation-v2",
+    "previousWorkState": "SUPERSEDED_BEFORE_NEURAL_GENERATION",
+    "previousNeuralGeneratedSegments": 0,
+    "wholeMinimumSubstantivelyParaphrasedSourceFraction": 0.5,
+    "wholeLiteralCopyFractionMaximum": 0.75,
+    "localAndMultiAllSegmentsRequireParaphrase": true
+  },
+  "legacyExports": {
+    "implementedVariants": [
+      "frozen-v2",
+      "semantic-disabled"
+    ],
+    "executedVariant": "semantic-disabled",
+    "actualCPUQueries": 75,
+    "referenceFields": 6311,
+    "missingPredictions": 0,
+    "failedQueries": 0,
+    "invalidEvidence": 0,
+    "evidenceOffsetChecks": {
+      "numerator": 606,
+      "denominator": 606,
+      "value": 1.0
+    },
+    "correctSourceEvidence": {
+      "numerator": 74,
+      "denominator": 75,
+      "value": 0.9866666666666667
+    },
+    "retrievalMissesKept": 1,
+    "scope": "DIAGNOSTIC_CONTROLS",
+    "normalFPR": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "semanticRewriteQualityMeasured": false,
+    "frozenV2GPUVariantExecutedThisStage": false,
+    "newDenseAblationExporters": "pending; no BERT substitution for unadapted M3"
+  },
+  "publicSourceStatus": {
+    "mainAndPublicAPI": "temporary site-unavailable HTML, not usable news JSON",
+    "weibo": "visitor verification; not bypassed",
+    "jyt": "explicit GPTBot restriction observed; no bulk acquisition launched",
+    "icucnPagination": {
+      "uniquePublicationsLinked": 15,
+      "newPublicationUrls": [],
+      "commentAnchorAliasesNotCounted": 10
+    },
+    "finiteAPIAcquisition": {
+      "state": "SOURCE_TEMPORARILY_UNAVAILABLE",
+      "newDownloadedPages": 0,
+      "reusedHistoricalPages": 12,
+      "newCorpusSourcesAudited": 0,
+      "trainingInputsChanged": false,
+      "retryAfterSeconds": 1800
+    },
+    "historicalCachedPagesReused": 12,
+    "maximumTemporaryWaitHours": 12,
+    "retryIntervalSeconds": 1800,
+    "TLSVerificationDisabled": false,
+    "thirdPartyEnrollmentSitesUsedAsOfficialSources": false
+  },
+  "coreChecks": {
+    "extendedReferenceSources": 6311,
+    "addedHeldoutSources": 30,
+    "trainBytesIdentical": true,
+    "originalTrainSha256": "d238ba76c76fe455f68cc0ad2a4466117f607f18c8abaa18da623bdb3c5eb70f",
+    "slotCount": 1800,
+    "positiveQueriesPlanned": 1020,
+    "uniqueOriginalSegments": 3085,
+    "constructionRangeChecks": 1020,
+    "maximumQueriesPerEvent": 2,
+    "crossSplitEvents": 0,
+    "liveGeneratedResultsFaked": false,
+    "neuralModelsLoadedInChecks": false,
+    "backgroundBoundAlgorithmsUnchanged": 18,
+    "baselineQueriesActuallyPredicted": 75,
+    "baselineFailedQueries": 0,
+    "baselineInvalidEvidence": 0,
+    "baselineScope": "DIAGNOSTIC_CONTROLS"
+  },
+  "checks": {
+    "syntaxFilesValid": 8,
+    "focusedChecks": 5,
+    "focusedChecksPassed": 5,
+    "fullRegressionRun": false
+  },
+  "background": {
+    "observedAt": "2026-10-28T05:39:55.721617+00:00",
+    "webRunId": "69ce0f98-93cb-4c63-aedd-840c32b33f34",
+    "webCounts": {
+      "ACCEPTED": 519,
+      "PENDING": 86,
+      "QUARANTINED": 789
+    },
+    "formalMaterial": {
+      "state": "WAITING_WEB_OR_GPU_RESOURCE",
+      "productActivated": false,
+      "qualityAccepted": false,
+      "reason": "其他模型任务正在计算",
+      "plannedOriginals": 3684,
+      "plannedSegments": 16773,
+      "neuralTrainingStarted": false
+    },
+    "heldoutConstruction": {
+      "state": "WAITING_CAMPUS_TRAINING_COMPLETION",
+      "neuralTrainingStarted": false,
+      "modelEvaluationStarted": false,
+      "upstreamState": "NOT_STARTED"
+    },
+    "heldoutWorkVersion": "heldout-generation-v2",
+    "publicAcquisition": {
+      "state": "SOURCE_TEMPORARILY_UNAVAILABLE",
+      "newDownloadedPages": 0,
+      "reusedHistoricalPages": 12,
+      "newCorpusSourcesAudited": 0,
+      "trainingInputsChanged": false,
+      "retryAfterSeconds": 1800
+    }
+  },
+  "newDependenciesInstalled": false,
+  "frontendChanged": false,
+  "serviceRestarted": false,
+  "originalTrainingEpochsEach": 2,
+  "dataScaleReduced": false,
+  "formalCampusTrainingComplete": false,
+  "formalFinalModelEvaluationExecuted": false,
+  "qualityAccepted": false,
+  "estimate": {
+    "formalGenerationHoursPriorEstimate": [
+      40,
+      80
+    ],
+    "campusTrainingHoursPriorEstimate": [
+      4,
+      12
+    ],
+    "additionalHeldoutGenerationHoursProvisional": [
+      10,
+      20
+    ],
+    "basis": "3037 pending heldout source windows, existing generator throughput; update after real runs",
+    "remainingIndependentEngineeringHours": [
+      6,
+      12
+    ],
+    "engineeringMayOverlapGPU": true,
+    "publicSourceRecoveryTimeKnown": false
+  },
+  "remaining": [
+    "NCUC home coverage to60% and additional genuinely separate source/event families",
+    "440 normal queries with complete supported negative scope",
+    "real formal training/generation/reload and heldout query generation",
+    "untrained dense/unadapted M3 controlled ablation exports and full real scores",
+    "matching production index/calibration/Web release integration",
+    "independent grammar/image-text evaluation and whole-system QA/reports"
+  ]
+}

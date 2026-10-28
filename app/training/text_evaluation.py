@@ -25,6 +25,7 @@ def _accepted(decision):
 
 
 def _supported(pair,prediction):
+    if pair.get('supportPolicyPassed') is False:return False
     if pair.get('evidenceKind')=='LITERAL_EXACT':return pair['queryText']==pair['sourceText']
     if 'scoreType' in pair:
         threshold=prediction.get('pairScoreThreshold',prediction.get('featureConfig',{}).get('pairScoreThreshold'))

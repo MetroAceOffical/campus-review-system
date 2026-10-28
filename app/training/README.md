@@ -1,5 +1,30 @@
 # 期末离线数据与训练
 
+## 10月28日留出构造与旧基线导出（阶段10）
+
+当前正式训练仍绑定campus-quality-20261028-v1，**不替换在跑配方**。新增只用于评价的campus-evaluation-partitions-20261028-v2为6,311篇，train文件与原版逐字节相同；新协议为text-evaluation-corrected-20261028-v3，当前仍只有340控制查询，不能称完整1,800条或独立质量已通过。
+
+- `recover_home_cache.py`恢复旧公开API中此前未入语料的正文，核验原响应SHA、已知来源/事件和公共训练重合；`--raw-root`只接受已经READY的项目runtime新采集缓存。真实恢复32候选→30留出候选，2篇训练关联隔离；旧执行源分别保存在runtime/source-checkpoints/home-cache-recovery-v1-code.py及v2-code.py，后续只增加新缓存入口，未重写旧审计。
+- `extend_heldout_partitions.py`只合并已审计的calibration/dev/final候选，复制原train字节，合并既有保守事件关系。原语料、训练计划和历史协议不覆盖。
+- `heldout_queries.py prepare/generate/assemble`构造1,020条留出正例，实际3,085不同原段/48短尾原样控制。局部背景为同分区真实原稿，有明确范围和参考排除；整篇/局部/多源均保留码点映射。不能使用train父稿，不能按生成计划伪写已构造查询。生成失败、重复、预算超限或段缺失均保留待补；440正常稿仍要求完整负范围依据。
+- 当前构造工作版本v2允许固定机构全名等作为原样控制保留，但整篇至少50%来源字数通过实质改写检查，并继续检查整篇复制率、事实和数字；局部/多来源片段全部要求改写。v1在神经生成前停止，仅本任务自己的未开算等待进程被替代，旧计划/执行源码保留。
+- `export_legacy_evaluation.py --variant frozen-v2/semantic-disabled`导出旧基线或完全关闭语义的实际结果，并自动调用evaluate_final。GPU旧v2遵守共享锁；纯CPU字面分支不加载任何神经权重，使用独立CPU锁及至少2GiB空闲内存，运行进程的OMP/MKL/OPENBLAS线程可设为2，不修改全局设置。显式`--resume`只续接同一未完成输出。最终分支同样要求完整开发、正式规模和本校覆盖；`--diagnostic-controls`仅限开发控制。
+
+当前后台状态文件：
+
+- `runtime/experiments/final-training-20261028/heldout-generation-v2/status.json`：等待校园训练/导出，然后串行生成/自动组装，最多等待96小时，无开机/周期任务。
+- `runtime/datasets/ncuc-public-api-20261028-v1/status.json`：先复用12份原缓存，等待官方站点恢复且robots允许，30分钟退避、最多12小时；未恢复不写READY，不关闭TLS或处理访客验证。
+- `runtime/experiments/final-training-20261028/literal-dev-controls-v1-metrics/summary.json`：实际75条CPU开发控制结果（1个来源召回未命中、0运行失败、0无效偏移），无正常稿FPR，不能当洗稿准确率。已完成不要重跑同一输出。
+
+重启后先确认对应原进程均已退出，再以同一源码/输入显式续接（CMD，勿在运行时重复执行）：
+
+```cmd
+runtime\environments\final-training\Scripts\python.exe -u -B app\training\heldout_queries.py generate --work runtime/experiments/final-training-20261028/heldout-generation-v2 --after-training-stage runtime/experiments/final-training-20261028/campus-training-stage-v2 --wait-hours 96 --assemble-output runtime/datasets/text-evaluation-generated-20261028-v4
+runtime\environments\final-training\Scripts\python.exe -u -B app\training\collect_ncuc_api.py --output runtime/datasets/ncuc-public-api-20261028-v1 --max-wait-hours 12
+```
+
+若后续补到新的本校来源，需要新协议和新的heldout工作目录，不修改旧协议/已保存查询，不把同事件别名当新独立稿。仍须补本校60%、正常稿真值、两路密集/未适配M3对照、完整真实评价及生产库匹配配置。
+
 ## 10月28日模型接入与自动评价准备（阶段9）
 
 `v3_workflow.py`已有`status/register/index/predict/calibrate/freeze-point`命令。当前只完成接入代码和协议准备，新校园BGE/M3还未完成训练；不要把可执行入口或被冻结的构造槽位记成新模型成绩。
