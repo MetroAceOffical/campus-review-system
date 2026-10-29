@@ -8,6 +8,19 @@ import static local.campus.review.content.DocumentModels.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CitationCoverageTest {
+    @Test void corroboratingSupportRequiresItsOwnCitationCoverage() throws Exception {
+        var json=new ObjectMapper();var codec=new DocumentCodec(json,new RuntimeSettings(json));var service=new CitationService(null,json,codec);
+        String anchor="在数媒、创意设计、电影电视制作和数字音乐等方向，他们持续积累专业基础，也逐渐熟悉新的制作工具及创作方式。",context="在南传国际，学生的国际化视野是在一节节课程中逐步建立起来的。";
+        var content=json.createObjectNode().put("type","doc");var paragraph=content.putArray("content").addObject().put("type","paragraph");paragraph.putObject("attrs").put("nodeId","anchor");var nodes=paragraph.putArray("content");
+        var first=nodes.addObject().put("type","text").put("text",anchor);first.putArray("marks").addObject().put("type","citation").putObject("attrs").putArray("sourceIds").add("s1");var second=nodes.addObject().put("type","text").put("text",context);
+        var sources=List.of(new Source("s1","","INTERNAL","12","21","原稿"));var evidence=json.createArrayNode();var item=evidence.addObject().put("evidenceType","TEXT_SIMILARITY").put("sourceWorkId","12").put("acceptedCandidate",false);item.putArray("matches");item.putObject("semanticSummary").put("suspectedReuse",true).put("selectionMethod","anchored-context-v1");var windows=item.putArray("semanticWindows");
+        int a=DocumentCodec.points(anchor),b=DocumentCodec.points(context);
+        windows.addObject().put("queryStart",0).put("queryEnd",a).put("sourceStart",100).put("sourceEnd",139).put("queryText",anchor).put("sourceText","他们不仅在数字媒体、创意设计、影视制作、数字音乐等专业领域内打下了坚实的基础，").put("score",.553).put("tfidfScore",.408).put("citationSupport",true);
+        windows.addObject().put("queryStart",a).put("queryEnd",a+b).put("sourceStart",0).put("sourceEnd",40).put("queryText",context).put("sourceText","南传国际的每一堂课仿佛是一块精心雕琢的拼图，逐渐构建起学生对全球视野的深刻理解。").put("score",.628).put("tfidfScore",.170).put("citationSupport",true);
+        service.annotate(evidence,codec.validateAndExtract(new DocumentInput("联合证据引用","2",content,sources)));assertFalse(item.path("fullyCited").asBoolean(),"联合判定使用的上下文同样需要独立引用覆盖");
+        second.set("marks",first.get("marks").deepCopy());service.annotate(evidence,codec.validateAndExtract(new DocumentInput("联合证据引用","2",content,sources)));assertTrue(item.path("fullyCited").asBoolean());
+    }
+
     @Test void quotedParagraphSeparatorIsNotUncitedArticleContent() throws Exception {
         var json=new ObjectMapper();var codec=new DocumentCodec(json,new RuntimeSettings(json));var service=new CitationService(null,json,codec);
         var content=json.createObjectNode().put("type","doc");var blocks=content.putArray("content");

@@ -6,6 +6,7 @@
   "detectorProfile": null,
   "imageEnhancement": false,
   "contextualText": true,
+  "refinedText": true,
   "ocrProfile": "baseline",
   "ocrPython": "validation/remaining/vision/env-ocr/Scripts/python.exe",
   "mysqlBin": "C:/Program Files/MySQL/MySQL Server 8.0/bin",

@@ -1,0 +1,263 @@
+{
+  "stage": 27,
+  "date": "2026-10-29",
+  "snapshotAt": "2026-10-29T11:21:20.109497+08:00",
+  "state": "ANCHORED_CONTEXT_AND_REFERENCE_CHROME_DEPLOYED",
+  "configId": "text-bbbbe2f485c16796c68d8e54f3551da6bb141f0b6ba1c093243d7177a69c05a6",
+  "previousContextConfigId": "text-bfafb42353288c59ac3ac8a0732d85e19f0cf5f5d171784647a24624dcd855fb",
+  "http": {
+    "state": "DEPLOYED_REFINEMENT_COMPLETE",
+    "actualDetectorRequests": 49,
+    "historical": {
+      "positiveDocuments": 12,
+      "completeCorrectSourceDocuments": 12,
+      "expectedSources": 13,
+      "correctSources": 13,
+      "normalDocuments": 4,
+      "scopedNormalAlerts": 0,
+      "normalAnySourceAlerts": 0,
+      "unjudgedSourceAlerts": 4
+    },
+    "realNews": {
+      "queries": 32,
+      "oldAlertedDocuments": 23,
+      "alertedDocuments": 18,
+      "addedAlertPairs": 0,
+      "removedAlertPairs": 50,
+      "noLongerAlerted": 5
+    },
+    "rawModelEvidenceEqualForAll48": true,
+    "configId": "text-bbbbe2f485c16796c68d8e54f3551da6bb141f0b6ba1c093243d7177a69c05a6",
+    "oldContextConfigId": "text-bfafb42353288c59ac3ac8a0732d85e19f0cf5f5d171784647a24624dcd855fb",
+    "oldContextIdPreserved": true,
+    "finalQueriesInferred": 0,
+    "newWeights": false,
+    "newTrainingSamples": 0,
+    "elapsedSeconds": 35.30178859999978,
+    "scope": "12known authored reuse,4scoped old normals,32actual public dev news without independent natural gold",
+    "actualBusinessChecks": [
+      {
+        "checkId": "b73ad3a6-d00b-48cb-afaa-05a5abf2f93d",
+        "label": "uncited",
+        "fullyCited": false,
+        "citationStates": [
+          "UNCITED"
+        ],
+        "supportingPairs": 2,
+        "configId": "text-bbbbe2f485c16796c68d8e54f3551da6bb141f0b6ba1c093243d7177a69c05a6"
+      },
+      {
+        "checkId": "e1687a58-a347-4238-aa08-aee5819a1a4d",
+        "label": "anchor-only",
+        "fullyCited": false,
+        "citationStates": [
+          "CITED",
+          "UNCITED"
+        ],
+        "supportingPairs": 2,
+        "configId": "text-bbbbe2f485c16796c68d8e54f3551da6bb141f0b6ba1c093243d7177a69c05a6"
+      },
+      {
+        "checkId": "5705312f-b0b1-4b60-8ad6-659423c574f0",
+        "label": "all-cited",
+        "fullyCited": true,
+        "citationStates": [
+          "CITED"
+        ],
+        "supportingPairs": 2,
+        "configId": "text-bbbbe2f485c16796c68d8e54f3551da6bb141f0b6ba1c093243d7177a69c05a6"
+      }
+    ],
+    "manuscriptId": "75",
+    "targetSourceWorkId": "206",
+    "duplicateWork224AutomaticallyCleared": false,
+    "temporaryDraftSoftDeleted": true,
+    "submitted": false,
+    "published": false
+  },
+  "deployment": {
+    "stage": 27,
+    "javaOfflineBuildPassed": true,
+    "focusedJavaTestMethods": 4,
+    "focusedPythonTests": 7,
+    "frontendStaticEntriesUnchanged": 436,
+    "frontendBuildRun": false,
+    "javaRestarted": true,
+    "detectorRestarted": true,
+    "ocrRestarted": false,
+    "newDependenciesInstalled": false,
+    "newJarSha256": "e5fb10575214f73c074930956dc30fbee227771213e96c878972e14896f4d947",
+    "textHealth": {
+      "ready": true,
+      "busy": false,
+      "runId": "aab4ebf5-b55f-4762-9f6e-fb1f4a19b0f8",
+      "activeAttemptId": null,
+      "errorCode": null,
+      "availableTextConfigs": [
+        {
+          "configId": "text-89f0a1c8a4c24a89b43869a60d9b242b9bc8c110493b5dc1847964c50c73c65e",
+          "profileId": null
+        },
+        {
+          "configId": "text-393f674ef0ce299ee2f2cc0c99a84a056a1df9dba9c6a2b3c93e4e785602f02a",
+          "profileId": null
+        },
+        {
+          "configId": "text-bfafb42353288c59ac3ac8a0732d85e19f0cf5f5d171784647a24624dcd855fb",
+          "profileId": null
+        },
+        {
+          "configId": "text-bbbbe2f485c16796c68d8e54f3551da6bb141f0b6ba1c093243d7177a69c05a6",
+          "profileId": null
+        }
+      ],
+      "imageSchema": "image-v1",
+      "contextualText": true,
+      "refinedText": true
+    },
+    "finalConfigId": "text-bbbbe2f485c16796c68d8e54f3551da6bb141f0b6ba1c093243d7177a69c05a6",
+    "supersededDevelopmentConfigs": [
+      "text-ab18eee25f7e91d02034fc8e4fdd029417faadce32ed0ebefc43bc6255fddc45",
+      "text-f9aaaef09daad1519a30a244b31c3752db4f2a467bdc9ec415198c7e17dc739e"
+    ]
+  },
+  "policy": {
+    "existingBertWeights": true,
+    "queryInputRewritten": false,
+    "queryFooterMarkersTrusted": false,
+    "referenceRecordsDeleted": 0,
+    "sourceGroupingOrCitationIdentityChanged": false,
+    "literalScoresAndRawSemanticWindowsPreserved": true,
+    "baseScoreThreshold": 0.5,
+    "baseLexicalFloor": 0.25,
+    "strongAnchor": {
+      "lexical": 0.35,
+      "queryCharacters": 32,
+      "sourceCharacters": 24,
+      "lengthBalance": 0.5
+    },
+    "corroboration": {
+      "score": 0.6,
+      "lexical": 0.15,
+      "pooledLexical": 0.25,
+      "minimumPairs": 2,
+      "minimumQueryCharacters": 64
+    },
+    "navigation": "Reference-only contiguous metadata/link,previous-next,collect-share; identical complete recommendation tail from >=3 distinct same-host URLs",
+    "confirmedReferencePages": 26
+  },
+  "supplementaryAuthoredNormals": {
+    "queries": 24,
+    "families": 8,
+    "oldAlerts": 0,
+    "candidateAlerts": 0,
+    "evaluationType": "cached policy replay; unchanged scoring inputs, not new independent inference"
+  },
+  "realPageScope": {
+    "actualPublicPages": 32,
+    "homeCampusPages": 20,
+    "otherCampusPages": 12,
+    "institutions": 8,
+    "includesNewsNoticesAndGalleryPages": true,
+    "independentHumanGold": false,
+    "naturalPopulationFalsePositiveRate": null,
+    "remainingAlertedPagesNotAllFalse": true
+  },
+  "review": {
+    "independentReadOnly": true,
+    "importantFindings": 1,
+    "finding": "Initial tail heuristic could hide subsequent real content",
+    "resolution": "No query marker trust; reference controls contiguous; recommendation suffix requires >=3 distinct URLs; append/prefix/multiline/repeated-URL tests passed"
+  },
+  "rejectedOrSuperseded": {
+    "unrestrictedPooling": "Added an unjudged political-learning source alert; rejected",
+    "navigationV1": "Overbroad tail range, superseded after review",
+    "navigationV2": "Did not recognize actual historical multiline reference layout, superseded",
+    "finalRun": "anchored-context-deployed-v3; earlier runs retained and not added to unique sample count"
+  },
+  "verification": {
+    "frontendFilesUnchanged": 71,
+    "jarStaticEntriesUnchanged": 436,
+    "focusedPythonTests": 7,
+    "focusedJavaMethods": 4,
+    "formalAlgorithmsUnchanged": 23,
+    "trainRecipeUnchanged": true,
+    "grammarProfileUnchanged": true,
+    "library18Unchanged": true,
+    "modelWeightsUpdated": false,
+    "newTrainingSamples": 0,
+    "newDependenciesInstalled": false,
+    "frontendBuildRun": false,
+    "fullRegressionRun": false,
+    "services": {
+      "java": {
+        "ready": true,
+        "busy": false
+      },
+      "detector": {
+        "ready": true,
+        "busy": false,
+        "runId": "aab4ebf5-b55f-4762-9f6e-fb1f4a19b0f8",
+        "activeAttemptId": null,
+        "errorCode": null,
+        "availableTextConfigs": [
+          {
+            "configId": "text-89f0a1c8a4c24a89b43869a60d9b242b9bc8c110493b5dc1847964c50c73c65e",
+            "profileId": null
+          },
+          {
+            "configId": "text-393f674ef0ce299ee2f2cc0c99a84a056a1df9dba9c6a2b3c93e4e785602f02a",
+            "profileId": null
+          },
+          {
+            "configId": "text-bfafb42353288c59ac3ac8a0732d85e19f0cf5f5d171784647a24624dcd855fb",
+            "profileId": null
+          },
+          {
+            "configId": "text-bbbbe2f485c16796c68d8e54f3551da6bb141f0b6ba1c093243d7177a69c05a6",
+            "profileId": null
+          }
+        ],
+        "imageSchema": "image-v1",
+        "contextualText": true,
+        "refinedText": true
+      },
+      "ocr": {
+        "ready": true,
+        "busy": false,
+        "runId": "5e54ab0d-9d06-4089-a894-2c9dc2a86e3b",
+        "activeAttemptId": null,
+        "errorCode": null,
+        "availableTextConfigs": null
+      }
+    }
+  },
+  "generationState": "PAUSED_BY_USER",
+  "generationCounts": {
+    "ACCEPTED": 2651,
+    "PENDING": 13509,
+    "QUARANTINED": 613
+  },
+  "formalTarget": {
+    "originals": 3684,
+    "windows": 16773,
+    "bgeEpochs": 2,
+    "m3Epochs": 2
+  },
+  "independentNaturalQualityAccepted": false,
+  "remaining": [
+    "真实同事件/同人物及公共讲话引用的误报区分",
+    "独立自然语法图文真值和图片可靠负例",
+    "完整开发/最终留出与仍暂停的校园BGE/M3训练校准",
+    "等待用户后续指令的前端优化"
+  ],
+  "nextBackendEngineeringEstimateHours": [
+    4,
+    8
+  ],
+  "estimateExcludes": [
+    "independent truth completion",
+    "final quality acceptance",
+    "paused formal training"
+  ]
+}

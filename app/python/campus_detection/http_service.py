@@ -15,11 +15,11 @@ from campus_detection.image import detect_image
 
 
 class Runtime:
-    def __init__(self,index_root,token,v3_profile=None,enhanced_images=False,contextual=False):
+    def __init__(self,index_root,token,v3_profile=None,enhanced_images=False,contextual=False,refined=False):
         self.index_root=Path(index_root).resolve()
         if not self.index_root.is_relative_to(ROOT/'runtime'):raise ValueError('Index root must stay inside project runtime')
         self.token=token;self.run_id=str(uuid.uuid4());self.models=None;self.load_error=None;self.v3_profile=v3_profile
-        self.compute=threading.Lock();self.active_attempt=None;self.libraries={};self.loaded_profile_id=None;self.enhanced_images=enhanced_images;self.contextual=contextual
+        self.compute=threading.Lock();self.active_attempt=None;self.libraries={};self.loaded_profile_id=None;self.enhanced_images=enhanced_images;self.contextual=contextual;self.refined=refined
     def load(self):
         try:
             profile=None
@@ -29,11 +29,15 @@ class Runtime:
                 if location!=profile_directory(location.parent.name)/'profile.json':raise ValueError('Select a prepared production service profile')
                 profile=verify_profile(location.parent.name)
             models=load_models(enhanced_images=True) if self.enhanced_images else load_models()
-            if self.contextual:
+            if self.contextual or self.refined:
                 if profile:raise ValueError('Select either the formal v3 profile or context refinement')
                 from campus_detection.contextual_text import configuration
                 context=configuration(models['textConfig'])
                 models={**models,'textConfig':context,'textConfigs':{**models['textConfigs'],context['configId']:context}}
+                if self.refined:
+                    from campus_detection.text_refinement import configuration as refined_configuration
+                    refined=refined_configuration(context)
+                    models={**models,'textConfig':refined,'textConfigs':{**models['textConfigs'],refined['configId']:refined}}
             if profile:
                 from campus_detection.v3_runtime import controlled,read,verify_files,load_bundle,attach_runtime
                 from campus_detection.retrieval import load_dense_index
@@ -128,6 +132,9 @@ def make_server(runtime,port=18081):
                 if self.path=='/detect/text' and runtime.models.get('textConfigs',{}).get(request.get('configId'),{}).get('contextPolicy'):
                     from campus_detection.contextual_text import detect
                     function=detect
+                if self.path=='/detect/text' and runtime.models.get('textConfigs',{}).get(request.get('configId'),{}).get('refinementPolicy'):
+                    from campus_detection.text_refinement import detect
+                    function=detect
                 result=function(request,library,runtime.models);validate_result(result,request)
                 result['processRunId']=runtime.run_id
                 self.reply(200,result)
@@ -145,10 +152,11 @@ def main():
     parser.add_argument('--v3-profile',type=Path,help='Explicit verified bundle/index/calibration profile; default v2 remains available')
     parser.add_argument('--enhanced-images',action='store_true')
     parser.add_argument('--contextual-text',action='store_true',help='Use version-budgeted BERT contexts; retain old configurations')
+    parser.add_argument('--refined-text',action='store_true',help='Exclude structured navigation tails and corroborate anchored contexts; retain older IDs')
     args=parser.parse_args()
     token_path=ROOT/'runtime/private-config/internal-token'
     if not token_path.is_file():raise RuntimeError('Run project initialization to create its private internal token')
-    runtime=Runtime(args.index_root,token_path.read_text().strip(),args.v3_profile,args.enhanced_images,args.contextual_text)
+    runtime=Runtime(args.index_root,token_path.read_text().strip(),args.v3_profile,args.enhanced_images,args.contextual_text,args.refined_text)
     server=make_server(runtime,args.port)
     threading.Thread(target=runtime.load,daemon=True).start()
     print(json.dumps({'event':'listening','port':server.server_port,'runId':runtime.run_id,'ready':False}),flush=True)

@@ -69,6 +69,7 @@ public class CitationService {
     }
     private List<JsonNode> semanticSupport(JsonNode item){
         var summary=item.path("semanticSummary");var windows=new ArrayList<JsonNode>();item.path("semanticWindows").forEach(windows::add);
+        if("anchored-context-v1".equals(summary.path("selectionMethod").asText()))return windows.stream().filter(w->w.path("citationSupport").asBoolean() && w.path("queryEnd").asInt()-w.path("queryStart").asInt()>=12 && w.path("score").asDouble()>=.5 && (w.path("tfidfScore").asDouble()>=.25 || w.path("tfidfScore").asDouble()>=.15 && w.path("score").asDouble()>=.6)).toList();
         windows.sort(Comparator.<JsonNode>comparingDouble(w->-w.path("score").asDouble()).thenComparingDouble(w->-w.path("tfidfScore").asDouble()).thenComparingInt(w->w.path("queryStart").asInt()));
         var selected=new ArrayList<JsonNode>();for(var window:windows){
             if(!qualifies(window,summary))continue;
