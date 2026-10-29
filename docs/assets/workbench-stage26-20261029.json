@@ -1,0 +1,265 @@
+{
+  "stage": 26,
+  "date": "2026-10-29",
+  "snapshotAt": "2026-10-29T10:41:13.763218+08:00",
+  "state": "CITATION_OCCURRENCE_COVERAGE_DEPLOYED",
+  "citationPolicyVersion": "occurrence-aware-v2",
+  "fixes": [
+    "Check every qualifying exact repeated query/source text-pair occurrence for citations",
+    "Ignore only Unicode whitespace-only gaps between correctly cited text ranges"
+  ],
+  "scope": "Per-source citation business policy; model acceptance, scores, thresholds and source identities unchanged",
+  "modelConfigId": "text-bfafb42353288c59ac3ac8a0732d85e19f0cf5f5d171784647a24624dcd855fb",
+  "modelWeightsUpdated": false,
+  "newTrainingExamples": 0,
+  "newDependenciesInstalled": false,
+  "deployment": {
+    "stage": 26,
+    "javaOfflineBuildPassed": true,
+    "focusedTestMethods": 3,
+    "frontendStaticEntriesUnchanged": 436,
+    "frontendBuildRun": false,
+    "oldJarSha256": "2c1e4de6795846330a95746d1668bb4acd52fc9197cea64d3c318d6622374ba0",
+    "newJarSha256": "440d884b963cae6ccb8a290309c010d0e29adf2d696eb0b5cfb14ee5c32887a7",
+    "citationSourceSha256": "41e25f84b90b47a051668e1840a7bf35c70648fb9a30d1d0ac7ba2ce860cf0b1",
+    "detectorRestarted": false,
+    "ocrRestarted": false,
+    "newDependenciesInstalled": false
+  },
+  "serviceRecoveryAfterDeployment": {
+    "reason": "All project listeners were stopped when final verification resumed",
+    "previousDetectorRunId": "d9787bdc-f166-4b2c-a9fa-a00373c5fd72",
+    "restoredWithExistingProjectSupervisor": [
+      "mysql",
+      "java",
+      "detector",
+      "ocr"
+    ],
+    "sampleGenerationOrTrainingStarted": false,
+    "currentHealth": {
+      "java": {
+        "ready": true,
+        "busy": false
+      },
+      "detector": {
+        "ready": true,
+        "busy": false,
+        "runId": "55f1c023-012a-4e19-b879-82ac7ab93fb6",
+        "activeAttemptId": null,
+        "errorCode": null,
+        "availableTextConfigs": [
+          {
+            "configId": "text-89f0a1c8a4c24a89b43869a60d9b242b9bc8c110493b5dc1847964c50c73c65e",
+            "profileId": null
+          },
+          {
+            "configId": "text-393f674ef0ce299ee2f2cc0c99a84a056a1df9dba9c6a2b3c93e4e785602f02a",
+            "profileId": null
+          },
+          {
+            "configId": "text-bfafb42353288c59ac3ac8a0732d85e19f0cf5f5d171784647a24624dcd855fb",
+            "profileId": null
+          }
+        ],
+        "imageSchema": "image-v1",
+        "contextualText": true
+      },
+      "ocr": {
+        "ready": true,
+        "busy": false,
+        "runId": "5e54ab0d-9d06-4089-a894-2c9dc2a86e3b",
+        "activeAttemptId": null,
+        "errorCode": null,
+        "availableTextConfigs": null
+      }
+    }
+  },
+  "http": {
+    "before": {
+      "checkId": "945ea85c-02a1-480f-97b7-1159af5b52d0",
+      "mode": "partial",
+      "fullyCited": true,
+      "citationVerifiedSegments": 4,
+      "states": [
+        "CITED",
+        "UNCITED"
+      ],
+      "configId": "text-bfafb42353288c59ac3ac8a0732d85e19f0cf5f5d171784647a24624dcd855fb",
+      "supportingPairs": 4,
+      "plainInputHash": "25db81dc259480d219b59f472e84d0bafb68a08cbd9098e041ba6b4f1c668764",
+      "semanticWindowCount": 56
+    },
+    "after": {
+      "checkId": "74fd9eac-1f01-45d7-9381-a6e1b6351c7b",
+      "mode": "partial",
+      "fullyCited": false,
+      "citationVerifiedSegments": 6,
+      "states": [
+        "CITED",
+        "UNCITED"
+      ],
+      "configId": "text-bfafb42353288c59ac3ac8a0732d85e19f0cf5f5d171784647a24624dcd855fb",
+      "supportingPairs": 4,
+      "plainInputHash": "25db81dc259480d219b59f472e84d0bafb68a08cbd9098e041ba6b4f1c668764",
+      "semanticWindowCount": 56,
+      "citationPolicyVersion": "occurrence-aware-v2"
+    },
+    "both": {
+      "checkId": "280300db-c8d8-4c41-8235-31c3d37e2185",
+      "mode": "both",
+      "fullyCited": true,
+      "citationVerifiedSegments": 8,
+      "states": [
+        "CITED"
+      ],
+      "configId": "text-bfafb42353288c59ac3ac8a0732d85e19f0cf5f5d171784647a24624dcd855fb",
+      "supportingPairs": 4,
+      "plainInputHash": "8d0dbb79a1fcbded66af38ea04128f7bb6580bce8f35b9fd0029eabc49d94376",
+      "semanticWindowCount": 56,
+      "citationPolicyVersion": "occurrence-aware-v2"
+    },
+    "external": {
+      "checkId": "fb3b8f96-dc8b-4db0-b02e-0ced5c2ede3b",
+      "mode": "external",
+      "fullyCited": false,
+      "citationVerifiedSegments": 0,
+      "states": [
+        "EXTERNAL_REVIEW"
+      ],
+      "configId": "text-bfafb42353288c59ac3ac8a0732d85e19f0cf5f5d171784647a24624dcd855fb",
+      "supportingPairs": 4,
+      "plainInputHash": "a02d72e936959ed257566a6cd13f8e109b0979ae0eb77ceeb2698de2f9d3d0a4",
+      "semanticWindowCount": 56,
+      "citationPolicyVersion": "occurrence-aware-v2"
+    },
+    "wrong": {
+      "checkId": "d92e27e7-ce18-4044-8fb5-49578f8b0a6a",
+      "mode": "wrong",
+      "fullyCited": false,
+      "citationVerifiedSegments": 0,
+      "states": [
+        "SOURCE_MISMATCH"
+      ],
+      "configId": "text-bfafb42353288c59ac3ac8a0732d85e19f0cf5f5d171784647a24624dcd855fb",
+      "supportingPairs": 4,
+      "plainInputHash": "2848ba43837539bf83fa538a0ed59fab0f461a4e2b7b7658432bfd5640caffd3",
+      "semanticWindowCount": 56,
+      "citationPolicyVersion": "occurrence-aware-v2"
+    },
+    "samePlainInputAndModel": true,
+    "rawDetectionsEqual": true,
+    "submitted": false,
+    "published": false,
+    "temporaryDraftSoftDeleted": true
+  },
+  "verification": {
+    "frontendFilesUnchanged": 71,
+    "frontendStaticEntriesUnchanged": 436,
+    "contextualModelAndReferenceGroupingUnchanged": true,
+    "grammarProfileUnchanged": true,
+    "library18Unchanged": true,
+    "protectedFormalAlgorithmsUnchanged": 23,
+    "trainAndRecipeUnchanged": true,
+    "frontendBuildRun": false,
+    "javaOfflineBuildPassed": true,
+    "javaRestartedForDeployment": true,
+    "detectorRestartedForDeployment": false,
+    "ocrRestartedForDeployment": false,
+    "fullRegressionRun": false,
+    "focusedTestMethods": 3,
+    "focusedReports": {
+      "citation-two-defects-red.xml": {
+        "tests": 3,
+        "failures": 2,
+        "errors": 0
+      },
+      "citation-green.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0
+      }
+    },
+    "samePlainInputAndModel": true,
+    "rawDetectionsEqual": true,
+    "services": {
+      "java": {
+        "ready": true,
+        "busy": false
+      },
+      "detector": {
+        "ready": true,
+        "busy": false,
+        "runId": "55f1c023-012a-4e19-b879-82ac7ab93fb6",
+        "activeAttemptId": null,
+        "errorCode": null,
+        "availableTextConfigs": [
+          {
+            "configId": "text-89f0a1c8a4c24a89b43869a60d9b242b9bc8c110493b5dc1847964c50c73c65e",
+            "profileId": null
+          },
+          {
+            "configId": "text-393f674ef0ce299ee2f2cc0c99a84a056a1df9dba9c6a2b3c93e4e785602f02a",
+            "profileId": null
+          },
+          {
+            "configId": "text-bfafb42353288c59ac3ac8a0732d85e19f0cf5f5d171784647a24624dcd855fb",
+            "profileId": null
+          }
+        ],
+        "imageSchema": "image-v1",
+        "contextualText": true
+      },
+      "ocr": {
+        "ready": true,
+        "busy": false,
+        "runId": "5e54ab0d-9d06-4089-a894-2c9dc2a86e3b",
+        "activeAttemptId": null,
+        "errorCode": null,
+        "availableTextConfigs": null
+      }
+    }
+  },
+  "review": {
+    "independentReadOnly": true,
+    "importantOrBlockingFindings": 0,
+    "scope": "Exact nonblank text-pair occurrences, source boundaries, whitespace and codepoint offsets"
+  },
+  "originalReportsRewritten": false,
+  "sourceWorkIdsUnified": false,
+  "targetSourceWorkId": "209",
+  "duplicateWork310AutomaticallyCleared": false,
+  "wholeManuscriptClearedClaim": false,
+  "generationState": "PAUSED_BY_USER",
+  "generationCounts": {
+    "ACCEPTED": 2651,
+    "PENDING": 13509,
+    "QUARANTINED": 613
+  },
+  "formalTarget": {
+    "eligibleOriginals": 3684,
+    "windows": 16773,
+    "bgeEpochs": 2,
+    "m3Epochs": 2
+  },
+  "remainingMissCases": [
+    "R01"
+  ],
+  "independentNaturalQualityAccepted": false,
+  "normalPopulationFalsePositiveRate": null,
+  "newModelAccuracyMeasurement": false,
+  "remaining": [
+    "R01类概括改写漏检与独立真实正常稿/同事件边界",
+    "自然语法/图文真值、图片可靠负例与完整最终留出评价",
+    "仍暂停的校园BGE/M3正式训练与校准",
+    "等待用户后续指令的前端优化"
+  ],
+  "nextBackendEngineeringEstimateHours": [
+    4,
+    8
+  ],
+  "estimateExcludes": [
+    "independent truth completion",
+    "final quality acceptance",
+    "paused training"
+  ]
+}

@@ -55,23 +55,32 @@ public class CitationService {
                 var cuts=new TreeSet<Integer>(List.of(start,end));
                 for(var span:document.citations())if(span.plainStart()<end && span.plainEnd()>start){cuts.add(Math.max(start,span.plainStart()));cuts.add(Math.min(end,span.plainEnd()));}
                 var points=new ArrayList<>(cuts);for(int i=0;i+1<points.size();i++){
-                    int left=points.get(i),right=points.get(i+1);var covers=document.citations().stream().filter(c->c.plainStart()<=left && c.plainEnd()>=right).map(c->sources.get(c.sourceId())).filter(Objects::nonNull).toList();
+                    int left=points.get(i),right=points.get(i+1);
+                    if(InspectionService.slice(document.plainText(),left,right).codePoints().allMatch(c->Character.isWhitespace(c)||Character.isSpaceChar(c)))continue;
+                    var covers=document.citations().stream().filter(c->c.plainStart()<=left && c.plainEnd()>=right).map(c->sources.get(c.sourceId())).filter(Objects::nonNull).toList();
                     boolean same=covers.stream().anyMatch(s->"INTERNAL".equals(s.kind()) && item.path("sourceWorkId").asText().equals(s.workId()));
                     String status=same?"CITED":covers.stream().anyMatch(s->"INTERNAL".equals(s.kind()))?"SOURCE_MISMATCH":covers.isEmpty()?"UNCITED":"EXTERNAL_REVIEW";
                     states.addObject().put("queryStart",left).put("queryEnd",right).put("status",status).put("evidenceField",field);
                     if(warning){relevant++;if(!same)uncovered++;}
                 }
             }
-            ((ObjectNode)item).put("fullyCited",relevant>0 && uncovered==0);((ObjectNode)item).put("citationVerifiedSegments",relevant-uncovered);
+            ((ObjectNode)item).put("fullyCited",relevant>0 && uncovered==0);((ObjectNode)item).put("citationVerifiedSegments",relevant-uncovered);((ObjectNode)item).put("citationPolicyVersion","occurrence-aware-v2");
         }
     }
     private List<JsonNode> semanticSupport(JsonNode item){
         var summary=item.path("semanticSummary");var windows=new ArrayList<JsonNode>();item.path("semanticWindows").forEach(windows::add);
         windows.sort(Comparator.<JsonNode>comparingDouble(w->-w.path("score").asDouble()).thenComparingDouble(w->-w.path("tfidfScore").asDouble()).thenComparingInt(w->w.path("queryStart").asInt()));
         var selected=new ArrayList<JsonNode>();for(var window:windows){
-            if(window.path("score").asDouble()<summary.path("scoreThreshold").asDouble(.5) || window.path("tfidfScore").asDouble()<summary.path("lexicalFloor").asDouble(.25) || window.path("queryEnd").asInt()-window.path("queryStart").asInt()<12)continue;
+            if(!qualifies(window,summary))continue;
             if(selected.stream().anyMatch(old->overlap(window,old,"query") || overlap(window,old,"source")))continue;selected.add(window);
-        }return selected;
+        }
+        // Source overlap limits independent support for the reuse decision. It
+        // must not hide another occurrence from per-position citation checking.
+        var occurrences=new ArrayList<JsonNode>(selected);
+        for(var window:windows)if(qualifies(window,summary) && !occurrences.contains(window) && selected.stream().anyMatch(old->sameTextPair(window,old)))occurrences.add(window);
+        return occurrences;
     }
+    private boolean qualifies(JsonNode window,JsonNode summary){return window.path("score").asDouble()>=summary.path("scoreThreshold").asDouble(.5) && window.path("tfidfScore").asDouble()>=summary.path("lexicalFloor").asDouble(.25) && window.path("queryEnd").asInt()-window.path("queryStart").asInt()>=12;}
+    private boolean sameTextPair(JsonNode a,JsonNode b){return a.path("queryText").isTextual() && a.path("sourceText").isTextual() && !a.path("queryText").asText().isBlank() && !a.path("sourceText").asText().isBlank() && a.get("queryText").equals(b.path("queryText")) && a.get("sourceText").equals(b.path("sourceText"));}
     private boolean overlap(JsonNode a,JsonNode b,String prefix){return a.path(prefix+"Start").asInt()<b.path(prefix+"End").asInt() && b.path(prefix+"Start").asInt()<a.path(prefix+"End").asInt();}
 }
