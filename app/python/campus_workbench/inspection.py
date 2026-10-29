@@ -41,6 +41,10 @@ def _corrected_edits(text,raw):
     if not isinstance(value,str):raise ValueError('INVALID_CORRECTION')
     if Counter(re.findall(r'\d+',value))!=Counter(re.findall(r'\d+',text)):raise ValueError('NUMBERS_CHANGED')
     edits=[entry for entry in difflib.SequenceMatcher(None,text,value,autojunk=False).get_opcodes() if entry[0]!='equal']
+    for _,a,b,c,d in edits:
+        removed=text[a:b]
+        if (b-a)-(d-c)>=2 and re.fullmatch(r'[\u4e00-\u9fff]+',removed) and text[max(0,a-len(removed)):a]!=removed and text[b:b+len(removed)]!=removed:
+            raise ValueError('CONTENT_WORD_DELETION')
     if sum(max(b-a,d-c) for _,a,b,c,d in edits)>max(4,len(text)*.2):raise ValueError('EXCESSIVE_REWRITE')
     return value,edits
 
@@ -81,6 +85,8 @@ def grammar(config, emit, enhanced=False):
             prompt = ('逐字校对下面的中文句子，只纠正确凿的错别字、同音形近字错用、重复字词和明确语法错误。'
                 '正常句子必须逐字原样返回；表达不够丰富、可换同义词、可以补充常用词语都不是错误。'
                 '禁止润色、扩写或补充活动内容，禁止为通顺而增添“活动”“了”“的”等词。'
+                '疑似错字应按原有词语逐字纠正，优先同音或形近字；不得改成同义词，不得用意思接近的另一词替代。'
+                '必须保留每个原有实词的意思和位置，不认识的词语也不能直接删掉。校对不是简写，不要用删除词语来回避纠错。'
                 '人名、校名、日期、数字及其出现次数、书名和引文必须原样保留。'
                 '例：学院举行专题交流，师生按要求完成准备。→原样；现场讨论由学生代表主持。→原样；'
                 '本次讨论旨在增进了解。→原样；本次活动取得圆满成攻。→本次活动取得圆满成功。；'

@@ -38,7 +38,14 @@ public class InspectionWorker {
             if(!payload.path("inputHash").asText().equals(result.path("inputHash").asText()))throw new IOException("检查结果与稿件版本不一致");
             if(payload.has("modelProfile")&&!payload.path("modelProfile").equals(result.path("modelProfile")))throw new IOException("检查模型与选定方案不一致");
             if(checks.db.update("UPDATE document_check SET status='COMPLETED',result_json=?,finished_at=UTC_TIMESTAMP(3) WHERE id=? AND status='RUNNING'",result.toString(),id)==1)checks.event(id,Map.of("stage","COMPLETED"));
-        }catch(Exception error){String message=Objects.toString(error.getMessage(),"检查未完成");if(message.length()>900)message=message.substring(0,900);if(checks.db.update("UPDATE document_check SET status='FAILED',error_message=?,finished_at=UTC_TIMESTAMP(3) WHERE id=? AND status='RUNNING'",message,id)==1)checks.event(id,Map.of("stage","FAILED","message",message));}
+        }catch(Exception error){
+            if(error instanceof DetectorClient.DetectorFailure failure && "PROCESS_BUSY".equals(failure.code)){
+                if(checks.db.update("UPDATE document_check SET status='WAITING_RESOURCE',error_message='等待模型计算资源',retry_after=DATE_ADD(UTC_TIMESTAMP(3),INTERVAL 30 SECOND) WHERE id=? AND status='RUNNING'",id)==1)
+                    checks.event(id,Map.of("stage","WAITING_RESOURCE"));
+                return;
+            }
+            String message=Objects.toString(error.getMessage(),"检查未完成");if(message.length()>900)message=message.substring(0,900);if(checks.db.update("UPDATE document_check SET status='FAILED',error_message=?,finished_at=UTC_TIMESTAMP(3) WHERE id=? AND status='RUNNING'",message,id)==1)checks.event(id,Map.of("stage","FAILED","message",message));
+        }
     }
     private JsonNode python(String id,ObjectNode payload)throws Exception{
         var folder=checks.settings.runtime().resolve("document-checks").resolve(id);Files.createDirectories(folder);var file=folder.resolve("input.json");Files.writeString(file,payload.toString());

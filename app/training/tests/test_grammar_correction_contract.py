@@ -9,5 +9,9 @@ class GrammarCorrectionTests(unittest.TestCase):
         self.assertEqual(value,'同学们积极响应号召。');self.assertEqual(len(edits),1)
         with self.assertRaises(ValueError):_corrected_edits('第2组参加。','{"corrected":"第2组和第2组参加。"}')
         with self.assertRaises(ValueError):_corrected_edits('师生到场。','{"corrected":"全体师生将在明日到达指定地点。"}')
+        with self.assertRaises(ValueError):_corrected_edits('师生通过研讨交流提升学习能力。','{"corrected":"师生通过交流提升学习能力。"}')
+        with self.assertRaises(ValueError):_corrected_edits('师生通过团队合作提升学习能力。','{"corrected":"师生通过协作提升学习能力。"}')
+        value,_=_corrected_edits('师生已经已经完成准备。','{"corrected":"师生已经完成准备。"}')
+        self.assertEqual(value,'师生已经完成准备。')
 
 if __name__=='__main__':unittest.main()

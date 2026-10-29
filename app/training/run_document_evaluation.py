@@ -11,11 +11,19 @@ import time
 
 from corpus import read_jsonl
 from construct_correspondence import verify_ready
-from document_evaluation import ROOT, DATA, atomic_json, sha, edit_score
+from document_evaluation import ROOT, DATA, atomic_json as _atomic_json, sha, edit_score
 from run_campus_stage import stage_lock
 
 sys.path.insert(0,str(ROOT/'app/python'))
 from campus_shared.contracts import digest_json, controlled_file
+
+
+def atomic_json(path,value):
+    for attempt in range(8):
+        try:return _atomic_json(path,value)
+        except PermissionError:
+            if attempt==7:raise
+            time.sleep(.05*(attempt+1))
 
 
 def resource_budget(kind,device):
@@ -39,7 +47,7 @@ def field_score(expected, actual):
 def aggregate(rows):
     keys=('truePositive','falsePositive','falseNegative','invalidSuggestions','assessableFields','correctFields',
           'unresolvedFields','conflictFields','detectedConflicts','falseConflicts','insufficientControls','correctInsufficient')
-    value={key:sum(r.get('metrics',{}).get(key,0) for r in rows) for key in keys}
+    value={key:sum(r.get('metrics',{}).get(key,0) for r in rows if not r.get('error')) for key in keys}
     value.update(failedQueries=sum(bool(r.get('error')) for r in rows),knownContextQueries=sum(bool(r.get('contextEligible')) for r in rows),
                  relatedTop1=sum(r.get('contextRank')==1 for r in rows),relatedTop3=sum(r.get('contextRank') in (1,2,3) for r in rows),
                  realRuntimeQueries=sum(r.get('realOrSynthetic')=='real' for r in rows),
@@ -56,7 +64,11 @@ def main():
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--resume',action='store_true')
     parser.add_argument('--device',choices=['cpu','cuda'],default='cpu')
+    parser.add_argument('--inspection',type=Path,help='Isolated candidate source under runtime/experiments; default is the deployed implementation')
     args=parser.parse_args();data=args.data.resolve();output=args.output.resolve()
+    inspector=(args.inspection or ROOT/'app/python/campus_workbench/inspection.py').resolve()
+    if args.inspection and (not inspector.is_relative_to((ROOT/'runtime/experiments').resolve()) or inspector.suffix!='.py' or not inspector.is_file()):
+        raise ValueError('Candidate inspection source must be a project experiment Python file')
     os.environ['CUDA_VISIBLE_DEVICES']='0' if args.device=='cuda' else ''
     if not data.is_relative_to((ROOT/'runtime/datasets').resolve()) or not output.is_relative_to((ROOT/'runtime/experiments').resolve()):
         raise ValueError('Use project dataset and experiment paths')
@@ -81,12 +93,12 @@ def main():
             material=ROOT/'app/training/document_evaluation.py'
             if sha(material)!=json.loads((data/'manifest.json').read_text(encoding='utf-8'))['materialCodeSha256']:
                 raise ValueError('Frozen material builder changed')
-            inspector=ROOT/'app/python/campus_workbench/inspection.py';snapshot=output/'inspection-snapshot.py'
+            snapshot=output/'inspection-snapshot.py'
             if not snapshot.exists():snapshot.write_bytes(inspector.read_bytes())
-            dependencies=[Path(__file__),material,ROOT/'app/training/corpus.py',ROOT/'app/training/construct_correspondence.py',ROOT/'app/training/run_campus_stage.py',ROOT/'app/python/campus_shared/contracts.py']
+            dependencies=[Path(__file__),material,ROOT/'app/training/corpus.py',ROOT/'app/training/construct_correspondence.py',ROOT/'app/training/run_campus_stage.py',ROOT/'app/python/campus_shared/contracts.py',ROOT/'app/python/campus_shared/document_compute.py',ROOT/'app/python/campus_workbench/grammar_edits.py']
             identity=dict(schemaVersion='document-development-evaluation-v1',kind=args.kind,samples=len(samples),
                 datasetReadySha256=sha(data/'READY'),datasetHashes=ready,device=args.device,batchSize=64 if grammar else 6,
-                inspectionSnapshotSha256=sha(snapshot),algorithms={str(p.relative_to(ROOT)):sha(p) for p in dependencies},artifactFiles={},
+                inspectionSource=str(inspector.relative_to(ROOT)),inspectionSnapshotSha256=sha(snapshot),algorithms={str(p.relative_to(ROOT)):sha(p) for p in dependencies},artifactFiles={},
                 candidateOrder='SHA256(sampleId + NUL + contextId)',
                 python=sys.version,software={name:importlib.metadata.version(name) for name in ['torch','transformers','Pillow','psutil']},
                 scope='AUTHORED_GRAMMAR_CONTROLS' if grammar else 'HISTORICAL_OCR_FIELD_DIAGNOSTIC' if args.kind=='image-fields' else 'SYNTHETIC_NOTICE_AND_UNLABELLED_REAL_RUNTIME')
@@ -197,8 +209,8 @@ def main():
                     try:
                         with stage_lock(ROOT/'runtime/locks/document-neural-evaluation.lock'):
                             from contextlib import nullcontext
-                            from campus_workbench.training import compute_slot
-                            with compute_slot(ROOT/'runtime',True) if gpu_minimum else nullcontext():execute()
+                            from campus_shared.document_compute import document_slot
+                            with document_slot(ROOT/'runtime',neural=True) if gpu_minimum else nullcontext():execute()
                         break
                     except RuntimeError as lock_error:
                         if 'holds the project lock' not in str(lock_error):raise

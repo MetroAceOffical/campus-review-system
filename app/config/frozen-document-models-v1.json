@@ -1,6 +1,6 @@
 {
   "schemaVersion": "document-models-v1",
-  "algorithmSha256": "174abfc3da21fc16be2f7643f291be370b08869de7cf5c603464b42afba2327a",
+  "algorithmSha256": "2d5215fe04f1807158ae8b1025cce5c376758f562efc8c1050d2cc6138b6174a",
   "software": {
     "torch": "2.8.0+cu128",
     "transformers": "4.57.1",
@@ -11,7 +11,7 @@
   "adapterSha256": "f847ee35c32d70c7597752851e6d39235a7845c2cbfb66e76be7938b1cf9d481",
   "coordinatorSha256": "f5cb62032bf34427c4ee327f86e5ed84c81d71ef1d685478a42b9528f48e010e",
   "engineAlgorithms": {
-    "grammar": "3f3bc721feb92abc3f9c54d8d18d724afb141966bd318c5c6923ff52ff9035f7",
+    "grammar": "6730044a888d4a484f2f1c938c1672ae00f068d30fa7e2bd02a6c3bdeafb4bb2",
     "imageText": "5df50f32d4b67bc102798ef8c4ffa9fcb20adf1c700733bb88a89d04768626da"
   },
   "devicePreference": "cuda",
@@ -71,9 +71,9 @@
     }
   },
   "evaluations": {
-    "grammar": "862e0a694d441aaf8465f8fe45da40efb5b1bf958f4a5f0273bc4abba31382eb",
+    "grammar": "bbdb1ebd43d9a88808298fc9baaa0ea725921c660f613aa0a8112fa2d77ebe90",
     "imageText": "dea8d4c040497fbf484230795e87ee1b47c2e01a405b2df2623a71fcc0ad2a8d"
   },
   "finalQualityAccepted": false,
-  "profileId": "document-cb6265844c4ae132a371221702f87ddf129cbab5a80e57e67499bc6b73e8cd97"
+  "profileId": "document-bacf6c7411a928cb29d30a38a4c8af44972ed632ea618cf8f2c97aab3521d57f"
 }
