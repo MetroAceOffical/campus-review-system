@@ -24,6 +24,9 @@ def configuration(evaluations):
         models={name:dict(name='Qwen2.5-3B-Instruct' if name=='grammar' else 'Chinese-CLIP ViT-B/16',revision=path.name,acquisitionSha256=file_sha256(path/'acquisition.json'))
                 for name,path in [('grammar',inspection.QWEN),('imageText',inspection.CLIP)]},
         evaluations=evaluations,finalQualityAccepted=False)
+    if hasattr(inspection,'SPELLING_LEXICON_SHA256'):
+        value['spellingSupport']=dict(package='pypinyin==0.55.0',algorithmSha256=inspection.SPELLING_ALGORITHM_SHA256,
+            lexiconSha256=inspection.SPELLING_LEXICON_SHA256,mode='NEURAL_CHANGE_RECOVERY',sourcePartition='existing-train')
     return value|{'profileId':'document-'+digest_json(value)}
 
 

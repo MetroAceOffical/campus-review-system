@@ -62,7 +62,7 @@
     {
       "key": "grammar_model",
       "title": "语法模型开发评价",
-      "directory": "runtime/experiments/final-training-20261029/grammar-preserve-words-development-v2",
+      "directory": "runtime/experiments/final-training-20261029/grammar-guided-phonetic-development-v2",
       "statusFile": "status.json"
     },
     {

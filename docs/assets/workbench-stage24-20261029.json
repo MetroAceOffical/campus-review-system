@@ -1,0 +1,436 @@
+{
+  "stage": 24,
+  "date": "2026-10-29",
+  "snapshotAt": "2026-10-29T09:04:30.843648+08:00",
+  "state": "GUIDED_SPELLING_DEPLOYED_AND_EXISTING_TEXT_DIAGNOSTICS_COMPLETE",
+  "grammar": {
+    "previous": {
+      "truePositive": 350,
+      "falsePositive": 10,
+      "falseNegative": 30,
+      "failedQueries": 0
+    },
+    "selected": {
+      "truePositive": 380,
+      "falsePositive": 0,
+      "falseNegative": 0,
+      "failedQueries": 0
+    },
+    "queries": 500,
+    "byCategory": {
+      "clean": {
+        "truePositive": 0,
+        "falsePositive": 0,
+        "falseNegative": 0,
+        "failedQueries": 0
+      },
+      "protected": {
+        "truePositive": 0,
+        "falsePositive": 0,
+        "falseNegative": 0,
+        "failedQueries": 0
+      },
+      "punctuation": {
+        "truePositive": 100,
+        "falsePositive": 0,
+        "falseNegative": 0,
+        "failedQueries": 0
+      },
+      "spaces": {
+        "truePositive": 100,
+        "falsePositive": 0,
+        "falseNegative": 0,
+        "failedQueries": 0
+      },
+      "typo": {
+        "truePositive": 80,
+        "falsePositive": 0,
+        "falseNegative": 0,
+        "failedQueries": 0
+      },
+      "word": {
+        "truePositive": 100,
+        "falsePositive": 0,
+        "falseNegative": 0,
+        "failedQueries": 0
+      }
+    },
+    "actualElapsedSeconds": 538.4907506,
+    "previousProfileId": "document-bacf6c7411a928cb29d30a38a4c8af44972ed632ea618cf8f2c97aab3521d57f",
+    "profileId": "document-537a5969757115c3b057020da028e420dc78ca24de19382e22c8effba7b07f18",
+    "spellingControlsBefore": 50,
+    "spellingControlsAfter": 80,
+    "spellingControlCount": 80,
+    "additional": {
+      "state": "ADDITIONAL_GRAMMAR_COMPLETE",
+      "queries": 24,
+      "results": {
+        "baseline": {
+          "truePositive": 12,
+          "falsePositive": 0,
+          "falseNegative": 0,
+          "invalidSuggestions": 0,
+          "cleanDocumentsWithSuggestions": 0
+        },
+        "candidate": {
+          "truePositive": 12,
+          "falsePositive": 0,
+          "falseNegative": 0,
+          "invalidSuggestions": 0,
+          "cleanDocumentsWithSuggestions": 0
+        }
+      },
+      "elapsedSeconds": 919.7355729999999,
+      "productActivated": false,
+      "naturalQualityAccepted": false
+    },
+    "cacheReplay": {
+      "scope": "Cached original Qwen outputs with newly computed corpus-guided recovery; NOT new500 neural inference",
+      "queries": 500,
+      "truePositive": 380,
+      "falsePositive": 0,
+      "falseNegative": 0,
+      "invalidSuggestions": 0,
+      "byCategory": {
+        "clean": {
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 0
+        },
+        "protected": {
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 0
+        },
+        "punctuation": {
+          "truePositive": 100,
+          "falsePositive": 0,
+          "falseNegative": 0
+        },
+        "spaces": {
+          "truePositive": 100,
+          "falsePositive": 0,
+          "falseNegative": 0
+        },
+        "typo": {
+          "truePositive": 80,
+          "falsePositive": 0,
+          "falseNegative": 0
+        },
+        "word": {
+          "truePositive": 100,
+          "falsePositive": 0,
+          "falseNegative": 0
+        }
+      },
+      "modelWeightsChanged": false,
+      "trainingSamplesAdded": 0,
+      "lexiconSourceDocuments": 3802
+    },
+    "rejectedDoublePrompt": {
+      "truePositive": 347,
+      "falsePositive": 23,
+      "falseNegative": 33,
+      "failedQueries": 0
+    },
+    "naturalAccuracyAccepted": false
+  },
+  "lexicon": {
+    "sourceDocuments": 3802,
+    "retainedNgrams": 977805,
+    "sourcePartition": "existing train only",
+    "sourceSha256": "d238ba76c76fe455f68cc0ad2a4466117f607f18c8abaa18da623bdb3c5eb70f",
+    "lexiconSha256": "832940c6969faa8ec40108498190a4503cef5753ec43ec780cc7261765481644",
+    "neuralWeightTraining": false
+  },
+  "pypinyinAcquisition": {
+    "package": "pypinyin",
+    "version": "0.55.0",
+    "metadataUrl": "https://pypi.org/pypi/pypinyin/0.55.0/json",
+    "url": "https://files.pythonhosted.org/packages/b9/7b/4cabc76fcc21c3c7d5c671d8783984d30ac9d3bb387c4ba784fca3cdfa3a/pypinyin-0.55.0-py2.py3-none-any.whl",
+    "filename": "pypinyin-0.55.0-py2.py3-none-any.whl",
+    "sha256": "d53b1e8ad2cdb815fb2cb604ed3123372f5a28c6f447571244aca36fc62a286f",
+    "bytes": 840203,
+    "scope": "runtime/environments/final-training only",
+    "userApproved": true,
+    "requiresDist": [
+      "argparse; python_version < \"2.7\"",
+      "enum34; python_version < \"3.4\"",
+      "typing; python_version < \"3.5\""
+    ]
+  },
+  "existingTextDecisions": {
+    "state": "EXISTING_TEXT_DECISIONS_COMPLETE",
+    "queries": 32,
+    "results": {
+      "original/current": {
+        "queries": 16,
+        "positiveDocuments": 12,
+        "completeCorrectSourceDocuments": 10,
+        "expectedSources": 13,
+        "correctSources": 11,
+        "normalDocuments": 4,
+        "scopedNormalAlerts": 0,
+        "normalAnySourceAlerts": 0,
+        "unjudgedSourceAlerts": 0
+      },
+      "original/cachedFloor015": {
+        "queries": 16,
+        "positiveDocuments": 12,
+        "completeCorrectSourceDocuments": 11,
+        "expectedSources": 13,
+        "correctSources": 12,
+        "normalDocuments": 4,
+        "scopedNormalAlerts": 0,
+        "normalAnySourceAlerts": 0,
+        "unjudgedSourceAlerts": 1
+      },
+      "18/current": {
+        "queries": 16,
+        "positiveDocuments": 12,
+        "completeCorrectSourceDocuments": 10,
+        "expectedSources": 13,
+        "correctSources": 11,
+        "normalDocuments": 4,
+        "scopedNormalAlerts": 0,
+        "normalAnySourceAlerts": 0,
+        "unjudgedSourceAlerts": 2
+      },
+      "18/cachedFloor015": {
+        "queries": 16,
+        "positiveDocuments": 12,
+        "completeCorrectSourceDocuments": 10,
+        "expectedSources": 13,
+        "correctSources": 11,
+        "normalDocuments": 4,
+        "scopedNormalAlerts": 0,
+        "normalAnySourceAlerts": 0,
+        "unjudgedSourceAlerts": 2
+      }
+    },
+    "elapsedSeconds": 741.5678114000002,
+    "finalQueriesInferred": 0,
+    "normalPopulationFpr": null,
+    "formalDevelopmentComplete": false,
+    "productPolicyChanged": false
+  },
+  "offlineTextVerifier": {
+    "inferenceQueries": 16,
+    "sourceInferenceSummarySha256": "dfb12b824b99b0d8377a3e738863e2701524e6783157f27ca932c8b6b4e8fd1a",
+    "predictionSha256": "41541b54a038d865c014054cf05c96b30f6d3fa9e7d7951829748cf00ac0bcb3",
+    "postprocessorSha256": "87c6a05748fa510a71195d3ceee820081efd8bf3e32968619d7bdad6bcb7e28e",
+    "sourceCounts": {
+      "attemptedSources": 48,
+      "assessedSources": 25,
+      "invalidSources": 17,
+      "skippedSources": 6,
+      "elapsedSeconds": 842.3938349
+    },
+    "scope": "Observed alerts across all cases; quality comparison only for completely assessed selected candidates, not full-library negatives",
+    "operationalAlertsWithAbstentions": {
+      "baseline": {
+        "positiveDocuments": 12,
+        "completeCorrectSourceDocuments": 10,
+        "expectedSources": 13,
+        "correctSources": 11,
+        "normalDocuments": 4,
+        "scopedNormalAlerts": 0,
+        "normalAnySourceAlerts": 0,
+        "unjudgedSourceAlerts": 2
+      },
+      "candidate": {
+        "positiveDocuments": 12,
+        "completeCorrectSourceDocuments": 4,
+        "expectedSources": 13,
+        "correctSources": 5,
+        "normalDocuments": 4,
+        "scopedNormalAlerts": 0,
+        "normalAnySourceAlerts": 0,
+        "unjudgedSourceAlerts": 0
+      }
+    },
+    "completeSelectedCandidateComparison": {
+      "baseline": {
+        "positiveDocuments": 0,
+        "completeCorrectSourceDocuments": 0,
+        "expectedSources": 0,
+        "correctSources": 0,
+        "normalDocuments": 3,
+        "scopedNormalAlerts": 0,
+        "normalAnySourceAlerts": 0,
+        "unjudgedSourceAlerts": 0
+      },
+      "candidate": {
+        "positiveDocuments": 0,
+        "completeCorrectSourceDocuments": 0,
+        "expectedSources": 0,
+        "correctSources": 0,
+        "normalDocuments": 3,
+        "scopedNormalAlerts": 0,
+        "normalAnySourceAlerts": 0,
+        "unjudgedSourceAlerts": 0
+      }
+    },
+    "coverage": {
+      "totalDocuments": 16,
+      "comparableDocuments": 3,
+      "abstainedDocuments": 13,
+      "abstainedNormalDocuments": 1,
+      "abstainedPositiveDocuments": 12,
+      "comparableCaseIds": [
+        "DEV-09",
+        "DEV-11",
+        "DEV-12"
+      ],
+      "abstainedCaseIds": [
+        "DEV-01",
+        "DEV-02",
+        "DEV-03",
+        "DEV-04",
+        "DEV-05",
+        "DEV-06",
+        "DEV-07",
+        "DEV-08",
+        "DEV-10",
+        "R01",
+        "R02",
+        "R03",
+        "R04"
+      ]
+    },
+    "normalPopulationFpr": null,
+    "independentNaturalQualityAccepted": false
+  },
+  "textPolicyActivated": false,
+  "textDefault": "text-v2",
+  "historicalSourceVersions": {
+    "pairs": [
+      [
+        "206",
+        "224"
+      ],
+      [
+        "207",
+        "290"
+      ],
+      [
+        "208",
+        "286"
+      ],
+      [
+        "209",
+        "310"
+      ]
+    ],
+    "samePublicUrl": true,
+    "exactBodyEqual": false,
+    "action": "Preserve separate versions and unjudged relationships; no automatic merging or label inflation"
+  },
+  "engineeringFailures": [
+    {
+      "directory": "grammar-guided-phonetic-development-v1",
+      "failedQueries": 500,
+      "neuralQueries": 0,
+      "reason": "Isolated snapshot lexicon ROOT path; excluded and full500 rerun in v2"
+    },
+    {
+      "directory": "existing-text-decisions-v1",
+      "neuralQueries": 0,
+      "reason": "Windows path key; preserved, fixed full32 v2"
+    },
+    {
+      "directory": "existing-text-verifier-v2",
+      "completeDocuments": 3,
+      "plannedDocuments": 16,
+      "reason": "Early rejected copied-quote protocol; not full16 quality"
+    }
+  ],
+  "http": {
+    "checkId": "2721fd4c-861d-4955-bfd8-240c0a79d7b7",
+    "manuscriptId": "70",
+    "profileId": "document-537a5969757115c3b057020da028e420dc78ca24de19382e22c8effba7b07f18",
+    "device": "cuda",
+    "typoCorrections": 3,
+    "expectedTypoCorrections": 3,
+    "issues": [
+      {
+        "id": "3237fd1fd2abb6e14408",
+        "end": 20,
+        "field": "BODY",
+        "start": 19,
+        "engine": "QWEN_CORPUS_PHONETIC",
+        "category": "语法或表达建议",
+        "original": "贱",
+        "replacement": "践"
+      },
+      {
+        "id": "8aa5d019848bfa66a7de",
+        "end": 42,
+        "field": "BODY",
+        "start": 41,
+        "engine": "QWEN",
+        "category": "语法或表达建议",
+        "original": "律",
+        "replacement": "率"
+      },
+      {
+        "id": "5fc0effaab41bf151042",
+        "end": 56,
+        "field": "BODY",
+        "start": 55,
+        "engine": "QWEN",
+        "category": "语法或表达建议",
+        "original": "对",
+        "replacement": "队"
+      },
+      {
+        "id": "cac3c861ae56de61051b",
+        "end": 84,
+        "field": "BODY",
+        "start": 80,
+        "engine": "RULES",
+        "category": "词语重复",
+        "original": "已经已经",
+        "replacement": "已经"
+      }
+    ],
+    "elapsedSeconds": 24.63925460000064,
+    "submitted": false,
+    "published": false,
+    "frontendChanged": false,
+    "temporaryDraftSoftDeleted": true
+  },
+  "verification": {
+    "frontendFilesUnchanged": 71,
+    "jarUnchanged": true,
+    "servedIndexMatches": true,
+    "protectedFormalAlgorithmsUnchanged": 23,
+    "trainAndRecipeUnchanged": true,
+    "focusedUnitTests": 4,
+    "frontendBuildRun": false,
+    "javaRebuildRun": false,
+    "fullRegressionRun": false
+  },
+  "generationState": "PAUSED_BY_USER",
+  "generationCounts": {
+    "ACCEPTED": 2651,
+    "PENDING": 13509,
+    "QUARANTINED": 613
+  },
+  "newNeuralTrainingSamples": 0,
+  "modelWeightsUpdated": false,
+  "newDependency": "User-approved isolated pypinyin0.55.0 only",
+  "frontendOptimizationStarted": false,
+  "review": {
+    "independentReadOnlyReview": true,
+    "importantFinding": "Unassessed verifier output mixed into normal metrics",
+    "fix": "Coverage/abstention and complete-selected-candidate subset, focused RED-to-GREEN test; original predictions preserved"
+  },
+  "remaining": [
+    "文本实际判定的低误报改进及同网址不同参考版本的候选占用",
+    "独立自然语法/正常新闻及最终留出效果核验",
+    "图片可靠负例与几何策略",
+    "暂停的校园BGE/M3正式训练与校准",
+    "等待后续指令的前端优化"
+  ]
+}

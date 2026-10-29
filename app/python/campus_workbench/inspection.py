@@ -15,6 +15,10 @@ QWEN = ROOT / 'runtime/models/final/Qwen2.5-3B-Instruct/aa8e72537993ba99e69dfaaf
 CLIP = ROOT / 'runtime/models/final/chinese-clip-vit-base-patch16/36e679e65c2a2fead755ae21162091293ad37834'
 
 
+SPELLING_LEXICON = Path('runtime/datasets/grammar-spelling-lexicon-20261029-v1')
+SPELLING_ALGORITHM_SHA256 = '0078e65580d4e2abfb8675a872559d0642b2780c7bca6dd7b9e5fa27b85ce26b'
+SPELLING_LEXICON_SHA256 = '832940c6969faa8ec40108498190a4503cef5753ec43ec780cc7261765481644'
+
 def check_files(folder):
     manifest = json.loads((folder / 'acquisition.json').read_text(encoding='utf-8'))
     for item in manifest['files']:
@@ -72,6 +76,11 @@ def grammar(config, emit, enhanced=False):
             add(field, match.start(), match.end(), match.group(), '', '多余空格', 'RULES')
     emit({'stage': 'RULES_CHECKED', 'processed': len(config['plainText']), 'total': len(config['plainText']), 'issues': len(issues)})
     if enhanced:
+        import pypinyin
+        from campus_workbench import phonetic_spelling
+        if pypinyin.__version__!='0.55.0' or hashlib.sha256(Path(phonetic_spelling.__file__).read_bytes()).hexdigest()!=SPELLING_ALGORITHM_SHA256 or hashlib.sha256((ROOT/SPELLING_LEXICON/'lexicon.json').read_bytes()).hexdigest()!=SPELLING_LEXICON_SHA256:
+            raise ValueError('SPELLING_DEPENDENCY_CHANGED')
+        lexicon=phonetic_spelling.load_lexicon(ROOT/SPELLING_LEXICON)
         import psutil
         import torch
         device = config.get('device', 'cpu')
@@ -98,9 +107,9 @@ def grammar(config, emit, enhanced=False):
             raw = tokenizer.decode(output[0, inputs.shape[1]:], skip_special_tokens=True)
             diagnostic={'field':field,'start':start,'original':text,'raw':raw,'decision':'ACCEPTED'}
             try:
-                value,edits=_corrected_edits(text,raw);diagnostic['corrected']=value
+                value,edits,recovered=phonetic_spelling.guided_edits(text,raw,_corrected_edits,lexicon);diagnostic['corrected']=value;diagnostic['recoveredPositions']=sorted(recovered)
                 for _, a, b, c, d in edits:
-                    add(field, start + a, start + b, text[a:b], value[c:d], '语法或表达建议', 'QWEN')
+                    add(field, start + a, start + b, text[a:b], value[c:d], '语法或表达建议', 'QWEN_CORPUS_PHONETIC' if a in recovered else 'QWEN')
             except (ValueError, TypeError, KeyError, AttributeError) as failure:
                 blocked += 1;diagnostic['decision']=str(failure) or type(failure).__name__
             if config.get('captureDiagnostics'):diagnostics.append(diagnostic)

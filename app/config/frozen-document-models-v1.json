@@ -1,6 +1,6 @@
 {
   "schemaVersion": "document-models-v1",
-  "algorithmSha256": "2d5215fe04f1807158ae8b1025cce5c376758f562efc8c1050d2cc6138b6174a",
+  "algorithmSha256": "394b07998fc3a250cac3269bbb6f5b6d602d7b3cf243098a08c3e0b364fabfe7",
   "software": {
     "torch": "2.8.0+cu128",
     "transformers": "4.57.1",
@@ -8,10 +8,10 @@
     "numpy": "2.3.3",
     "Pillow": "13.0.0"
   },
-  "adapterSha256": "f847ee35c32d70c7597752851e6d39235a7845c2cbfb66e76be7938b1cf9d481",
+  "adapterSha256": "bd70b169203d1b76a95af70cda6941c1462b5f50c1f83a66c89df16bc79a63c0",
   "coordinatorSha256": "f5cb62032bf34427c4ee327f86e5ed84c81d71ef1d685478a42b9528f48e010e",
   "engineAlgorithms": {
-    "grammar": "6730044a888d4a484f2f1c938c1672ae00f068d30fa7e2bd02a6c3bdeafb4bb2",
+    "grammar": "1a4188dd9fafdd0cd7602a8f934b4d7f86670cbd1ce9f983f83bb2dad692c415",
     "imageText": "5df50f32d4b67bc102798ef8c4ffa9fcb20adf1c700733bb88a89d04768626da"
   },
   "devicePreference": "cuda",
@@ -71,9 +71,16 @@
     }
   },
   "evaluations": {
-    "grammar": "bbdb1ebd43d9a88808298fc9baaa0ea725921c660f613aa0a8112fa2d77ebe90",
+    "grammar": "1f6d6768105fc695a374c6d647143e57e95a09143aa02a5688ddf20e9fcbf092",
     "imageText": "dea8d4c040497fbf484230795e87ee1b47c2e01a405b2df2623a71fcc0ad2a8d"
   },
   "finalQualityAccepted": false,
-  "profileId": "document-bacf6c7411a928cb29d30a38a4c8af44972ed632ea618cf8f2c97aab3521d57f"
+  "spellingSupport": {
+    "package": "pypinyin==0.55.0",
+    "algorithmSha256": "0078e65580d4e2abfb8675a872559d0642b2780c7bca6dd7b9e5fa27b85ce26b",
+    "lexiconSha256": "832940c6969faa8ec40108498190a4503cef5753ec43ec780cc7261765481644",
+    "mode": "NEURAL_CHANGE_RECOVERY",
+    "sourcePartition": "existing-train"
+  },
+  "profileId": "document-537a5969757115c3b057020da028e420dc78ca24de19382e22c8effba7b07f18"
 }
