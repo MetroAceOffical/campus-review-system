@@ -1,0 +1,225 @@
+{
+  "stage": 25,
+  "date": "2026-10-29",
+  "snapshotAt": "2026-10-29T09:51:30.097666+08:00",
+  "state": "VERSION_GROUPED_CONTEXT_BERT_DEPLOYED",
+  "selectedConfigId": "text-bfafb42353288c59ac3ac8a0732d85e19f0cf5f5d171784647a24624dcd855fb",
+  "previousConfigId": "text-89f0a1c8a4c24a89b43869a60d9b242b9bc8c110493b5dc1847964c50c73c65e",
+  "offlineComparison": {
+    "state": "CONTEXTUAL_TEXT_COMPLETE",
+    "requests": 32,
+    "uniqueCases": 16,
+    "referenceRecords": 385,
+    "referenceGroups": 376,
+    "duplicateGroups": 9,
+    "baseline": {
+      "positiveDocuments": 12,
+      "completeCorrectSourceDocuments": 10,
+      "expectedSources": 13,
+      "correctSources": 11,
+      "normalDocuments": 4,
+      "scopedNormalAlerts": 0,
+      "normalAnySourceAlerts": 0,
+      "unjudgedSourceAlerts": 2
+    },
+    "methods": {
+      "context-lexical": {
+        "positiveDocuments": 12,
+        "completeCorrectSourceDocuments": 11,
+        "expectedSources": 13,
+        "correctSources": 12,
+        "normalDocuments": 4,
+        "scopedNormalAlerts": 0,
+        "normalAnySourceAlerts": 0,
+        "unjudgedSourceAlerts": 3,
+        "totalPairs": 4384,
+        "elapsedMs": 10116.5103000003
+      },
+      "context-hybrid": {
+        "positiveDocuments": 12,
+        "completeCorrectSourceDocuments": 11,
+        "expectedSources": 13,
+        "correctSources": 12,
+        "normalDocuments": 4,
+        "scopedNormalAlerts": 0,
+        "normalAnySourceAlerts": 0,
+        "unjudgedSourceAlerts": 3,
+        "totalPairs": 5240,
+        "elapsedMs": 19091.334099999585
+      }
+    },
+    "elapsedSeconds": 35.401784300000145,
+    "productActivated": false,
+    "naturalQualityAccepted": false,
+    "normalPopulationFpr": null,
+    "finalQueriesInferred": 0
+  },
+  "supplementaryNormalControls": {
+    "state": "NORMAL_CONTROLS_COMPLETE",
+    "queries": 24,
+    "independentAuthoredFamilies": 8,
+    "requests": 48,
+    "methods": {
+      "baseline": {
+        "queries": 24,
+        "alertedDocuments": 0,
+        "alertedFamilies": 0,
+        "elapsedMs": 2312.513899994883
+      },
+      "context-lexical": {
+        "queries": 24,
+        "alertedDocuments": 0,
+        "alertedFamilies": 0,
+        "elapsedMs": 8481.331200000568
+      }
+    },
+    "elapsedSeconds": 46.11727829999836,
+    "scope": "Authored8familiesx3controls; not natural-population false-positive rate",
+    "normalPopulationFpr": null
+  },
+  "references": {
+    "libraryManifestSha256": "e63c6c8b7f18dab04e99e6904bee07624bf30d0b90eba558520a982edc3609db",
+    "records": 385,
+    "groups": 376,
+    "duplicates": [
+      [
+        "183:BODY",
+        "246:BODY"
+      ],
+      [
+        "185:BODY",
+        "244:BODY"
+      ],
+      [
+        "187:BODY",
+        "217:BODY"
+      ],
+      [
+        "192:BODY",
+        "282:BODY"
+      ],
+      [
+        "194:BODY",
+        "259:BODY"
+      ],
+      [
+        "206:BODY",
+        "224:BODY"
+      ],
+      [
+        "207:BODY",
+        "290:BODY"
+      ],
+      [
+        "208:BODY",
+        "286:BODY"
+      ],
+      [
+        "209:BODY",
+        "310:BODY"
+      ]
+    ],
+    "recordsRemoved": 0
+  },
+  "referenceRecordsDeleted": 0,
+  "referenceTruthRemapped": false,
+  "additionalRecordAlertAudit": [
+    {
+      "caseId": "R04",
+      "source": "WORK:310",
+      "sameReferenceGroupAsExpected": true,
+      "truthRemapped": false
+    }
+  ],
+  "selectedMethod": "context-lexical",
+  "hybridBgeDeployed": false,
+  "scoreThresholdUnchanged": 0.5,
+  "lexicalFloorUnchanged": 0.25,
+  "modelWeightsUpdated": false,
+  "newTrainingExamples": 0,
+  "newDependenciesInstalled": false,
+  "http": {
+    "actualDetectorRequests": 33,
+    "uniqueHistoricalCases": 16,
+    "methods": {
+      "deployed": {
+        "positiveDocuments": 12,
+        "completeCorrectSourceDocuments": 11,
+        "expectedSources": 13,
+        "correctSources": 12,
+        "normalDocuments": 4,
+        "scopedNormalAlerts": 0,
+        "normalAnySourceAlerts": 0,
+        "unjudgedSourceAlerts": 3
+      },
+      "old-id": {
+        "positiveDocuments": 12,
+        "completeCorrectSourceDocuments": 10,
+        "expectedSources": 13,
+        "correctSources": 11,
+        "normalDocuments": 4,
+        "scopedNormalAlerts": 0,
+        "normalAnySourceAlerts": 0,
+        "unjudgedSourceAlerts": 2
+      }
+    },
+    "repeatedQueryLateWindowCount": 254,
+    "repeatedOffsetsVerified": true,
+    "actualBusinessCheck": {
+      "manuscriptId": "71",
+      "checkId": "fa725f71-833f-4bfe-a0f5-bda6727888a7",
+      "configId": "text-bfafb42353288c59ac3ac8a0732d85e19f0cf5f5d171784647a24624dcd855fb",
+      "recoveredSourceWorkId": "209",
+      "supportingPairs": 5,
+      "citationStates": [
+        "UNCITED"
+      ],
+      "submitted": false,
+      "published": false,
+      "temporaryDraftSoftDeleted": true
+    },
+    "configId": "text-bfafb42353288c59ac3ac8a0732d85e19f0cf5f5d171784647a24624dcd855fb",
+    "oldConfigRetained": true,
+    "imageConfigUnchanged": true,
+    "frontendChanged": false
+  },
+  "review": {
+    "independentReadOnly": true,
+    "finding": "Text-content dedup lost distinct repeated occurrence offsets",
+    "fix": "Dedup by(start,end); cache only text-pair inference and retain all selected occurrence mappings",
+    "focusedRedGreen": true
+  },
+  "verification": {
+    "frontendFilesUnchanged": 71,
+    "javaJarUnchanged": true,
+    "javaRestarted": false,
+    "ocrRestarted": false,
+    "grammarProfileUnchanged": true,
+    "protectedFormalAlgorithmsUnchanged": 23,
+    "trainAndRecipeUnchanged": true,
+    "library18Unchanged": true,
+    "focusedUnitTests": 3,
+    "frontendBuildRun": false,
+    "javaBuildRun": false,
+    "fullRegressionRun": false
+  },
+  "generationState": "PAUSED_BY_USER",
+  "generationCounts": {
+    "ACCEPTED": 2651,
+    "PENDING": 13509,
+    "QUARANTINED": 613
+  },
+  "remainingMissCases": [
+    "R01"
+  ],
+  "independentNaturalQualityAccepted": false,
+  "normalPopulationFalsePositiveRate": null,
+  "remaining": [
+    "R01类抽象概括改写漏检",
+    "独立真实新闻及同事件/通知正常稿质量",
+    "不同引用状态的重复语义段业务边界核验",
+    "图片可靠负例与几何策略",
+    "仍暂停的校园BGE/M3正式训练、校准与最终留出评价",
+    "等待用户后续指令的前端优化"
+  ]
+}
