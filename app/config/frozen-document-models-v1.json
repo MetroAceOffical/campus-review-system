@@ -1,6 +1,6 @@
 {
   "schemaVersion": "document-models-v1",
-  "algorithmSha256": "394b07998fc3a250cac3269bbb6f5b6d602d7b3cf243098a08c3e0b364fabfe7",
+  "algorithmSha256": "148276df71ba578345de07605e5c67eafed3b0d5636af28f8b80c653e4119aa7",
   "software": {
     "torch": "2.8.0+cu128",
     "transformers": "4.57.1",
@@ -11,8 +11,8 @@
   "adapterSha256": "bd70b169203d1b76a95af70cda6941c1462b5f50c1f83a66c89df16bc79a63c0",
   "coordinatorSha256": "f5cb62032bf34427c4ee327f86e5ed84c81d71ef1d685478a42b9528f48e010e",
   "engineAlgorithms": {
-    "grammar": "1a4188dd9fafdd0cd7602a8f934b4d7f86670cbd1ce9f983f83bb2dad692c415",
-    "imageText": "5df50f32d4b67bc102798ef8c4ffa9fcb20adf1c700733bb88a89d04768626da"
+    "grammar": "5d6ad8ff814d8d74585a51730869365474a78f6fd7790ea637ca48125b7655a3",
+    "imageText": "1cfe38d928de9a2e2268cd3e3ee3e26e4040f19d5a071e73d24642d29a40214b"
   },
   "devicePreference": "cuda",
   "gpuMinimumGiB": {
@@ -71,8 +71,8 @@
     }
   },
   "evaluations": {
-    "grammar": "1f6d6768105fc695a374c6d647143e57e95a09143aa02a5688ddf20e9fcbf092",
-    "imageText": "dea8d4c040497fbf484230795e87ee1b47c2e01a405b2df2623a71fcc0ad2a8d"
+    "grammar": "fb850cf7359c9510dbf3cf1ffd5156d81a1cd1831ed153976ce3ffb3cf555bf6",
+    "imageText": "6ac741bc2cc0e4c9dfb2e1c03814c0bf34dda6281b5597b6876a1f88a2fef162"
   },
   "finalQualityAccepted": false,
   "spellingSupport": {
@@ -82,5 +82,5 @@
     "mode": "NEURAL_CHANGE_RECOVERY",
     "sourcePartition": "existing-train"
   },
-  "profileId": "document-537a5969757115c3b057020da028e420dc78ca24de19382e22c8effba7b07f18"
+  "profileId": "document-077f9e5d3b447a3d1eb1e26cf95bf69c691e837a208cd89ceb9a545f2943a809"
 }

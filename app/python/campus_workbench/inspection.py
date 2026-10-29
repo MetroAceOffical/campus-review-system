@@ -60,6 +60,10 @@ def grammar(config, emit, enhanced=False):
         text = config['title'] if field == 'TITLE' else config['plainText']
         if text[start:end] != old or old == replacement:
             return
+        if engine == 'QWEN':
+            from campus_workbench.grammar_acceptance import accept_edit
+            if not accept_edit(text,start,end,replacement,lexicon):
+                blocked += 1;return
         spans = protected(text) + ([(c['plainStart'], c['plainEnd']) for c in config['citations']] if field == 'BODY' else [])
         if any(start < b and end > a or start == end and a <= start < b for a, b in spans):
             blocked += 1;return
@@ -80,6 +84,8 @@ def grammar(config, emit, enhanced=False):
         from campus_workbench import phonetic_spelling
         if pypinyin.__version__!='0.55.0' or hashlib.sha256(Path(phonetic_spelling.__file__).read_bytes()).hexdigest()!=SPELLING_ALGORITHM_SHA256 or hashlib.sha256((ROOT/SPELLING_LEXICON/'lexicon.json').read_bytes()).hexdigest()!=SPELLING_LEXICON_SHA256:
             raise ValueError('SPELLING_DEPENDENCY_CHANGED')
+        from campus_workbench import grammar_acceptance
+        if hashlib.sha256(Path(grammar_acceptance.__file__).read_bytes()).hexdigest()!='ba4ef5644da14a76aed46215345a1df561b32c33005fe4786b19fbe19505c972':raise ValueError('GRAMMAR_ACCEPTANCE_CHANGED')
         lexicon=phonetic_spelling.load_lexicon(ROOT/SPELLING_LEXICON)
         import psutil
         import torch
@@ -120,19 +126,9 @@ def grammar(config, emit, enhanced=False):
 
 
 def fields(text):
-    text = unicodedata.normalize('NFKC', text)
-    values = {'日期': set(), '地点': set(), '主办单位': set()}
-    for pattern in (r'(?:(\d{4})年)?(\d{1,2})月(\d{1,2})日', r'(?<!\d)(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?!\d)'):
-        for match in re.finditer(pattern, text):
-            year, month, day = int(match[1]) if match[1] else None, int(match[2]), int(match[3])
-            try:
-                date(year if year is not None else 2000, month, day)
-            except ValueError:
-                continue
-            values['日期'].add(f'{year if year is not None else ""}/{month}/{day}')
-    for key in ('地点', '主办单位'):
-        values[key].update(m.group(1).strip() for m in re.finditer(key + r'[：:]\s*([^\n，。；]{2,40})', text))
-    return values
+    from campus_workbench import news_fields
+    if hashlib.sha256(Path(news_fields.__file__).read_bytes()).hexdigest()!='b29005f994b84fde4f4ae0f88c4d74f58c67f0e6ab068c45581504e523e88bd5':raise ValueError('NEWS_FIELDS_CHANGED')
+    return news_fields.fields(text)
 
 
 def compare_fields(ocr, context):

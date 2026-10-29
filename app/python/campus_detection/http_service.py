@@ -38,6 +38,9 @@ class Runtime:
                     from campus_detection.text_refinement import configuration as refined_configuration
                     refined=refined_configuration(context)
                     models={**models,'textConfig':refined,'textConfigs':{**models['textConfigs'],refined['configId']:refined}}
+                    from campus_detection.mutual_text import configuration as mutual_configuration
+                    guarded=mutual_configuration(refined)
+                    models={**models,'textConfig':guarded,'textConfigs':{**models['textConfigs'],guarded['configId']:guarded}}
             if profile:
                 from campus_detection.v3_runtime import controlled,read,verify_files,load_bundle,attach_runtime
                 from campus_detection.retrieval import load_dense_index
@@ -134,6 +137,9 @@ def make_server(runtime,port=18081):
                     function=detect
                 if self.path=='/detect/text' and runtime.models.get('textConfigs',{}).get(request.get('configId'),{}).get('refinementPolicy'):
                     from campus_detection.text_refinement import detect
+                    function=detect
+                if self.path=='/detect/text' and runtime.models.get('textConfigs',{}).get(request.get('configId'),{}).get('mutualEvidencePolicy'):
+                    from campus_detection.mutual_text import detect
                     function=detect
                 result=function(request,library,runtime.models);validate_result(result,request)
                 result['processRunId']=runtime.run_id

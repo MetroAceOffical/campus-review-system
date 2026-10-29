@@ -1,0 +1,483 @@
+{
+  "stage": 28,
+  "date": "2026-10-29",
+  "snapshotAt": "2026-10-29T12:10:34.349467+08:00",
+  "state": "TODAY_THREE_ITEM_CHECKS_AND_DEPLOYMENT_COMPLETE_AWAITING_GITHUB_RECEIPT",
+  "gate": {
+    "textOptimization": "COMPLETE",
+    "grammarImageImageTextTargetedRound": "COMPLETE",
+    "requiredVerificationAndDocs": "COMPLETE",
+    "githubSync": "Verify local stage28-github-receipt.json after commit",
+    "completionAnnouncementOnlyAfterGithubVerified": true,
+    "frontendStillFrozen": true
+  },
+  "text": {
+    "state": "DEPLOYED_REFINEMENT_COMPLETE",
+    "actualDetectorRequests": 50,
+    "historical": {
+      "positiveDocuments": 12,
+      "completeCorrectSourceDocuments": 12,
+      "expectedSources": 13,
+      "correctSources": 13,
+      "normalDocuments": 4,
+      "scopedNormalAlerts": 0,
+      "normalAnySourceAlerts": 0,
+      "unjudgedSourceAlerts": 4
+    },
+    "realNews": {
+      "queries": 32,
+      "oldAlertedDocuments": 23,
+      "alertedDocuments": 17,
+      "addedAlertPairs": 0,
+      "removedAlertPairs": 52,
+      "noLongerAlerted": 6
+    },
+    "rawModelEvidenceEqualForAll48": true,
+    "configId": "text-1e6f8490873eb23b8d80ee99b9ea09e039c94fb7ca48c687f854ba3cdce149e1",
+    "oldContextConfigId": "text-bfafb42353288c59ac3ac8a0732d85e19f0cf5f5d171784647a24624dcd855fb",
+    "oldContextIdPreserved": true,
+    "finalQueriesInferred": 0,
+    "newWeights": false,
+    "newTrainingSamples": 0,
+    "elapsedSeconds": 35.37459189999936,
+    "scope": "12known authored reuse,4scoped old normals,32actual public dev news without independent natural gold",
+    "actualBusinessChecks": [
+      {
+        "checkId": "5886072e-e851-4f47-989e-2c0926fef843",
+        "label": "uncited",
+        "fullyCited": false,
+        "citationStates": [
+          "UNCITED"
+        ],
+        "supportingPairs": 2,
+        "configId": "text-1e6f8490873eb23b8d80ee99b9ea09e039c94fb7ca48c687f854ba3cdce149e1"
+      },
+      {
+        "checkId": "3284a22b-8642-46fb-aaaf-6db450bb56a2",
+        "label": "anchor-only",
+        "fullyCited": false,
+        "citationStates": [
+          "CITED",
+          "UNCITED"
+        ],
+        "supportingPairs": 2,
+        "configId": "text-1e6f8490873eb23b8d80ee99b9ea09e039c94fb7ca48c687f854ba3cdce149e1"
+      },
+      {
+        "checkId": "201a205d-6dbe-4014-bd45-3c3c438cc67a",
+        "label": "all-cited",
+        "fullyCited": true,
+        "citationStates": [
+          "CITED"
+        ],
+        "supportingPairs": 2,
+        "configId": "text-1e6f8490873eb23b8d80ee99b9ea09e039c94fb7ca48c687f854ba3cdce149e1"
+      }
+    ],
+    "manuscriptId": "76",
+    "targetSourceWorkId": "206",
+    "duplicateWork224AutomaticallyCleared": false,
+    "temporaryDraftSoftDeleted": true,
+    "submitted": false,
+    "published": false
+  },
+  "grammar": {
+    "original500FreshInference": {
+      "state": "DOCUMENT_EVALUATION_COMPLETE",
+      "kind": "grammar-model",
+      "queries": 500,
+      "runId": "71e6c229f05d652bf84755462a0585267505f3117a1d3f509fa25f7bc1a275e9",
+      "truePositive": 380,
+      "falsePositive": 0,
+      "falseNegative": 0,
+      "invalidSuggestions": 0,
+      "assessableFields": 0,
+      "correctFields": 0,
+      "unresolvedFields": 0,
+      "conflictFields": 0,
+      "detectedConflicts": 0,
+      "falseConflicts": 0,
+      "insufficientControls": 0,
+      "correctInsufficient": 0,
+      "failedQueries": 0,
+      "knownContextQueries": 0,
+      "relatedTop1": 0,
+      "relatedTop3": 0,
+      "realRuntimeQueries": 0,
+      "realRuntimeCompleted": 0,
+      "scope": "AUTHORED_GRAMMAR_CONTROLS",
+      "qualityAccepted": false,
+      "finalQueriesEvaluated": 0,
+      "cudaPeakAllocatedBytes": 6228309504,
+      "byCategory": {
+        "clean": {
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 0,
+          "invalidSuggestions": 0,
+          "assessableFields": 0,
+          "correctFields": 0,
+          "unresolvedFields": 0,
+          "conflictFields": 0,
+          "detectedConflicts": 0,
+          "falseConflicts": 0,
+          "insufficientControls": 0,
+          "correctInsufficient": 0,
+          "failedQueries": 0,
+          "knownContextQueries": 0,
+          "relatedTop1": 0,
+          "relatedTop3": 0,
+          "realRuntimeQueries": 0,
+          "realRuntimeCompleted": 0
+        },
+        "protected": {
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 0,
+          "invalidSuggestions": 0,
+          "assessableFields": 0,
+          "correctFields": 0,
+          "unresolvedFields": 0,
+          "conflictFields": 0,
+          "detectedConflicts": 0,
+          "falseConflicts": 0,
+          "insufficientControls": 0,
+          "correctInsufficient": 0,
+          "failedQueries": 0,
+          "knownContextQueries": 0,
+          "relatedTop1": 0,
+          "relatedTop3": 0,
+          "realRuntimeQueries": 0,
+          "realRuntimeCompleted": 0
+        },
+        "punctuation": {
+          "truePositive": 100,
+          "falsePositive": 0,
+          "falseNegative": 0,
+          "invalidSuggestions": 0,
+          "assessableFields": 0,
+          "correctFields": 0,
+          "unresolvedFields": 0,
+          "conflictFields": 0,
+          "detectedConflicts": 0,
+          "falseConflicts": 0,
+          "insufficientControls": 0,
+          "correctInsufficient": 0,
+          "failedQueries": 0,
+          "knownContextQueries": 0,
+          "relatedTop1": 0,
+          "relatedTop3": 0,
+          "realRuntimeQueries": 0,
+          "realRuntimeCompleted": 0
+        },
+        "spaces": {
+          "truePositive": 100,
+          "falsePositive": 0,
+          "falseNegative": 0,
+          "invalidSuggestions": 0,
+          "assessableFields": 0,
+          "correctFields": 0,
+          "unresolvedFields": 0,
+          "conflictFields": 0,
+          "detectedConflicts": 0,
+          "falseConflicts": 0,
+          "insufficientControls": 0,
+          "correctInsufficient": 0,
+          "failedQueries": 0,
+          "knownContextQueries": 0,
+          "relatedTop1": 0,
+          "relatedTop3": 0,
+          "realRuntimeQueries": 0,
+          "realRuntimeCompleted": 0
+        },
+        "typo": {
+          "truePositive": 80,
+          "falsePositive": 0,
+          "falseNegative": 0,
+          "invalidSuggestions": 0,
+          "assessableFields": 0,
+          "correctFields": 0,
+          "unresolvedFields": 0,
+          "conflictFields": 0,
+          "detectedConflicts": 0,
+          "falseConflicts": 0,
+          "insufficientControls": 0,
+          "correctInsufficient": 0,
+          "failedQueries": 0,
+          "knownContextQueries": 0,
+          "relatedTop1": 0,
+          "relatedTop3": 0,
+          "realRuntimeQueries": 0,
+          "realRuntimeCompleted": 0
+        },
+        "word": {
+          "truePositive": 100,
+          "falsePositive": 0,
+          "falseNegative": 0,
+          "invalidSuggestions": 0,
+          "assessableFields": 0,
+          "correctFields": 0,
+          "unresolvedFields": 0,
+          "conflictFields": 0,
+          "detectedConflicts": 0,
+          "falseConflicts": 0,
+          "insufficientControls": 0,
+          "correctInsufficient": 0,
+          "failedQueries": 0,
+          "knownContextQueries": 0,
+          "relatedTop1": 0,
+          "relatedTop3": 0,
+          "realRuntimeQueries": 0,
+          "realRuntimeCompleted": 0
+        }
+      }
+    },
+    "finalRepeatGuardCachedReplay": {
+      "evaluationType": "Final repeat-guard cached policy replay on complete500 new model outputs",
+      "queries": 500,
+      "metrics": {
+        "truePositive": 380,
+        "falsePositive": 0,
+        "falseNegative": 0
+      },
+      "helperSha256": "ba4ef5644da14a76aed46215345a1df561b32c33005fe4786b19fbe19505c972"
+    },
+    "naturalBefore": {
+      "state": "NATURAL_GRAMMAR_CHECK_COMPLETE",
+      "publicParentPages": 32,
+      "units": 64,
+      "suggestions": 17,
+      "changedUnits": 15,
+      "sourceSha256": "394b07998fc3a250cac3269bbb6f5b6d602d7b3cf243098a08c3e0b364fabfe7",
+      "weightsUpdated": false,
+      "scope": "Review suggested edits before assigning correctness; not natural gold FPR",
+      "elapsedSeconds": 104.54964239999936
+    },
+    "naturalCandidate": {
+      "state": "NATURAL_GRAMMAR_CHECK_COMPLETE",
+      "publicParentPages": 32,
+      "units": 64,
+      "suggestions": 0,
+      "changedUnits": 0,
+      "sourceSha256": "1bc7e1d4da225b6bbe45e3f2ae71da881d1d0dd8f159f11b113e282ed62a9aa3",
+      "weightsUpdated": false,
+      "scope": "Review suggested edits before assigning correctness; not natural gold FPR",
+      "elapsedSeconds": 103.24926120000237
+    },
+    "latestProfileActualBusinessCheck": {
+      "checkId": "3bc0949b-16df-4386-91a7-708f069ffab8",
+      "manuscriptId": "77",
+      "expectedTypos": 3,
+      "correctTypos": 3,
+      "normalPassages": 3,
+      "normalSuggestions": 0,
+      "resultKeys": [
+        "categoryCounts",
+        "executionDevice",
+        "inputHash",
+        "issues",
+        "kind",
+        "model",
+        "modelProfile",
+        "protectedSuggestions",
+        "status"
+      ],
+      "submitted": false,
+      "published": false,
+      "temporaryDraftSoftDeleted": true
+    },
+    "scope": "64 correlated units from32public pages;17suggestions included optional rewrites;not independent natural gold accuracy. Final repeat tightening verified by unit/cached replay and actual deployed business check"
+  },
+  "images": {
+    "state": "TARGETED_IMAGE_CHECK_COMPLETE",
+    "originals": 8,
+    "positiveQueries": 24,
+    "negativePairs": 28,
+    "baselinePositive": 21,
+    "geometryPositive": 20,
+    "baselineNegativeAlerts": 0,
+    "geometryNegativeAlerts": 0,
+    "finalQueriesInferred": 0,
+    "weightsUpdated": false,
+    "elapsedSeconds": 21.14754819999871,
+    "scope": "24 controlled positives and28 correlated reviewed distinct-image pairs;not natural FPR"
+  },
+  "imageText": {
+    "state": "TARGETED_CLIP_OCR_COMPLETE",
+    "realImages": 8,
+    "realCaptionTop1": 8,
+    "controlledNotices": 2,
+    "noticeDates": [
+      "MATCH",
+      "CONFLICT"
+    ],
+    "ocrCompleted": 8,
+    "elapsedSeconds": 100.04240930000014,
+    "weightsUpdated": false,
+    "finalQueriesInferred": 0,
+    "scope": "8visually grounded caption controls and2correlated synthetic notices, not overall real-news accuracy"
+  },
+  "fieldsReplay": {
+    "evaluationType": "Original150 cached OCR field replay only;no new CLIP/OCR inference",
+    "rows": 150,
+    "scoredSyntheticQueries": 100,
+    "unscoredRealQueries": 50,
+    "originalFieldsChanged": [],
+    "metrics": {
+      "truePositive": 0,
+      "falsePositive": 0,
+      "falseNegative": 0,
+      "invalidSuggestions": 0,
+      "assessableFields": 150,
+      "correctFields": 150,
+      "unresolvedFields": 0,
+      "conflictFields": 50,
+      "detectedConflicts": 50,
+      "falseConflicts": 0,
+      "insufficientControls": 150,
+      "correctInsufficient": 150,
+      "failedQueries": 0,
+      "knownContextQueries": 0,
+      "relatedTop1": 0,
+      "relatedTop3": 0,
+      "realRuntimeQueries": 0,
+      "realRuntimeCompleted": 0
+    },
+    "newControls": [
+      {
+        "left": "日期：2026年 10 月29 日",
+        "right": "日期：2026年10月30日",
+        "field": "日期",
+        "expected": "CONFLICT",
+        "before": "INSUFFICIENT",
+        "after": "CONFLICT"
+      },
+      {
+        "left": "活动时间：2026.10.29",
+        "right": "日期：2026年10月29日",
+        "field": "日期",
+        "expected": "MATCH",
+        "before": "INSUFFICIENT",
+        "after": "MATCH"
+      },
+      {
+        "left": "主办方：新闻中心",
+        "right": "主办单位：学生会",
+        "field": "主办单位",
+        "expected": "CONFLICT",
+        "before": "INSUFFICIENT",
+        "after": "CONFLICT"
+      },
+      {
+        "left": "主办：新闻中心",
+        "right": "主办单位：新闻中心",
+        "field": "主办单位",
+        "expected": "MATCH",
+        "before": "INSUFFICIENT",
+        "after": "MATCH"
+      }
+    ]
+  },
+  "imagePolicyDecision": "Keep original image-v1. Geometry20/24 vs baseline21/24 and union23/24 on eight source families is not enough hard-negative validation to replace production policy",
+  "documentDeployment": {
+    "previousProfileId": "document-537a5969757115c3b057020da028e420dc78ca24de19382e22c8effba7b07f18",
+    "profileId": "document-077f9e5d3b447a3d1eb1e26cf95bf69c691e837a208cd89ceb9a545f2943a809",
+    "inspectionSha256": "148276df71ba578345de07605e5c67eafed3b0d5636af28f8b80c653e4119aa7",
+    "profileSha256": "9df89a48de6f3cb3e01d0ef9272e3e6ee31103e2169aed50267df7c5a42b41c6",
+    "javaRestarted": false,
+    "javaRebuilt": false,
+    "weightsUpdated": false,
+    "newDependenciesInstalled": false,
+    "grammar500FinalReplay": {
+      "truePositive": 380,
+      "falsePositive": 0,
+      "falseNegative": 0
+    }
+  },
+  "review": {
+    "independentReadOnly": true,
+    "importantFindings": 1,
+    "finding": "Normal reduplicated Chinese words could be shortened",
+    "resolution": "Only established repeated-word noise whitelist may be deleted; 人人/好好/看看/研究研究 regression RED then GREEN"
+  },
+  "verification": {
+    "focusedPythonTests": 14,
+    "frontendFilesUnchanged": 71,
+    "javaJarUnchanged": true,
+    "javaRebuilt": false,
+    "javaRestarted": false,
+    "ocrRestarted": false,
+    "library18Unchanged": true,
+    "protectedFormalAlgorithmsUnchanged": 23,
+    "trainRecipeUnchanged": true,
+    "modelWeightsUpdated": false,
+    "newTrainingSamples": 0,
+    "newDependenciesInstalled": false,
+    "fullRegressionRun": false,
+    "services": {
+      "java": {
+        "ready": true,
+        "busy": false
+      },
+      "detector": {
+        "ready": true,
+        "busy": false,
+        "runId": "b061cf15-ecbc-4e6c-b71a-ecc71dcaec36",
+        "activeAttemptId": null,
+        "errorCode": null,
+        "availableTextConfigs": [
+          {
+            "configId": "text-89f0a1c8a4c24a89b43869a60d9b242b9bc8c110493b5dc1847964c50c73c65e",
+            "profileId": null
+          },
+          {
+            "configId": "text-393f674ef0ce299ee2f2cc0c99a84a056a1df9dba9c6a2b3c93e4e785602f02a",
+            "profileId": null
+          },
+          {
+            "configId": "text-bfafb42353288c59ac3ac8a0732d85e19f0cf5f5d171784647a24624dcd855fb",
+            "profileId": null
+          },
+          {
+            "configId": "text-bbbbe2f485c16796c68d8e54f3551da6bb141f0b6ba1c093243d7177a69c05a6",
+            "profileId": null
+          },
+          {
+            "configId": "text-1e6f8490873eb23b8d80ee99b9ea09e039c94fb7ca48c687f854ba3cdce149e1",
+            "profileId": null
+          }
+        ],
+        "imageSchema": "image-v1",
+        "contextualText": true,
+        "refinedText": true
+      },
+      "ocr": {
+        "ready": true,
+        "busy": false,
+        "runId": "5e54ab0d-9d06-4089-a894-2c9dc2a86e3b",
+        "activeAttemptId": null,
+        "errorCode": null,
+        "availableTextConfigs": null
+      }
+    }
+  },
+  "generationState": "PAUSED_BY_USER",
+  "generationCounts": {
+    "ACCEPTED": 2651,
+    "PENDING": 13509,
+    "QUARANTINED": 613
+  },
+  "formalTarget": {
+    "originals": 3684,
+    "windows": 16773,
+    "bgeEpochs": 2,
+    "m3Epochs": 2
+  },
+  "remainingOutsideThisRound": [
+    "独立自然新闻总体质量与完整最终留出评价",
+    "较难图片负例及几何融合策略正式校准",
+    "仍暂停的校园BGE/M3正式训练与校准",
+    "需另行讨论的前端优化"
+  ],
+  "independentNaturalQualityAccepted": false
+}
