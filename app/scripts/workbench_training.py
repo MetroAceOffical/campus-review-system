@@ -11,6 +11,7 @@ from campus_workbench.datasets import read_dataset
 from campus_workbench.preparation import sha
 from campus_workbench.training import compute_slot, train, predict, evaluate
 from campus_workbench.news_samples import generate
+from campus_shared.document_compute import document_slot
 
 
 def send(kind, value):
@@ -30,10 +31,11 @@ def main():
         result = prepare(config['input'], config['output'], config['kind'], config.get('parameters', {}), emit)
     else:
         gpu = config.get('device') == 'cuda'
-        # CPU work has its own serial lane while formal GPU preparation runs.
-        # Keep the frozen core and the shared GPU exclusion unchanged.
+        # Web model jobs share the actual inference lock. A listening detector
+        # is not an active computation. Keep generation's older GPU guard.
         compute_runtime = config['runtime'] if gpu else str(Path(config['runtime']) / 'web-cpu')
-        with compute_slot(compute_runtime, gpu):
+        slot = document_slot(compute_runtime, neural=True) if gpu and action in ('TRAIN','EVALUATE','PREDICT') else compute_slot(compute_runtime, gpu)
+        with slot:
             if action == 'GENERATE':
                 result = generate(config['preparation'], config['output'], config.get('parameters', {}), emit, resume=config.get('resume'), caches=config.get('caches', []))
             elif action == 'TRAIN':

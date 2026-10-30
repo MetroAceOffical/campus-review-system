@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-30",
+  "problem": "网页GPU训练把在线检测端口处于监听状态误当成实际计算占用，因此服务启动后一直排队",
+  "evidenceBefore": {
+    "runId": "9127d657-c314-4992-824f-2cbe2e1a3427",
+    "family": "cnn",
+    "device": "cuda",
+    "status": "QUEUED",
+    "onlineDetectorReady": true,
+    "onlineDetectorBusy": false,
+    "activeDocumentChecks": 0
+  },
+  "change": "网页TRAIN/EVALUATE/PREDICT的GPU任务复用在线推理的实际计算锁，保留旧GPU任务进程检查；CPU独立通道及GENERATE原有保护保持",
+  "applicationFiles": ["app/scripts/workbench_training.py"],
+  "tests": {
+    "file": "app/python/tests/test_web_training_resources.py",
+    "passed": 4,
+    "cases": ["在线服务监听但无计算时允许GPU训练", "在线实际计算锁占用时仍等待", "样本生成保留原服务保护", "CPU训练保留独立通道"]
+  },
+  "liveObservation": {
+    "cnnRunId": "9127d657-c314-4992-824f-2cbe2e1a3427",
+    "cnnStatus": "COMPLETED",
+    "cnnTrainRows": 24,
+    "cnnValidationRows": 12,
+    "bilstmRunId": "bfcdb410-fe69-44f2-9e27-6a66840f45c3",
+    "bilstmStatus": "COMPLETED",
+    "bertRunId": "6ab244e5-824d-41e9-9863-70c9ad34731b",
+    "bertStatusAtInitialObservation": "RUNNING",
+    "bertFinalStatus": "COMPLETED",
+    "javaDetectorAndOcrReadyAfterTraining": true
+  },
+  "userTrainingParametersChanged": false,
+  "servicesStopped": false,
+  "dependenciesInstalled": false,
+  "formalSampleGenerationResumed": false
+}
