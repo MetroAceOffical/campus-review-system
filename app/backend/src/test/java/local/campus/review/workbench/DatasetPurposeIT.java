@@ -21,9 +21,9 @@ class DatasetPurposeIT extends HttpTestSupport {
     @Test void persistsPurposeAndEnqueuesOneApprovalOnlyImportAfterSuccessfulCleaning() throws Exception {
         var session=login("reviewer");
         var file=new MockMultipartFile("file","news.csv","text/csv","id,title,text\na,新闻稿,学校举办新闻写作交流活动。\n".getBytes(StandardCharsets.UTF_8));
-        var response=http.perform(csrf(multipart("/api/workbench/datasets").file(file).param("organizationId","1").param("name","用途衔接专用检查").param("kind","NEWS").param("purpose","BOTH"),session)).andExpect(status().isOk()).andReturn();
+        var response=http.perform(csrf(multipart("/api/workbench/datasets").file(file).param("organizationId","1").param("name","用途衔接专用检查").param("kind","NEWS").param("purpose","LIBRARY"),session)).andExpect(status().isOk()).andReturn();
         var dataset=json.readTree(response.getResponse().getContentAsString()).path("data");String id=dataset.path("datasetId").asText();
-        http.perform(get("/api/workbench/datasets/"+id).session(session)).andExpect(jsonPath("$.data.purpose").value("BOTH"));
+        http.perform(get("/api/workbench/datasets/"+id).session(session)).andExpect(jsonPath("$.data.purpose").value("LIBRARY"));
         worker.runOne();
         response=http.perform(csrf(post("/api/workbench/datasets/"+id+"/runs"),session).contentType("application/json").content(json.writeValueAsBytes(Map.of("action","CLEAN","versionId",dataset.path("versionId").asText(),"options",Map.of("auto_reference_import",true))))).andExpect(status().isOk()).andReturn();
         String run=json.readTree(response.getResponse().getContentAsString()).path("data").path("runId").asText();

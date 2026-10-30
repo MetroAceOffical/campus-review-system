@@ -1,0 +1,19 @@
+{
+  "stage": 30,
+  "date": "2026-10-30",
+  "requirement": "管理员独占模型训练，审核员保留新闻对比库材料上传",
+  "adminOnly": ["PREPARE", "GENERATE", "TRAIN", "TRAIN_RESUME", "PIPELINE_CREATE", "PIPELINE_RETRY", "PIPELINE_CONTROL"],
+  "reviewerRetained": ["NEWS_UPLOAD", "AUDIT", "CLEAN", "REFERENCE_IMPORT_REQUEST", "MODEL_READ", "EVALUATE", "PREDICT", "REVIEW"],
+  "referenceImportApproval": "ADMIN",
+  "queueChecks": ["enabled administrator creator before training execution", "administrator actor before automatic pipeline dispatch"],
+  "verification": {
+    "frontend": "7 targeted checks passed; production frontend compiled",
+    "backend": "6 targeted checks passed; 1 optional pipeline integration case skipped; separate reviewer upload-clean-import integration passed",
+    "deployedApi": "18 authorization and accessibility checks passed; no training or pipeline jobs created",
+    "package": "Maven offline package passed after stopping the Java process to release the running jar"
+  },
+  "formalGeneration": "PAUSED_BY_USER",
+  "modelWeightsChanged": false,
+  "trainingScaleChanged": false,
+  "dependenciesInstalled": false
+}

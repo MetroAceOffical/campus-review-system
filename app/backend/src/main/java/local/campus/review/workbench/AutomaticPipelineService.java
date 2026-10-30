@@ -21,7 +21,7 @@ public class AutomaticPipelineService {
     public record Model(String family,JsonNode parameters){}
     public record Create(String datasetId,String versionId,String name,JsonNode mapping,JsonNode cleaning,JsonNode preparation,JsonNode generation,List<Model> models,boolean evaluate){}
     public JsonNode create(CurrentUser actor,Create input){
-        data.role(actor);if(input==null)throw invalid("请配置自动流程");var dataset=data.dataset(actor,input.datasetId());var version=data.version(input.datasetId(),input.versionId());
+        AccessPolicy.requireAdmin(actor);if(input==null)throw invalid("请配置自动流程");var dataset=data.dataset(actor,input.datasetId());var version=data.version(input.datasetId(),input.versionId());
         if(Boolean.TRUE.equals(dataset.get("archived"))||!"READY".equals(version.get("status"))||"sources.json".equals(version.get("file_name")))throw invalid("请选择未归档数据集的就绪数据版本");
         validateModels(input.models());String name=DatasetService.name(input.name());
         var config=data.json.createObjectNode().put("inputSha256",version.get("sha256").toString()).put("kind",dataset.get("kind").toString()).put("evaluate",input.evaluate());
@@ -47,7 +47,7 @@ public class AutomaticPipelineService {
     }
     public JsonNode list(CurrentUser actor,String dataset,int page){return list(actor,dataset,page,10);}
     public JsonNode list(CurrentUser actor,String dataset,int page,int size){data.dataset(actor,dataset);if(page<1 || size<1 || size>100)throw invalid("分页无效");var result=data.json.createObjectNode().put("page",page).put("pageSize",size).put("total",data.db.queryForObject("SELECT COUNT(*) FROM ml_pipeline WHERE dataset_id=?",Long.class,dataset));var items=result.putArray("items");for(var row:data.db.queryForList("SELECT * FROM ml_pipeline WHERE dataset_id=? ORDER BY created_at DESC,id LIMIT ? OFFSET ?",dataset,size,(page-1L)*size))items.add(view(row));return result;}
-    public JsonNode control(CurrentUser actor,String id,boolean retry){row(actor,id);data.transactions.executeWithoutResult(tx->{
+    public JsonNode control(CurrentUser actor,String id,boolean retry){AccessPolicy.requireAdmin(actor);row(actor,id);data.transactions.executeWithoutResult(tx->{
         var current=data.db.queryForMap("SELECT * FROM ml_pipeline WHERE id=? FOR UPDATE",id);var state=(ObjectNode)JsonSupport.parse(data.json,current.get("state_json").toString());String status=current.get("status").toString();
         if(retry){if(!Set.of("FAILED","CANCELLED").contains(status))throw invalid("仅失败或已取消流程可重试");if(state.hasNonNull("currentRunId")&&!"COMPLETED".equals(data.runRow(actor,state.path("currentRunId").asText()).get("status"))){state.put("retryRunId",state.path("currentRunId").asText());state.remove("currentRunId");}data.db.update("UPDATE ml_pipeline SET status='QUEUED',state_json=?,error_message=NULL,actor_id=?,updated_at=UTC_TIMESTAMP(3) WHERE id=?",state.toString(),actor.userId(),id);}
         else {if(Set.of("QUEUED","RUNNING").contains(status)&&state.hasNonNull("currentRunId"))data.cancel(actor,state.path("currentRunId").asText());data.db.update("UPDATE ml_pipeline SET status=CASE WHEN status IN ('QUEUED','RUNNING') THEN 'CANCELLED' ELSE status END,updated_at=UTC_TIMESTAMP(3) WHERE id=?",id);}
@@ -58,6 +58,7 @@ public class AutomaticPipelineService {
         try{data.transactions.executeWithoutResult(tx->{
             var row=data.db.queryForMap("SELECT * FROM ml_pipeline WHERE id=? FOR UPDATE",id);if(!Set.of("QUEUED","RUNNING").contains(row.get("status")))return;
             String username=data.db.queryForObject("SELECT username FROM app_user WHERE id=?",String.class,row.get("actor_id"));var actor=users.require(UsernamePasswordAuthenticationToken.authenticated(username,null,List.of()));
+            AccessPolicy.requireAdmin(actor);
             String dataset=row.get("dataset_id").toString();data.dataset(actor,dataset);
             var config=JsonSupport.parse(data.json,row.get("config_json").toString());var state=(ObjectNode)JsonSupport.parse(data.json,row.get("state_json").toString());
             if(!config.path("inputSha256").asText().equals(data.version(dataset,row.get("input_version_id").toString()).get("sha256")))throw invalid("流程输入版本已变化");

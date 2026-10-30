@@ -11,7 +11,7 @@ import type {Dataset,Detail} from '../api/workbench'
 import {versionName} from '../workbench-guidance'
 import {session} from '../session'
 const route=useRoute(),admin=computed(()=>session.user?.role==='ADMIN'),datasetId=ref(String(route.query.dataset??'')),versionId=ref(String(route.query.version??'')),q=ref(''),items=ref<Dataset[]>([]),dataPage=ref(1),dataTotal=ref(0),detail=ref<Detail>(),batches=ref<ImportBatch[]>([]),page=ref(1),total=ref(0),generation=ref(''),error=ref(''),busy=ref(false),selected=ref<ImportBatch>(),rows=ref<ImportRow[]>([]),rowPage=ref(1),rowTotal=ref(0)
-const activeTab=ref(route.query.version?'new':'records')
+const activeTab=ref(route.query.version || route.query.tab==='new'?'new':'records')
 const cleanVersions=computed(()=>detail.value?.versions.filter(v=>v.stage==='CLEAN'&&v.status==='READY')??[])
 let timer:ReturnType<typeof setInterval>|undefined,alive=true,refreshing=false
 async function loadData(){const result=await datasets.datasets(dataPage.value,q.value,false,dataSize.value);items.value=result.items.filter(d=>d.kind==='NEWS');dataTotal.value=result.total}

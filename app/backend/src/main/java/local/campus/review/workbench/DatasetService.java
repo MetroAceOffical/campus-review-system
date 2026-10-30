@@ -162,7 +162,7 @@ public class DatasetService {
     public JsonNode events(CurrentUser user,String id,long after){runRow(user,id);if(after<0)throw new ApiException(400,"VALIDATION_ERROR","事件序号无效");return storedEvents(id,after);}
     JsonNode storedEvents(String id,long after){var result=json.createArrayNode();for(var row:db.queryForList("SELECT id,payload_json FROM ml_run_event WHERE run_id=? AND id>? ORDER BY id LIMIT 500",id,after))result.addObject().put("sequence",((Number)row.get("id")).longValue()).set("data",JsonSupport.parse(json,row.get("payload_json").toString()));return result;}
     public JsonNode cancel(CurrentUser user,String id){
-        runRow(user,id);transactions.executeWithoutResult(tx->{
+        var task=runRow(user,id);TrainingService.requireTrainingAccess(user,task.get("action").toString());transactions.executeWithoutResult(tx->{
             if(db.update("UPDATE ml_run SET status='CANCELLED',finished_at=UTC_TIMESTAMP(3) WHERE id=? AND status IN ('QUEUED','RUNNING')",id)==1){
                 db.update("UPDATE ml_dataset_version v JOIN ml_run r ON r.output_version_id=v.id SET v.status='CANCELLED' WHERE r.id=?",id);event(id,Map.of("stage","CANCELLED"));
             }

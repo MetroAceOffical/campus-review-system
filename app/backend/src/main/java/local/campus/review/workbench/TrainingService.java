@@ -3,6 +3,7 @@ package local.campus.review.workbench;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import local.campus.review.auth.CurrentUser;
+import local.campus.review.auth.AccessPolicy;
 import local.campus.review.common.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +17,7 @@ import java.util.*;
 @Service
 public class TrainingService {
     static final Set<String> ACTIONS=Set.of("PREPARE","GENERATE","TRAIN","EVALUATE","PREDICT");
+    static final Set<String> TRAINING_ACTIONS=Set.of("PREPARE","GENERATE","TRAIN");
     static final Set<String> FAMILIES=Set.of("lr","svm","rf","cnn","bilstm","bert");
     final DatasetService data;
     public TrainingService(DatasetService data){this.data=data;}
@@ -45,7 +47,9 @@ public class TrainingService {
         return run;
     }
     public record Start(String datasetId,String versionId,String action,String preparationId,String modelId,String family,String name,JsonNode parameters,JsonNode rows,String resumeRunId){}
+    static void requireTrainingAccess(CurrentUser user,String action){if(action!=null&&TRAINING_ACTIONS.contains(action))AccessPolicy.requireAdmin(user);}
     public JsonNode start(CurrentUser user,Start request){
+        data.role(user);requireTrainingAccess(user,request.action());
         if(request.action()==null || !ACTIONS.contains(request.action()))throw invalid("任务类型无效");
         var dataset=data.dataset(user,request.datasetId());var version=data.version(request.datasetId(),request.versionId());
         if(!"CLEAN".equals(version.get("stage")) || !"READY".equals(version.get("status")))throw invalid("请选择已完成的清洗版本");

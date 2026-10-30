@@ -55,6 +55,7 @@ public class TrainingWorker {
     }
     private void execute(Map<String,Object> job)throws Exception{
         String id=job.get("id").toString(),action=job.get("action").toString(),dataset=job.get("dataset_id").toString();
+        if(TrainingService.TRAINING_ACTIONS.contains(action)&&data.db.queryForObject("SELECT COUNT(*) FROM app_user WHERE id=? AND role='ADMIN' AND enabled=true",Integer.class,job.get("created_by"))!=1)throw new IOException("训练任务仅限启用的管理员执行");
         var options=JsonSupport.parse(data.json,job.get("options_json").toString());var source=data.version(dataset,job.get("input_version_id").toString());
         boolean uploaded=action.equals("PREDICT")&&"UPLOADED_FILE".equals(options.path("inputKind").asText());
         Path input=uploaded?null:data.input(source);if(input!=null&&!sha(input).equals(source.get("sha256")))throw new IOException("清洗数据校验失败");
