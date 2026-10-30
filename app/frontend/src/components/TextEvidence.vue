@@ -14,13 +14,13 @@ const citationStates = (item: TextEvidenceItem, start: number, end: number) => A
   <section v-for="item in evidence" :key="item.evidenceId" class="evidence-card">
     <div class="section-heading">
       <strong>{{ item.sourceTitle }}</strong>
-      <el-tag :type="item.fullyCited ? 'success' : item.acceptedCandidate ? 'warning' : 'info'" effect="plain">{{ item.fullyCited ? '已标注引用' : item.acceptedCandidate ? '符合字面证据条件' : item.semanticSummary ? '尚无符合条件的字面片段' : '召回候选，未达字面条件' }}</el-tag>
+      <el-tag :type="item.fullyCited ? 'success' : item.acceptedCandidate ? 'warning' : 'info'" effect="plain">{{ item.fullyCited ? '已标注引用' : item.acceptedCandidate ? '发现字面复用' : '相近来源' }}</el-tag>
       <el-tag v-if="item.semanticSummary?.suspectedReuse && !item.fullyCited" type="warning">疑似语义复用</el-tag>
     </div>
-    <p class="muted">来源{{ item.sourceWorkId }} / 修订{{ item.sourceRevisionId }} · {{ item.sourceKind === 'IMAGE_OCR' ? '来源图片OCR文字' : '来源正文' }} · TF-IDF {{ item.tfidfScore.toFixed(4) }}</p>
-    <a v-if="item.sourceUrl" :href="item.sourceUrl" target="_blank" rel="noopener noreferrer">{{ item.sourceUrl }}</a>
+
+    <a class="source-external" v-if="item.sourceUrl" :href="item.sourceUrl" target="_blank" rel="noopener noreferrer">查看原始来源 ↗</a>
     <p v-else-if="item.sourceMetadata?.description">{{ item.sourceMetadata.description }}</p>
-    <p>字面匹配{{ item.literalSummary.matched_characters }}个字符 · 查询字面覆盖{{ (item.literalSummary.query_character_coverage * 100).toFixed(1) }}% · 最长片段{{ item.literalSummary.longest_match }}字</p>
+    <div class="evidence-metrics"><div><span>字面重复字符</span><strong>{{ item.literalSummary.matched_characters }}</strong></div><div><span>本稿字面覆盖</span><strong>{{ (item.literalSummary.query_character_coverage * 100).toFixed(1) }}%</strong></div><div><span>最长重复片段</span><strong>{{ item.literalSummary.longest_match }}<small> 字</small></strong></div></div>
     <p v-if="item.semanticSummary?.queryCoverage !== undefined" class="muted">语义证据覆盖：本稿 <strong>{{ (item.semanticSummary.queryCoverage * 100).toFixed(1) }}%</strong> · 来源 <strong>{{ ((item.semanticSummary.sourceCoverage ?? 0) * 100).toFixed(1) }}%</strong></p>
     <p v-if="item.semanticSummary?.status === 'EVALUATED'" :class="{ unsaved: item.semanticSummary.suspectedReuse && !item.fullyCited }">
       {{ item.fullyCited ? '对应片段已标注站内引用。' : item.semanticSummary.suspectedReuse ? '发现多处语义相近片段。' : '语义比对已完成。' }}
@@ -28,7 +28,7 @@ const citationStates = (item: TextEvidenceItem, start: number, end: number) => A
     </p>
     <div v-for="(match, index) in item.matches" :key="`${item.evidenceId}-${index}`" class="match-block">
       <el-tag v-for="status in citationStates(item,match.queryStart,match.queryEnd)" :key="status" :type="status==='CITED'?'success':'info'" size="small">{{citationLabels[status]}}</el-tag>
-      <div class="match-pair"><div><span class="muted">本稿片段 [{{ match.queryStart }}, {{ match.queryEnd }})</span><p><mark>{{ match.queryText }}</mark></p></div><div><span class="muted">来源片段 [{{ match.sourceStart }}, {{ match.sourceEnd }})</span><p><mark>{{ match.sourceText }}</mark></p></div></div>
+      <div class="match-pair"><div><span class="muted">本稿片段</span><p><mark>{{ match.queryText }}</mark></p></div><div><span class="muted">来源片段</span><p><mark>{{ match.sourceText }}</mark></p></div></div>
       <el-button v-if="allowLocate" size="small" @click="$emit('locate', match.queryStart, match.queryEnd)">定位正文</el-button>
     </div>
     <el-collapse v-if="item.semanticWindows.length">
@@ -45,6 +45,6 @@ const citationStates = (item: TextEvidenceItem, start: number, end: number) => A
     <el-collapse v-if="item.sourceKind === 'IMAGE_OCR' && item.sourceMetadata?.ocr && item.sourceMetadata.sourceFileId" v-model="expandedSources">
       <el-collapse-item :name="item.evidenceId" title="来源图片与OCR区域"><OcrEvidence v-if="expandedSources.includes(item.evidenceId)" :result="item.sourceMetadata.ocr" :file-id="item.sourceMetadata.sourceFileId" source /></el-collapse-item>
     </el-collapse>
-    <small class="muted evidence-id">证据 {{ item.evidenceId }}</small>
+    <details><summary>技术信息与证据编号</summary>    <p class="muted">来源{{ item.sourceWorkId }} / 修订{{ item.sourceRevisionId }} · {{ item.sourceKind === 'IMAGE_OCR' ? '来源图片OCR文字' : '来源正文' }} · TF-IDF {{ item.tfidfScore.toFixed(4) }}</p><small class="muted evidence-id">证据 {{ item.evidenceId }}</small></details>
   </section>
 </template>

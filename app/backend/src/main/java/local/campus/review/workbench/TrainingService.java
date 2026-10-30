@@ -125,25 +125,28 @@ public class TrainingService {
         options.put("modelId",id);
     }
     public JsonNode runs(CurrentUser user,int page,String q){return runs(user,page,q,null);}
-    public JsonNode runs(CurrentUser user,int page,String q,String modelId){
-        data.role(user);if(page<1 || q.length()>120)throw invalid("查询参数无效");
+    public JsonNode runs(CurrentUser user,int page,String q,String modelId){return runs(user,page,20,q,modelId);}
+    public JsonNode runs(CurrentUser user,int page,int size,String q,String modelId){
+        data.role(user);if(page<1 || size<1 || size>100 || q.length()>120)throw invalid("查询参数无效");
         String from=" FROM ml_run r JOIN ml_dataset d ON d.id=r.dataset_id WHERE r.action IN ('PREPARE','GENERATE','TRAIN','EVALUATE','PREDICT') AND d.name LIKE ?";
         var args=new ArrayList<Object>(List.of("%"+q+"%"));
         if(modelId!=null&&!modelId.isBlank()){
             var selected=model(user,modelId);from+=" AND (JSON_UNQUOTE(JSON_EXTRACT(r.options_json,'$.modelId'))=? OR r.id=?)";
             args.add(modelId);args.add(selected.get("run_id").toString());
         }
-        var result=data.json.createObjectNode().put("total",data.db.queryForObject("SELECT COUNT(*)"+from,Long.class,args.toArray()));
-        args.add((page-1L)*20);var items=result.putArray("items");
-        for(var row:data.db.queryForList("SELECT r.*,d.name AS dataset_name"+from+" ORDER BY r.created_at DESC,r.id LIMIT 20 OFFSET ?",args.toArray())){var item=(ObjectNode)data.runJson(row);item.put("datasetName",row.get("dataset_name").toString());item.set("checkpoint",TrainingCheckpoints.inspect(data,row));items.add(item);}
+        var result=data.json.createObjectNode().put("page",page).put("pageSize",size).put("total",data.db.queryForObject("SELECT COUNT(*)"+from,Long.class,args.toArray()));
+        args.add(size);args.add((page-1L)*size);var items=result.putArray("items");
+        for(var row:data.db.queryForList("SELECT r.*,d.name AS dataset_name"+from+" ORDER BY r.created_at DESC,r.id LIMIT ? OFFSET ?",args.toArray())){var item=(ObjectNode)data.runJson(row);item.put("datasetName",row.get("dataset_name").toString());item.set("checkpoint",TrainingCheckpoints.inspect(data,row));items.add(item);}
         return result;
     }
-    public JsonNode models(CurrentUser user,int page,String q,boolean archived){
-        data.role(user);if(page<1 || q.length()>120)throw invalid("查询参数无效");
+    public JsonNode models(CurrentUser user,int page,String q,boolean archived){return models(user,page,20,q,archived);}
+    public JsonNode models(CurrentUser user,int page,int size,String q,boolean archived){
+        data.role(user);if(page<1 || size<1 || size>100 || q.length()>120)throw invalid("查询参数无效");
         String from=" FROM ml_model m JOIN ml_dataset d ON d.id=m.dataset_id JOIN ml_run r ON r.id=m.run_id WHERE m.archived=? AND m.name LIKE ?";var args=new ArrayList<Object>(List.of(archived,"%"+q+"%"));
-        var result=data.json.createObjectNode().put("total",data.db.queryForObject("SELECT COUNT(*)"+from,Long.class,args.toArray()));args.add((page-1L)*20);var items=result.putArray("items");
-        for(var row:data.db.queryForList("SELECT m.*,d.name AS dataset_name,r.input_version_id"+from+" ORDER BY m.created_at DESC,m.id LIMIT 20 OFFSET ?",args.toArray()))items.add(modelJson(row));return result;
+        var result=data.json.createObjectNode().put("page",page).put("pageSize",size).put("total",data.db.queryForObject("SELECT COUNT(*)"+from,Long.class,args.toArray()));args.add(size);args.add((page-1L)*size);var items=result.putArray("items");
+        for(var row:data.db.queryForList("SELECT m.*,d.name AS dataset_name,r.input_version_id"+from+" ORDER BY m.created_at DESC,m.id LIMIT ? OFFSET ?",args.toArray()))items.add(modelJson(row));return result;
     }
+    public JsonNode getModel(CurrentUser user,String id){var row=model(user,id);row.put("input_version_id",data.db.queryForObject("SELECT input_version_id FROM ml_run WHERE id=?",String.class,row.get("run_id")));return modelJson(row);}
     ObjectNode modelJson(Map<String,Object> row){
         var result=data.json.createObjectNode().put("modelId",row.get("id").toString()).put("datasetId",row.get("dataset_id").toString()).put("runId",row.get("run_id").toString()).put("name",row.get("name").toString()).put("family",row.get("family").toString()).put("organizationId",row.get("organization_id").toString()).put("archived",Boolean.TRUE.equals(row.get("archived"))).put("createdAt",row.get("created_at").toString());
         if(row.get("dataset_name")!=null)result.put("datasetName",row.get("dataset_name").toString());
@@ -161,7 +164,7 @@ public class TrainingService {
     }
     public JsonNode samples(CurrentUser user,String id,String kind,int page,int size)throws Exception{
         if(page<1 || size<1 || size>100 || !Set.of("pairs","quarantine").contains(kind))throw invalid("样本分页参数无效");
-        Path file=artifact(user,id,kind+".jsonl");var result=data.json.createObjectNode().put("page",page);var items=result.putArray("items");
+        Path file=artifact(user,id,kind+".jsonl");var result=data.json.createObjectNode().put("page",page).put("pageSize",size);var items=result.putArray("items");
         long total=0;try(var reader=Files.newBufferedReader(file)){String line;long begin=(long)(page-1)*size;while((line=reader.readLine())!=null){if(total>=begin && items.size()<size)items.add(data.json.readTree(line));total++;}}
         result.put("total",total);return result;
     }

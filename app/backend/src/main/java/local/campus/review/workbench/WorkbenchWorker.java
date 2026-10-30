@@ -69,6 +69,8 @@ public class WorkbenchWorker {
         String kind=data.db.queryForObject("SELECT kind FROM ml_dataset WHERE id=?",String.class,datasetId);
         var logs=data.settings.runtime().resolve("workbench/logs");Files.createDirectories(logs);
         var config=data.json.createObjectNode();config.set("mapping",JsonSupport.parse(data.json,job.get("mapping_json").toString()));config.set("options",JsonSupport.parse(data.json,job.get("options_json").toString()));
+        // Workflow orchestration belongs to Java; the Python cleaner accepts only cleaning options.
+        ((com.fasterxml.jackson.databind.node.ObjectNode)config.path("options")).remove("auto_reference_import");
         config.put("internalVersion","CLEAN".equals(input.get("stage")));
         var configFile=logs.resolve(id+".json");Files.writeString(configFile,config.toString(),StandardOpenOption.CREATE_NEW);
         var args=new ArrayList<>(List.of(data.settings.python().toString(),"-B",data.settings.root().resolve("app/scripts/workbench.py").toString(),action.toLowerCase(Locale.ROOT),"--input",file.toString(),"--kind",kind,"--config-file",configFile.toString()));
@@ -106,6 +108,12 @@ public class WorkbenchWorker {
             if(Set.of("CLEAN","COMPOSE").contains(action))data.db.update("UPDATE ml_dataset_version SET status='READY',sha256=?,row_count=? WHERE id=?",finalResult.path("artifacts").path("corpus.jsonl").asText(),finalResult.path("outputRows").asLong(),job.get("output_version_id"));
             else data.db.update("UPDATE ml_dataset_version SET row_count=?,mapping_json=? WHERE id=?",finalResult.path("audit").path("totalRows").asLong(),job.get("mapping_json").toString(),input.get("id"));
             data.db.update("UPDATE ml_run SET status='COMPLETED',result_json=?,finished_at=UTC_TIMESTAMP(3) WHERE id=?",finalResult.toString(),id);
+            // A fresh clean version and its requested import commit together. Refreshing UI cannot enqueue a duplicate.
+            if("CLEAN".equals(action)&&JsonSupport.parse(data.json,job.get("options_json").toString()).path("auto_reference_import").asBoolean(false)){
+                var creator=data.db.queryForMap("SELECT role,enabled FROM app_user WHERE id=?",job.get("created_by"));
+                String importStatus="ADMIN".equals(creator.get("role"))&&Boolean.TRUE.equals(creator.get("enabled"))?"QUEUED":"PENDING_APPROVAL";
+                data.db.update("INSERT INTO reference_import(id,dataset_id,version_id,created_by,status,created_at) VALUES(?,?,?,?,?,UTC_TIMESTAMP(3))",DatasetService.uuid(),datasetId,job.get("output_version_id"),job.get("created_by"),importStatus);
+            }
             data.db.update("UPDATE ml_dataset SET updated_at=UTC_TIMESTAMP(3) WHERE id=?",datasetId);
             data.event(id,Map.of("stage","COMPLETED","action",action));
         });

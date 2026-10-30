@@ -109,7 +109,8 @@ it('keeps the current sample page when an earlier page returns late', async () =
   versionedFixture(page => page === 2 ? new Promise(resolve => { finishSecond = resolve }) : Promise.resolve({ total: 30, items: [{ title: `样本第${page}页`, text: '对应页面内容' }] }))
   const wrapper = mount(DatasetView, { global: { plugins: [ElementPlus], stubs: { DatasetCharts: true } } })
   await flushPromises()
-  const next = () => wrapper.findAll('button').filter(button => button.attributes('aria-label') === 'Go to next page').at(-1)!
+  await wrapper.findAll('[role="tab"]').find(tab => tab.text() === '样本预览')!.trigger('click'); await flushPromises()
+  const next = () => wrapper.find('#pane-samples').findAll('button').find(button => button.attributes('aria-label') === 'Go to next page')!
   await next().trigger('click'); await flushPromises()
   expect(finishSecond).toBeTruthy()
   await next().trigger('click'); await flushPromises()

@@ -73,6 +73,16 @@ public class InspectionService {
     }
     JsonNode response(Map<String,Object> row){var payload=JsonSupport.parse(json,row.get("payload_json").toString());var result=json.createObjectNode().put("checkId",row.get("id").toString()).put("kind",row.get("kind").toString()).put("status",row.get("status").toString()).put("inputHash",row.get("input_sha256").toString()).put("error",Objects.toString(row.get("error_message"),""));result.set("positionMap",payload.path("positionMap"));result.set("document",payload.path("document"));if(row.get("result_json")!=null)result.set("result",JsonSupport.parse(json,row.get("result_json").toString()));return result;}
     public JsonNode list(CurrentUser user,String manuscript,String version){access(user,manuscript,version!=null);String sql="SELECT * FROM document_check WHERE manuscript_id=?";var args=new ArrayList<Object>(List.of(manuscript));if(version!=null){sql+=" AND submission_version_id=?";args.add(version);}sql+=" ORDER BY created_at DESC LIMIT 30";var result=json.createArrayNode();for(var row:db.queryForList(sql,args.toArray()))result.add(response(row));return result;}
+    public JsonNode history(CurrentUser user,String manuscript,String version,int page,int size){
+        return history(user,manuscript,version,page,size,"");
+    }
+    public JsonNode history(CurrentUser user,String manuscript,String version,int page,int size,String panel){
+        access(user,manuscript,version!=null);if(page<1 || size<1 || size>100)throw new ApiException(400,"VALIDATION_ERROR","分页参数无效");
+        String from=" FROM document_check WHERE manuscript_id=?";var args=new ArrayList<Object>(List.of(manuscript));if(version!=null){from+=" AND submission_version_id=?";args.add(version);}
+        from+=switch(Objects.toString(panel,"")){case ""->"";case "content"->" AND kind='CONTENT'";case "grammar"->" AND kind IN ('GRAMMAR_RULES','GRAMMAR_MODEL')";case "image"->" AND kind='IMAGE_TEXT'";default->throw new ApiException(400,"VALIDATION_ERROR","检查类型无效");};
+        var result=json.createObjectNode().put("page",page).put("pageSize",size).put("total",db.queryForObject("SELECT COUNT(*)"+from,Long.class,args.toArray()));
+        args.add(size);args.add((page-1L)*size);var items=result.putArray("items");for(var row:db.queryForList("SELECT *"+from+" ORDER BY created_at DESC,id DESC LIMIT ? OFFSET ?",args.toArray()))items.add(response(row));return result;
+    }
     void event(String id,Object value){db.update("INSERT INTO document_check_event(check_id,payload_json,created_at) VALUES(?,?,UTC_TIMESTAMP(3))",id,JsonSupport.encode(json,value));}
     public JsonNode events(CurrentUser user,String id,long after){require(user,id);var result=json.createArrayNode();for(var row:db.queryForList("SELECT id,payload_json FROM document_check_event WHERE check_id=? AND id>? ORDER BY id LIMIT 500",id,Math.max(0,after)))result.addObject().put("sequence",((Number)row.get("id")).longValue()).set("data",JsonSupport.parse(json,row.get("payload_json").toString()));return result;}
     public JsonNode cancel(CurrentUser user,String id){require(user,id);db.update("UPDATE document_check SET status='CANCELLED',finished_at=UTC_TIMESTAMP(3) WHERE id=? AND status IN ('QUEUED','WAITING_SERVICE','WAITING_RESOURCE','RUNNING')",id);var process=processes.get(id);if(process!=null)stop(process);return get(user,id);}

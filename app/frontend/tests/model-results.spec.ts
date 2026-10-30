@@ -32,8 +32,8 @@ test('keeps comparison charts within one data split and paginates filtered compl
     const selects = results.findAllComponents({ name: 'ElSelect' })
     selects[1]!.vm.$emit('update:modelValue', 'FP'); selects[1]!.vm.$emit('change', 'FP'); await flushPromises()
     expect(api.predictions).toHaveBeenLastCalledWith('run', 1, 20, '', '', 'FP')
-    const pagination = results.findComponent({ name: 'ElPagination' })
-    pagination.vm.$emit('update:currentPage', 2); pagination.vm.$emit('current-change', 2); await flushPromises()
+    const pagination = results.findComponent({ name: 'RecordPagination' })
+    pagination.vm.$emit('update:currentPage', 2); pagination.vm.$emit('change'); await flushPromises()
     expect(api.predictions).toHaveBeenLastCalledWith('run', 2, 20, '', '', 'FP')
     expect(results.findComponent({ name: 'ElTable' }).props('data')[0].id).toBe('101')
   } finally { results.unmount() }

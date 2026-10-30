@@ -10,10 +10,10 @@ export interface ReferenceSnapshot extends DocumentInput { referenceId: string; 
 export interface PublicationSummary { manuscriptId: string; submissionId: string; title: string; organizationName: string; publishedAt: string }
 export interface Publication extends DocumentInput, PublicationSummary { reprintAllowed: boolean }
 export const referenceLabel: Record<string, string> = { QUEUED: '排队中', PROCESSING: '处理中', PREPARED: '等待索引切换', READY: '可用于比对', PARTIAL: '部分可用', FAILED: '处理失败', AVAILABLE: '可用', NOT_APPLICABLE: '不适用', PENDING_INDEX: '等待索引' }
-export const listReferences = (page: number, q: string) => request<ReferencePage>(`/api/references?${new URLSearchParams({ page: String(page), q })}`)
+export const listReferences = (page: number, q: string, pageSize = 20) => request<ReferencePage>(`/api/references?${new URLSearchParams({ page: String(page), pageSize: String(pageSize), q })}`)
 export const getReference = (id: string) => request<ReferenceSnapshot>(`/api/references/${id}`)
 export const createReference = (key: string, input: DocumentInput & { sourceMetadata: ReferenceMetadata }) => request<{ referenceId: string }>(`/api/references`, { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify(input) })
 export const setReferenceEnabled = (id: string, key: string, enabled: boolean) => request<{ requestedEnabled: boolean; effectiveEnabled: boolean; status: string }>(`/api/references/${id}/enabled`, { method: 'PATCH', headers: { 'Idempotency-Key': key }, body: JSON.stringify({ enabled }) })
 export const retryReference = (id: string, key: string, failedPartKeys: string[] = []) => request(`/api/references/${id}/retries`, { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify({ failedPartKeys }) })
-export const listPublications = (page: number, q: string) => request<Page<PublicationSummary>>(`/api/publications?${new URLSearchParams({ page: String(page), q })}`)
+export const listPublications = (page: number, q: string, pageSize = 20) => request<Page<PublicationSummary>>(`/api/publications?${new URLSearchParams({ page: String(page), pageSize: String(pageSize), q })}`)
 export const getPublication = (id: string) => request<Publication>(`/api/publications/${id}`)

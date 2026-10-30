@@ -12,7 +12,7 @@ export const qualityLabel: Record<string, string> = { EMPTY_LIBRARY: '当前参�
 export const qualityText = (flags: readonly string[]) => flags.map(flag => qualityLabel[flag] ?? '').filter(Boolean).join(' / ')
 export interface ReportItem { itemId: string; type: string; targetKey: string; status: string; activeAttemptId: string | null; activeAttempt: { attemptId: string; attemptNo: number; status: string; modelConfig: unknown; errorCode: string; errorMessage: string; result: RecognitionResult & { evidence?: Evidence[] } } | null; evidence: Evidence[]; qualityFlags: string[] }
 export interface Report extends Omit<Progress, 'items'> { submissionId: string; versionNo: number; libraryGenerationId: string | null; pipelineManifest: Record<string, unknown> | null; items: ReportItem[] }
-export const listReviews = (page: number, q: string, status: string) => request<Page<ReviewRow>>(`/api/reviews?${new URLSearchParams({ page: String(page), q, status })}`)
+export const listReviews = (page: number, q: string, status: string, pageSize = 20) => request<Page<ReviewRow>>(`/api/reviews?${new URLSearchParams({ page: String(page), pageSize: String(pageSize), q, status })}`)
 export const getFormalReport = (id: string) => request<Report>(`/api/detection-batches/${id}/report`)
 export const retryItem = (id: string, key: string, expectedAttemptId: string) => request(`/api/detection-items/${id}/retries`, { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify({ expectedAttemptId }) })
 export const decide = (id: string, key: string, decision: string, reason: string) => request(`/api/submissions/${id}/decision`, { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify({ decision, reason }) })

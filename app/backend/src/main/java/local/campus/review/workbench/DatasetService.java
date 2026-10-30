@@ -52,9 +52,22 @@ public class DatasetService {
     Path directory(String dataset,String version){identity(dataset);identity(version);return settings.runtime().resolve("workbench/datasets").resolve(dataset).resolve(version);}
     Path input(Map<String,Object> version){return directory(version.get("dataset_id").toString(),version.get("id").toString()).resolve("RAW".equals(version.get("stage"))?version.get("file_name").toString():"corpus.jsonl");}
     static String name(String value){if(value==null || value.isBlank() || value.length()>120)throw new ApiException(400,"VALIDATION_ERROR","数据集名称须为1—120字");return value.strip();}
-    public JsonNode upload(CurrentUser user,String organization,String name,String kind,MultipartFile file)throws Exception{
+    static String purpose(String kind,String value){
+        String selected=value==null?("PAIRS".equals(kind)?"TRAIN":"UNSET"):value;
+        if(!Set.of("UNSET","LIBRARY","TRAIN","BOTH").contains(selected)||"PAIRS".equals(kind)&&!Set.of("UNSET","TRAIN").contains(selected))throw new ApiException(400,"VALIDATION_ERROR","标签句对仅用于模型训练，请选择兼容的数据用途");
+        return selected;
+    }
+    static boolean autoImport(String kind,String usePurpose,JsonNode options){
+        if(options.has("auto_reference_import")&&!options.path("auto_reference_import").isBoolean())throw new ApiException(400,"VALIDATION_ERROR","入库选项无效");
+        boolean requested=options.path("auto_reference_import").asBoolean(false);
+        if(requested&&(!"NEWS".equals(kind)||!Set.of("LIBRARY","BOTH").contains(usePurpose)))throw new ApiException(400,"VALIDATION_ERROR","请先将新闻用途设置为历史新闻库或入库并训练");
+        return requested;
+    }
+    public JsonNode upload(CurrentUser user,String organization,String name,String kind,MultipartFile file)throws Exception{return upload(user,organization,name,kind,file,null);}
+    public JsonNode upload(CurrentUser user,String organization,String name,String kind,MultipartFile file,String usePurpose)throws Exception{
         organization(user,organization);String label=name(name);
         if(!Set.of("NEWS","PAIRS").contains(kind))throw new ApiException(400,"VALIDATION_ERROR","请选择原始新闻或标签句对");
+        String selectedPurpose=purpose(kind,usePurpose);
         if(file.isEmpty())throw new ApiException(400,"VALIDATION_ERROR","请选择数据文件");
         if(file.getSize()>UPLOAD_LIMIT)throw new ApiException(413,"UPLOAD_TOO_LARGE","数据文件不能超过50MiB");
         String filename=Objects.toString(file.getOriginalFilename(),"").toLowerCase(Locale.ROOT);
@@ -69,7 +82,7 @@ public class DatasetService {
         }catch(Exception error){Files.deleteIfExists(dir.resolve(stored));throw error;}
         String sha=HexFormat.of().formatHex(digest.digest());
         transactions.executeWithoutResult(tx->{
-            db.update("INSERT INTO ml_dataset(id,organization_id,name,kind,created_by,created_at,updated_at) VALUES(?,?,?,?,?,UTC_TIMESTAMP(3),UTC_TIMESTAMP(3))",dataset,organization,label,kind,user.userId());
+            db.update("INSERT INTO ml_dataset(id,organization_id,name,kind,purpose,created_by,created_at,updated_at) VALUES(?,?,?,?,?,?,UTC_TIMESTAMP(3),UTC_TIMESTAMP(3))",dataset,organization,label,kind,selectedPurpose,user.userId());
             db.update("INSERT INTO ml_dataset_version(id,dataset_id,stage,status,file_name,sha256,mapping_json,created_at) VALUES(?,?,'RAW','READY',?,?,'{}',UTC_TIMESTAMP(3))",version,dataset,stored,sha);
             insertRun(run,dataset,version,null,"AUDIT","{}","{}",user.userId());
         });
@@ -88,24 +101,37 @@ public class DatasetService {
         for(var row:db.queryForList("SELECT d.*,o.name AS organization_name"+from+" ORDER BY d.updated_at DESC,d.id LIMIT ? OFFSET ?",args.toArray()))items.add(summary(row));
         return result;
     }
-    JsonNode summary(Map<String,Object> row){return json.createObjectNode().put("datasetId",row.get("id").toString()).put("organizationId",row.get("organization_id").toString()).put("name",row.get("name").toString()).put("kind",row.get("kind").toString()).put("archived",Boolean.TRUE.equals(row.get("archived"))).put("updatedAt",row.get("updated_at").toString());}
+    JsonNode summary(Map<String,Object> row){return json.createObjectNode().put("datasetId",row.get("id").toString()).put("organizationId",row.get("organization_id").toString()).put("name",row.get("name").toString()).put("kind",row.get("kind").toString()).put("purpose",Objects.toString(row.get("purpose"),"UNSET")).put("archived",Boolean.TRUE.equals(row.get("archived"))).put("updatedAt",row.get("updated_at").toString());}
     public JsonNode get(CurrentUser user,String id){
         var row=dataset(user,id);var result=(com.fasterxml.jackson.databind.node.ObjectNode)summary(row);
         var versions=result.putArray("versions");for(var version:db.queryForList("SELECT v.*,p.file_name AS parent_file_name FROM ml_dataset_version v LEFT JOIN ml_dataset_version p ON p.id=v.parent_version_id WHERE v.dataset_id=? ORDER BY v.created_at DESC,v.id",id)){
             var item=versions.addObject().put("versionId",version.get("id").toString()).put("stage",version.get("stage").toString()).put("status",version.get("status").toString()).put("sha256",Objects.toString(version.get("sha256"),"")).put("createdAt",version.get("created_at").toString());
             if(version.get("row_count")==null)item.putNull("rowCount");else item.put("rowCount",((Number)version.get("row_count")).longValue());
+            if(version.get("parent_version_id")!=null)item.put("parentVersionId",version.get("parent_version_id").toString());
             if("sources.json".equals(version.get("file_name"))||"sources.json".equals(version.get("parent_file_name")))item.put("origin","COMPOSITION");
         }
-        var runs=result.putArray("runs");for(var task:db.queryForList("SELECT * FROM ml_run WHERE dataset_id=? ORDER BY created_at DESC,id LIMIT 50",id))runs.add(runJson(task));return result;
+        var runs=result.putArray("runs");for(var task:db.queryForList("SELECT * FROM ml_run WHERE dataset_id=? ORDER BY created_at DESC,id LIMIT 50",id))runs.add(runJson(task));
+        result.set("referenceImports",json.valueToTree(db.queryForList("SELECT id,version_id AS versionId,status,CAST(generation_id AS CHAR) AS generationId FROM reference_import WHERE dataset_id=? ORDER BY created_at DESC,id LIMIT 50",id)));
+        result.set("modelReleases",json.valueToTree(db.queryForList("SELECT r.id,t.input_version_id AS versionId,r.status,(p.release_id IS NOT NULL) AS active FROM model_release r JOIN ml_model m ON m.id=r.model_id JOIN ml_run t ON t.id=m.run_id LEFT JOIN model_release_pointer p ON p.release_id=r.id WHERE m.dataset_id=? ORDER BY r.created_at DESC LIMIT 50",id)));return result;
+    }
+    public JsonNode runs(CurrentUser user,String id,int page,int size){
+        dataset(user,id);if(page<1 || size<1 || size>100)throw new ApiException(400,"VALIDATION_ERROR","分页参数无效");
+        var result=json.createObjectNode().put("page",page).put("pageSize",size).put("total",db.queryForObject("SELECT COUNT(*) FROM ml_run WHERE dataset_id=?",Long.class,id));
+        var items=result.putArray("items");for(var row:db.queryForList("SELECT * FROM ml_run WHERE dataset_id=? ORDER BY created_at DESC,id LIMIT ? OFFSET ?",id,size,(page-1L)*size))items.add(runJson(row));return result;
     }
     public JsonNode update(CurrentUser user,String id,String name,Boolean archived){
-        dataset(user,id);if(name==null && archived==null)throw new ApiException(400,"VALIDATION_ERROR","请填写修改内容");
+        return update(user,id,name,archived,null);
+    }
+    public JsonNode update(CurrentUser user,String id,String name,Boolean archived,String usePurpose){
+        var current=dataset(user,id);if(name==null && archived==null && usePurpose==null)throw new ApiException(400,"VALIDATION_ERROR","请填写修改内容");
+        String selectedPurpose=usePurpose==null?null:purpose(current.get("kind").toString(),usePurpose);
         String updatedName=name==null?null:name(name);
         transactions.executeWithoutResult(tx->{
             db.queryForObject("SELECT archived FROM ml_dataset WHERE id=? FOR UPDATE",Boolean.class,id);
             if(Boolean.TRUE.equals(archived) && db.queryForObject("SELECT COUNT(*) FROM ml_run WHERE dataset_id=? AND status IN ('QUEUED','RUNNING')",Integer.class,id)>0)throw new ApiException(409,"TASK_ACTIVE","请先结束运行中的任务");
             if(updatedName!=null)db.update("UPDATE ml_dataset SET name=?,updated_at=UTC_TIMESTAMP(3) WHERE id=?",updatedName,id);
             if(archived!=null)db.update("UPDATE ml_dataset SET archived=?,updated_at=UTC_TIMESTAMP(3) WHERE id=?",archived,id);
+            if(selectedPurpose!=null)db.update("UPDATE ml_dataset SET purpose=?,updated_at=UTC_TIMESTAMP(3) WHERE id=?",selectedPurpose,id);
         });
         return get(user,id);
     }
@@ -116,6 +142,7 @@ public class DatasetService {
         if(action==null || !Set.of("AUDIT","CLEAN").contains(action))throw new ApiException(400,"VALIDATION_ERROR","请选择质量评估或数据清洗");
         if(mapping==null)mapping=json.createObjectNode();if(options==null)options=json.createObjectNode();
         if(!mapping.isObject() || !options.isObject() || mapping.toString().length()>10000 || options.toString().length()>10000)throw new ApiException(400,"VALIDATION_ERROR","映射或清洗参数无效");
+        if("CLEAN".equals(action))autoImport(dataset.get("kind").toString(),Objects.toString(dataset.get("purpose"),"UNSET"),options);
         String run=uuid(),output="CLEAN".equals(action)?uuid():null,mapped=mapping.toString(),settings=options.toString();
         transactions.executeWithoutResult(tx->{
             if(Boolean.TRUE.equals(db.queryForObject("SELECT archived FROM ml_dataset WHERE id=? FOR UPDATE",Boolean.class,id)))throw new ApiException(409,"DATASET_ARCHIVED","请先恢复数据集");

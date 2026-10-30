@@ -16,12 +16,13 @@ public class CitationService {
     private String visible(CurrentUser user){return user.role()==CurrentUser.Role.ADMIN || user.role()==CurrentUser.Role.REVIEWER?"1=1":"(w.origin_type='PUBLISHED' AND m.publication_state='PUBLISHED')";}
     private final String from=" FROM reference_revision r JOIN reference_work w ON w.id=r.reference_work_id LEFT JOIN manuscript m ON m.id=w.manuscript_id LEFT JOIN organization o ON o.id=m.organization_id WHERE w.enabled=true AND ";
     public JsonNode departments(){return json.valueToTree(db.queryForList("SELECT CAST(id AS CHAR) AS id,name FROM organization WHERE enabled=true ORDER BY id"));}
-    public JsonNode search(CurrentUser user,String q,String department,int page){
-        if(q.length()>200 || page<1 || department.length()>20 || (!department.isEmpty() && !department.matches("[1-9][0-9]{0,18}")))throw new ApiException(400,"VALIDATION_ERROR","来源搜索参数无效");
+    public JsonNode search(CurrentUser user,String q,String department,int page){return search(user,q,department,page,10);}
+    public JsonNode search(CurrentUser user,String q,String department,int page,int size){
+        if(q.length()>200 || page<1 || size<1 || size>100 || department.length()>20 || (!department.isEmpty() && !department.matches("[1-9][0-9]{0,18}")))throw new ApiException(400,"VALIDATION_ERROR","来源搜索参数无效");
         String sql=from+visible(user)+" AND r.revision_no=(SELECT MAX(x.revision_no) FROM reference_revision x WHERE x.reference_work_id=w.id) AND r.title LIKE ?";
         var args=new ArrayList<Object>(List.of("%"+q+"%"));if(!department.isEmpty()){sql+=" AND m.organization_id=?";args.add(department);}
-        var result=json.createObjectNode().put("total",db.queryForObject("SELECT COUNT(*)"+sql,Long.class,args.toArray()));var items=result.putArray("items");args.add((page-1L)*10);
-        for(var row:db.queryForList("SELECT r.id,r.reference_work_id,r.title,r.artifacts_json,r.content_json,o.name AS department"+sql+" ORDER BY r.created_at DESC,r.id DESC LIMIT 10 OFFSET ?",args.toArray())){
+        var result=json.createObjectNode().put("page",page).put("pageSize",size).put("total",db.queryForObject("SELECT COUNT(*)"+sql,Long.class,args.toArray()));var items=result.putArray("items");args.add(size);args.add((page-1L)*size);
+        for(var row:db.queryForList("SELECT r.id,r.reference_work_id,r.title,r.artifacts_json,r.content_json,o.name AS department"+sql+" ORDER BY r.created_at DESC,r.id DESC LIMIT ? OFFSET ?",args.toArray())){
             var item=items.addObject().put("workId",row.get("reference_work_id").toString()).put("revisionId",row.get("id").toString()).put("title",row.get("title").toString()).put("department",Objects.toString(row.get("department"),"参考材料"));
             String text=JsonSupport.parse(json,row.get("artifacts_json").toString()).path("plainText").asText();item.put("preview",text.substring(0,Math.min(300,text.length())));
         }return result;
