@@ -19,12 +19,31 @@ export function versionName(v: Version): string {
   return `${v.stage === 'CLEAN' ? '清洗' : '原始'}${date ? ' · ' + date : ''} · ${v.rowCount?.toLocaleString() ?? '待统计'}条 · ${v.versionId.slice(0, 8)}`
 }
 export interface JourneyStage { key: string; label: string; description: string; status: 'done' | 'active' | 'waiting' | 'error'; icon: string }
-export function workflowStages(detail: Detail, versionId: string): JourneyStage[] {
+export function workflowDestination(detail: Detail, versionId: string, step: string): { path: string; query: Record<string, string> } {
+  const version = detail.versions.find(v => v.versionId === versionId)
+  const rawId = version?.stage === 'CLEAN' ? version.parentVersionId : versionId
+  const clean = version?.stage === 'CLEAN' ? version : detail.versions.find(v => v.stage === 'CLEAN' && v.status === 'READY' && v.parentVersionId === rawId)
+  const query: Record<string, string> = { dataset: detail.datasetId, version: clean?.versionId || versionId }
+  const trained = detail.runs.find(r => r.action === 'TRAIN' && r.inputVersionId === clean?.versionId && r.status === 'COMPLETED')
+  if (step === 'library') {
+    const batch = detail.referenceImports?.find(r => r.versionId === clean?.versionId)
+    return { path: '/reference-imports', query: { ...query, ...(batch ? { batch: batch.id, tab: 'records' } : { tab: 'new' }) } }
+  }
+  if (step === 'train' || step === 'prepare') {
+    const run = detail.runs.find(r => (step === 'train' ? r.action === 'TRAIN' : ['PREPARE', 'GENERATE'].includes(r.action)) && r.inputVersionId === clean?.versionId)
+    return { path: '/training', query: { ...query, ...(run ? { run: run.runId } : { tab: 'new', step: step === 'prepare' ? '1' : '2' }) } }
+  }
+  if (step === 'evaluate') return { path: '/models', query: { ...query, ...(trained ? { model: trained.runId, tab: 'evaluation' } : {}) } }
+  if (step === 'publish') return { path: '/releases', query: { ...query, ...(trained ? { modelId: trained.runId, tab: 'new' } : {}) } }
+  return { path: '/datasets', query: { dataset: detail.datasetId, version: ['upload', 'audit'].includes(step) ? rawId || versionId : query.version! } }
+}
+export function workflowStages(detail: Detail, versionId: string, selectedModel?: string): JourneyStage[] {
   const version = detail.versions.find(v => v.versionId === versionId)
   const sourceId = version?.stage === 'CLEAN' ? version.parentVersionId : versionId
   const clean = version?.stage === 'CLEAN' && version.status === 'READY' ? version : detail.versions.find(v => v.stage === 'CLEAN' && v.status === 'READY' && v.parentVersionId === sourceId)
+  const modelId = selectedModel || detail.runs.find(r => r.action === 'TRAIN' && r.inputVersionId === clean?.versionId && r.status === 'COMPLETED')?.runId
   const status = (action: string, input: string | undefined): JourneyStage['status'] => {
-    const run = detail.runs.find(r => r.action === action && r.inputVersionId === input)
+    const run = detail.runs.find(r => r.action === action && r.inputVersionId === input && (action !== 'EVALUATE' || r.options?.modelId === modelId))
     return run?.status === 'COMPLETED' ? 'done' : ['QUEUED', 'RUNNING'].includes(run?.status || '') ? 'active' : ['FAILED', 'INTERRUPTED', 'CANCELLED'].includes(run?.status || '') ? 'error' : 'waiting'
   }
   const rows: JourneyStage[] = [

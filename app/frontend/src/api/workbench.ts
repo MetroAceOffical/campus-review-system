@@ -9,7 +9,7 @@ export interface Audit {
 export interface Dataset { datasetId: string; organizationId: string; name: string; kind: 'NEWS' | 'PAIRS'; archived: boolean; purpose?: 'UNSET' | 'LIBRARY' | 'TRAIN' | 'BOTH' }
 export interface Version { versionId: string; stage: 'RAW' | 'CLEAN'; status: string; sha256: string; rowCount: number | null; origin?: 'COMPOSITION'; createdAt?: string; parentVersionId?: string }
 export interface RunResult { audit?: Audit; columns?: string[]; mapping?: Record<string, string>; preview?: Array<Record<string, unknown>>; outputRows?: number; quarantineRows?: number; duplicateRows?: number }
-export interface Run { runId: string; datasetId: string; inputVersionId: string; outputVersionId: string; action: string; status: string; error: string; result?: RunResult; mapping?: Record<string, string>; createdAt?: string }
+export interface Run { runId: string; datasetId: string; inputVersionId: string; outputVersionId: string; action: string; status: string; error: string; result?: RunResult; options?: { modelId?: string }; mapping?: Record<string, string>; createdAt?: string }
 export interface Detail extends Dataset { versions: Version[]; runs: Run[]; referenceImports?: Array<{ id: string; versionId: string; status: string; generationId?: string }>; modelReleases?: Array<{id: string;versionId: string;status: string;active: boolean | number}> }
 export interface Progress { sequence: number; data: { stage: string; processed?: number; total?: number; retained?: number; quarantined?: number; duplicates?: number; message?: string } }
 export interface Cleaning { before: Audit; after: Audit; inputRows: number; outputRows: number; duplicateRows: number }

@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-30",
+  "scope": "Cross-page workflow context and evidence presentation",
+  "frontendFocusedChecksPassed": 11,
+  "frontendTypecheckAndBuild": "PASSED",
+  "mavenPackage": "PASSED_TESTS_SKIPPED",
+  "javaDeployment": "READY",
+  "reviewFindingsAddressed": 5,
+  "beforeDeploymentActiveJobs": {
+    "ml_run": 0,
+    "ml_pipeline": 0,
+    "document_check": 0,
+    "reference_import": 0
+  },
+  "browserBeforeDeployment": "Existing uploaded dataset and model routes audited in Edge",
+  "browserAfterDeployment": "CORE_NAVIGATION_AND_EXISTING_EVIDENCE_VERIFIED",
+  "freshUploadCompleted": false,
+  "trainingStartedByThisChange": false,
+  "formalGenerationResumed": false,
+  "thresholdsOrModelWeightsChanged": false,
+  "newDependencies": false,
+  "remaining": [
+    "Full fresh-upload to submission rehearsal",
+    "Other page interactions from the recording workflow"
+  ],
+  "verifiedNavigation": [
+    "completed BERT task",
+    "exact model evaluation and original split",
+    "refresh",
+    "return to exact data version",
+    "older CNN model identity",
+    "browser back",
+    "existing import result"
+  ],
+  "existingEvidenceObserved": {
+    "manuscriptId": "81",
+    "supportingPairs": 16,
+    "matchedQueryCharacters": 399,
+    "literalZerosPreserved": true,
+    "otherCandidatesCollapsed": 9,
+    "currentDraftEmpty": true,
+    "newCheckStarted": false
+  }
+}

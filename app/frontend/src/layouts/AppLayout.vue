@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import AppIcon from '../components/AppIcon.vue'
+import WorkflowNavigator from '../components/workbench/WorkflowNavigator.vue'
+import { contextualLink } from '../workflow-context'
 import { useRoute, useRouter, isNavigationFailure, NavigationFailureType } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import { session, logout, home } from '../session'
@@ -41,8 +43,8 @@ async function signOut() {
         <div class="theme-form"><label>显示模式</label><el-select v-model="theme.mode" @change="applyTheme(theme)"><el-option label="浅色" value="light" /><el-option label="深色" value="dark" /><el-option label="跟随系统" value="system" /></el-select><label>主题色</label><div class="theme-colors"><button v-for="color in ['#215dba', '#16704a', '#7955a3', '#a34131']" :key="color" :aria-label="`使用主题色 ${color}`" :style="{ background: color }" @click="theme.primary = color; applyTheme(theme)" /><input v-model="theme.primary" aria-label="自定义主题色" type="color" @input="applyTheme(theme)" /></div></div>
       </el-popover><span class="account-label">{{ session.user?.displayName }}<small>{{ roleName }}</small></span><el-button @click="signOut">退出</el-button>
     </div></header>
-    <div class="shell-body"><button v-if="navigationOpen" class="navigation-scrim" aria-label="关闭导航" @click="navigationOpen = false" /><aside class="sidebar" :class="{ 'navigation-open': navigationOpen }"><div class="organization-label"><span>当前工作空间</span><strong>{{ session.user?.organizations.map(o => o.name).join(' / ') || '南京传媒学院 · 全校' }}</strong></div><nav aria-label="主导航"><template v-for="(link,index) in links" :key="link.to"><span v-if="group(link.to) && (index === 0 || group(link.to) !== group(links[index-1]!.to))" class="nav-group">{{ group(link.to) }}</span><RouterLink :to="link.to" :active-class="link.to.includes('?panel=') ? 'workspace-route' : 'router-link-active'" :class="{ 'workspace-active': link.to === `${route.path}?panel=${String(route.query.panel || 'content')}` }"><AppIcon :name="icon(link.to)" /><span>{{ link.label }}</span></RouterLink></template></nav><div class="sidebar-foot">校园内容 · 有序流转</div></aside>
-      <main id="main-content" class="page-content" tabindex="-1"><div class="page-heading"><div><span class="page-eyebrow">{{ roleName }}工作台 / 南京传媒学院</span><h1>{{ route.meta.title }}</h1></div><span class="page-heading-mark" aria-hidden="true"><AppIcon :name="icon(route.path)" :size="28" /></span></div><RouterView :key="route.path" /></main>
+    <div class="shell-body"><button v-if="navigationOpen" class="navigation-scrim" aria-label="关闭导航" @click="navigationOpen = false" /><aside class="sidebar" :class="{ 'navigation-open': navigationOpen }"><div class="organization-label"><span>当前工作空间</span><strong>{{ session.user?.organizations.map(o => o.name).join(' / ') || '南京传媒学院 · 全校' }}</strong></div><nav aria-label="主导航"><template v-for="(link,index) in links" :key="link.to"><span v-if="group(link.to) && (index === 0 || group(link.to) !== group(links[index-1]!.to))" class="nav-group">{{ group(link.to) }}</span><RouterLink :to="contextualLink(link.to)" :active-class="link.to.includes('?panel=') ? 'workspace-route' : 'router-link-active'" :class="{ 'workspace-active': link.to === `${route.path}?panel=${String(route.query.panel || 'content')}` }"><AppIcon :name="icon(link.to)" /><span>{{ link.label }}</span></RouterLink></template></nav><div class="sidebar-foot">校园内容 · 有序流转</div></aside>
+      <main id="main-content" class="page-content" tabindex="-1"><div class="page-heading"><div><span class="page-eyebrow">{{ roleName }}工作台 / 南京传媒学院</span><h1>{{ route.meta.title }}</h1></div><span class="page-heading-mark" aria-hidden="true"><AppIcon :name="icon(route.path)" :size="28" /></span></div><WorkflowNavigator /><RouterView :key="route.path" /></main>
     </div>
   </div>
 </template>

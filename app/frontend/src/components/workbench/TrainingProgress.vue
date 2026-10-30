@@ -2,12 +2,15 @@
 import { computed } from 'vue'
 import { session } from '../../session'
 import type { ComputeEvent, ComputeRun } from '../../api/training'
-import { actionNames, stateNames, terminal } from '../../api/training'
+import { actionNames, stateNames, terminal, modelNames } from '../../api/training'
 import ExperimentChart from '../experiments/ExperimentChart.vue'
 const props = defineProps<{ run: ComputeRun; events: ComputeEvent[] }>()
 defineEmits<{ cancel: [] }>()
 const latest = computed(() => [...props.events].reverse().find(event => event.data.stage !== 'HEARTBEAT')?.data)
-const progress = computed(() => latest.value?.total ? Math.round((latest.value.processed ?? 0) / latest.value.total * 100) : null)
+const counts = computed(() => [...props.events].reverse().find(event => event.data.processed !== undefined && event.data.total !== undefined)?.data)
+const epoch = computed(() => [...props.events].reverse().find(event => event.data.epoch !== undefined && ['TRAINING','EPOCH'].includes(event.data.stage))?.data)
+
+const progress = computed(() => counts.value?.total ? Math.round((counts.value.processed ?? 0) / counts.value.total * 100) : null)
 const curve = computed(() => props.events.filter(e => e.data.loss !== undefined && e.data.stage === 'TRAINING'))
 const epochs = computed(() => props.events.filter(e => e.data.stage === 'EPOCH' || (e.data.trees !== undefined && e.data.validation)))
 const generation = computed(() => props.events.filter(e => e.data.accepted !== undefined))
@@ -20,8 +23,8 @@ const rate = computed(() => ({ ...base, xAxis: { type: 'category', data: curve.v
 const generationCurve = computed(() => ({ ...base, legend: { data: ['合格改写', '隔离段落'] }, xAxis: { type: 'category', data: generation.value.map(e => e.data.processed) }, yAxis: { type: 'value' }, series: [{ name: '合格改写', type: 'line', showSymbol: false, data: generation.value.map(e => e.data.accepted) }, { name: '隔离段落', type: 'line', showSymbol: false, data: generation.value.map(e => e.data.quarantined) }] }))
 </script>
 <template>
-  <section class="work-panel" aria-live="polite"><div class="work-heading"><div><h2>{{ run.options.name || actionNames[run.action] }}</h2><span class="muted">{{ actionNames[run.action] }} · {{ run.runId.slice(0, 8) }}</span></div><el-tag>{{ stateNames[run.status] || run.status }}</el-tag></div>
-    <div class="work-stats"><div><span>当前阶段</span><strong class="stage-value">{{ stateNames[latest?.stage || run.status] || latest?.stage }}</strong></div><div><span>已处理 / 总量</span><strong>{{ latest?.processed?.toLocaleString() ?? '—' }} <small>/ {{ latest?.total?.toLocaleString() ?? '—' }}</small></strong></div><div><span>轮数</span><strong>{{ latest?.epoch ?? '—' }} <small v-if="latest?.epochs">/ {{ latest.epochs }}</small></strong></div></div>
+  <section class="work-panel" aria-live="polite"><div class="work-heading"><div><h2>{{ run.options.name || actionNames[run.action] }}</h2><span class="muted">{{ actionNames[run.action] }}<template v-if="run.options.family"> · {{ modelNames[run.options.family] }}</template> · {{ run.runId.slice(0, 8) }}</span></div><el-tag>{{ stateNames[run.status] || run.status }}</el-tag></div>
+    <div class="work-stats"><div><span>当前阶段</span><strong class="stage-value">{{ stateNames[latest?.stage || run.status] || latest?.stage }}</strong></div><div><span>已处理 / 总量</span><strong>{{ counts?.processed?.toLocaleString() ?? '—' }} <small>/ {{ counts?.total?.toLocaleString() ?? '—' }}</small></strong></div><div><span>轮数</span><strong>{{ epoch?.epoch ?? '—' }} <small v-if="epoch?.epochs || run.options.parameters?.epochs">/ {{ epoch?.epochs ?? run.options.parameters?.epochs }}</small></strong></div></div>
     <el-progress v-if="progress !== null" :percentage="Math.min(100, progress)" />
     <p v-if="run.error" class="work-error" role="alert">{{ run.error }}</p><p v-if="latest?.message">{{ latest.message }}</p>
     <el-button v-if="!terminal(run.status) && (session.user?.role === 'ADMIN' || !['PREPARE','GENERATE','TRAIN'].includes(run.action))" @click="$emit('cancel')">取消任务</el-button>

@@ -18,5 +18,6 @@ export const imports=(page=1,pageSize=20)=>request<{items:ImportBatch[];total:nu
 export const createImport=(datasetId:string,versionId:string)=>request('/api/workbench/reference-imports',{method:'POST',body:JSON.stringify({datasetId,versionId})})
 export const importAction=(id:string,action:string)=>request(`/api/workbench/reference-imports/${id}/${action}`,{method:'POST'})
 export const importRows=(id:string,page=1,pageSize=20)=>request<{items:ImportRow[];total:number}>(`/api/workbench/reference-imports/${id}/rows?page=${page}&pageSize=${pageSize}`)
+export const importBatch=(id:string)=>request<ImportBatch>(`/api/workbench/reference-imports/${encodeURIComponent(id)}`)
 
 export const releaseHistory=(page=1,pageSize=20)=>request<{items:Releases['history'];total:number}>(`/api/workbench/releases/history?page=${page}&pageSize=${pageSize}`)

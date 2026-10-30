@@ -10,7 +10,8 @@ import DatasetCharts from '../components/workbench/DatasetCharts.vue'
 import AppIcon from '../components/AppIcon.vue'
 import DatasetJourney from '../components/workbench/DatasetJourney.vue'
 import { session } from '../session'
-import { purposeFor, versionName } from '../workbench-guidance'
+import { workflowContext } from '../workflow-context'
+import { purposeFor, versionName, workflowDestination } from '../workbench-guidance'
 import DatasetComposer from '../components/workbench/DatasetComposer.vue'
 import '../styles/workbench.css'
 const route = useRoute(), router = useRouter()
@@ -27,6 +28,7 @@ const samplePage = ref(1), sampleTotal = ref(0), samples = ref<Array<Record<stri
 const detailTab=ref('quality'), taskPage=ref(1),taskSize=ref(20),taskTotal=ref(0),taskRows=ref<Run[]>([])
 async function readTaskHistory(){if(!detail.value)return;const id=detail.value.datasetId;try{const result=await api.datasetRuns(id,taskPage.value,taskSize.value);if(detail.value?.datasetId===id){taskRows.value=result.items;taskTotal.value=result.total}}catch(value){message(value)}}
 watch(detailTab,tab=>{if(tab==='tasks')void readTaskHistory()})
+watch(detail, data => { if (data && workflowContext.dataset?.datasetId === data.datasetId) workflowContext.dataset = data })
 const composed = ref<api.Composition>()
 watch(() => form.kind, kind => { form.purpose = kind === 'PAIRS' ? 'TRAIN' : 'LIBRARY' })
 async function setPurpose(value: string) { if (!detail.value) return; detail.value = await api.update(detail.value.datasetId, { purpose: value }); await refreshList() }
@@ -128,6 +130,10 @@ async function cancelCurrent() { if (!currentRun.value || !detail.value) return;
 function download(name: string, text: string, mime: string) { const url = URL.createObjectURL(new Blob([text], { type: mime })), link = document.createElement('a'); link.href = url; link.download = name; link.click(); URL.revokeObjectURL(url) }
 function template() { download(`${form.kind.toLowerCase()}-template.csv`, '\uFEFF' + (form.kind === 'NEWS' ? 'id,title,text,department,url,published_at,source_institution\n' : 'sentence1,sentence2,label,source_id,group_id,label_origin\n'), 'text/csv;charset=utf-8') }
 let journeyTimer: ReturnType<typeof setInterval> | undefined
+watch(() => [route.query.dataset, route.query.version], () => {
+  const id = String(route.query.dataset || ''), version = String(route.query.version || '')
+  if (id && (detail.value?.datasetId !== id || inputVersion.value !== version)) void select(id, version || undefined)
+})
 onMounted(() => { void initialize(); journeyTimer=setInterval(async () => { if (!detail.value || active.value) return; const id=detail.value.datasetId, token=generation; try { const incoming=await api.dataset(id); if (alive && generation===token && detail.value?.datasetId===id) detail.value=incoming } catch { /* Existing report remains visible; explicit refresh surfaces errors. */ } },5000) }); onBeforeUnmount(() => { alive = false; generation++; stop(); if (journeyTimer) clearInterval(journeyTimer) })
 </script>
 
@@ -154,7 +160,7 @@ onMounted(() => { void initialize(); journeyTimer=setInterval(async () => { if (
     </section>
     <section v-if="detail" class="dataset-detail">
       <details v-if="composed"><summary>组合来源与处理数量</summary><el-table :data="composed.sources"><el-table-column prop="name" label="来源" /><el-table-column prop="inputRows" label="输入" /><el-table-column prop="retainedRows" label="保留" /><el-table-column prop="duplicateRows" label="重复" /><el-table-column prop="quarantineRows" label="隔离" /></el-table><a :href="api.downloadUrl(detail.datasetId, inputVersion, 'lineage.jsonl')">下载逐行来源映射</a></details>
-      <div class="section-heading"><div><h2>{{ detail.name }}</h2><span class="muted">{{ detail.kind === 'NEWS' ? '原始新闻' : '标签句对' }} · {{ detail.versions.length }}个版本</span></div><div><RouterLink v-if="admin && cleanVersion" :to="`/training?dataset=${detail.datasetId}&version=${cleanVersion.versionId}`">准备与训练</RouterLink><el-button @click="editName">重命名</el-button><el-button :disabled="!!active" @click="archive">{{ detail.archived ? '恢复' : '归档' }}</el-button></div></div>
+      <div class="section-heading"><div><h2>{{ detail.name }}</h2><span class="muted">{{ detail.kind === 'NEWS' ? '原始新闻' : '标签句对' }} · {{ detail.versions.length }}个版本</span></div><div><RouterLink v-if="cleanVersion && ['LIBRARY','BOTH'].includes(purposeFor(detail.kind,detail.purpose))" class="link-button" :to="workflowDestination(detail,inputVersion,'library')">查看入库结果</RouterLink><RouterLink v-if="admin && cleanVersion && ['TRAIN','BOTH'].includes(purposeFor(detail.kind,detail.purpose))" class="link-button" :to="workflowDestination(detail,inputVersion,'train')">准备与训练</RouterLink><el-button @click="editName">重命名</el-button><el-button :disabled="!!active" @click="archive">{{ detail.archived ? '恢复' : '归档' }}</el-button></div></div>
       <div class="purpose-selector"><label>这批数据用于</label><el-select :model-value="purposeFor(detail.kind,detail.purpose)" :disabled="detail.kind === 'PAIRS' || busy" @change="(value:string) => perform(() => setPurpose(value))"><el-option value="UNSET" label="请选择用途" disabled /><el-option value="LIBRARY" label="加入历史新闻库" /><el-option v-if="admin || detail?.purpose === 'TRAIN'" :disabled="!admin" value="TRAIN" label="训练模型" /><el-option v-if="admin || detail?.purpose === 'BOTH'" :disabled="!admin" value="BOTH" label="入库并训练模型" /></el-select></div><DatasetJourney v-if="!sourceList" :dataset="detail" :version-id="inputVersion" @clean="start('CLEAN')" />
       <div class="version-selector"><label for="dataset-version">查看与处理版本</label><select id="dataset-version" v-model="inputVersion" aria-label="输入版本" @change="changeVersion"><option v-for="version in detail.versions.filter(v => v.status === 'READY')" :key="version.versionId" :value="version.versionId">{{ version.origin === 'COMPOSITION' && version.stage === 'RAW' ? '组合来源清单 · ' : '' }}{{ versionName(version) }}</option></select></div>
       <div v-if="audit" class="dataset-stats"><div><span>总记录</span><el-statistic :value="audit.totalRows" /></div><div class="positive"><span>结构有效</span><el-statistic :value="audit.validRows" /></div><div class="attention"><span>待处理记录</span><el-statistic :value="audit.invalidRows" /></div><div><span>精确重复</span><el-statistic :value="audit.duplicateRows" /></div></div>

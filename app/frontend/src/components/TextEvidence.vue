@@ -1,50 +1,18 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { TextEvidenceItem } from '../api/review'
-import { ref } from 'vue'
-import OcrEvidence from './OcrEvidence.vue'
-defineProps<{ evidence: TextEvidenceItem[]; allowLocate?: boolean }>()
-defineEmits<{ locate: [start: number, end: number] }>()
-const expandedSources = ref<string[]>([])
-const citationLabels: Record<string,string> = { CITED:'已标注引用',SOURCE_MISMATCH:'来源不一致',UNCITED:'未标注来源',EXTERNAL_REVIEW:'站外来源待核验' }
-const citationStates = (item: TextEvidenceItem, start: number, end: number) => Array.from(new Set((item.citationChecks ?? []).filter(c=>c.queryStart<end&&c.queryEnd>start).map(c=>c.status)))
+import TextSourceEvidence from './TextSourceEvidence.vue'
+const props = defineProps<{ evidence: TextEvidenceItem[]; allowLocate?: boolean }>()
+const emit = defineEmits<{ locate: [start: number, end: number] }>()
+const important = (item: TextEvidenceItem) => item.fullyCited || item.acceptedCandidate || item.semanticSummary?.suspectedReuse
+const primary = computed(() => props.evidence.filter(important))
+const other = computed(() => props.evidence.filter(item => !important(item)))
 </script>
 <template>
-  <p class="muted">查看来源片段，点击定位可在正文中高亮。</p>
+  <p class="muted">核对投稿与来源片段，点击定位可查看正文位置。</p>
   <el-empty v-if="!evidence.length" description="当前参考范围没有可展示的候选证据" />
-  <section v-for="item in evidence" :key="item.evidenceId" class="evidence-card">
-    <div class="section-heading">
-      <strong>{{ item.sourceTitle }}</strong>
-      <el-tag :type="item.fullyCited ? 'success' : item.acceptedCandidate ? 'warning' : 'info'" effect="plain">{{ item.fullyCited ? '已标注引用' : item.acceptedCandidate ? '发现字面复用' : '相近来源' }}</el-tag>
-      <el-tag v-if="item.semanticSummary?.suspectedReuse && !item.fullyCited" type="warning">疑似语义复用</el-tag>
-    </div>
-
-    <a class="source-external" v-if="item.sourceUrl" :href="item.sourceUrl" target="_blank" rel="noopener noreferrer">查看原始来源 ↗</a>
-    <p v-else-if="item.sourceMetadata?.description">{{ item.sourceMetadata.description }}</p>
-    <div class="evidence-metrics"><div><span>字面重复字符</span><strong>{{ item.literalSummary.matched_characters }}</strong></div><div><span>本稿字面覆盖</span><strong>{{ (item.literalSummary.query_character_coverage * 100).toFixed(1) }}%</strong></div><div><span>最长重复片段</span><strong>{{ item.literalSummary.longest_match }}<small> 字</small></strong></div></div>
-    <p v-if="item.semanticSummary?.queryCoverage !== undefined" class="muted">语义证据覆盖：本稿 <strong>{{ (item.semanticSummary.queryCoverage * 100).toFixed(1) }}%</strong> · 来源 <strong>{{ ((item.semanticSummary.sourceCoverage ?? 0) * 100).toFixed(1) }}%</strong></p>
-    <p v-if="item.semanticSummary?.status === 'EVALUATED'" :class="{ unsaved: item.semanticSummary.suspectedReuse && !item.fullyCited }">
-      {{ item.fullyCited ? '对应片段已标注站内引用。' : item.semanticSummary.suspectedReuse ? '发现多处语义相近片段。' : '语义比对已完成。' }}
-      支持片段{{ item.semanticSummary.supportingPairs }}组，涉及本稿{{ item.semanticSummary.matchedQueryCharacters }}个字符。
-    </p>
-    <div v-for="(match, index) in item.matches" :key="`${item.evidenceId}-${index}`" class="match-block">
-      <el-tag v-for="status in citationStates(item,match.queryStart,match.queryEnd)" :key="status" :type="status==='CITED'?'success':'info'" size="small">{{citationLabels[status]}}</el-tag>
-      <div class="match-pair"><div><span class="muted">本稿片段</span><p><mark>{{ match.queryText }}</mark></p></div><div><span class="muted">来源片段</span><p><mark>{{ match.sourceText }}</mark></p></div></div>
-      <el-button v-if="allowLocate" size="small" @click="$emit('locate', match.queryStart, match.queryEnd)">定位正文</el-button>
-    </div>
-    <el-collapse v-if="item.semanticWindows.length">
-      <el-collapse-item :title="item.semanticSummary ? '句子对齐语义证据' : 'BERT部分窗口语义辅助'">
-        <p v-if="item.semanticSummary" class="muted">按语义分数展示前{{ Math.min(6, item.semanticWindows.length) }}组片段。</p>
-        <div v-for="(window, index) in item.semanticWindows.slice(0, 6)" :key="index" class="semantic-window">
-          <el-tag v-for="status in citationStates(item,window.queryStart,window.queryEnd)" :key="status" :type="status==='CITED'?'success':'info'" size="small">{{citationLabels[status]}}</el-tag>
-          <p>{{ window.scoreType === 'CONTENT_CORRESPONDENCE_SCORE' ? 'M3对应分数' : 'BERT分数' }} {{ window.score.toFixed(4) }}</p>
-          <div class="match-pair"><p>{{ window.queryText }}</p><p>{{ window.sourceText }}</p></div>
-          <el-button v-if="allowLocate" size="small" @click="$emit('locate', window.queryStart, window.queryEnd)">定位语义片段</el-button>
-        </div>
-      </el-collapse-item>
-    </el-collapse>
-    <el-collapse v-if="item.sourceKind === 'IMAGE_OCR' && item.sourceMetadata?.ocr && item.sourceMetadata.sourceFileId" v-model="expandedSources">
-      <el-collapse-item :name="item.evidenceId" title="来源图片与OCR区域"><OcrEvidence v-if="expandedSources.includes(item.evidenceId)" :result="item.sourceMetadata.ocr" :file-id="item.sourceMetadata.sourceFileId" source /></el-collapse-item>
-    </el-collapse>
-    <details><summary>技术信息与证据编号</summary>    <p class="muted">来源{{ item.sourceWorkId }} / 修订{{ item.sourceRevisionId }} · {{ item.sourceKind === 'IMAGE_OCR' ? '来源图片OCR文字' : '来源正文' }} · TF-IDF {{ item.tfidfScore.toFixed(4) }}</p><small class="muted evidence-id">证据 {{ item.evidenceId }}</small></details>
-  </section>
+  <div v-if="primary.length" data-testid="primary-text-evidence"><TextSourceEvidence v-for="item in primary" :key="item.evidenceId" :item="item" :allow-locate="allowLocate" @locate="(start,end) => emit('locate',start,end)" /></div>
+  <p v-else-if="evidence.length" class="muted">本次比对没有触发文字复用提示。</p>
+  <details v-if="other.length" data-testid="other-text-candidates" class="other-text-candidates"><summary>其他检索候选 · {{ other.length }}个来源</summary><TextSourceEvidence v-for="item in other" :key="item.evidenceId" :item="item" :allow-locate="allowLocate" @locate="(start,end) => emit('locate',start,end)" /></details>
 </template>
+<style scoped>.other-text-candidates{border:1px solid var(--line);padding:16px;margin-top:18px}.other-text-candidates>summary{cursor:pointer;font-weight:600}</style>
