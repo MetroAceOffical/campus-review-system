@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-30",
+  "purpose": "期末作业二次答辩视频材料",
+  "localFolder": "runtime/manual-demo/期末二次答辩材料-20261030",
+  "localArchive": "runtime/manual-demo/期末二次答辩材料-20261030.zip",
+  "groups": [
+    {"name": "教学科研", "uniqueNews": 8, "newsUploadRows": 9, "duplicateRows": 1, "pairs": 48, "trainRows": 24, "validationRows": 12, "testRows": 12, "rewriteSourceId": "DEMO1-01", "matchingSourceFound": true, "literalHint": false, "semanticHint": true, "pairedCharacters": 363},
+    {"name": "校园服务", "uniqueNews": 8, "newsUploadRows": 9, "duplicateRows": 1, "pairs": 48, "trainRows": 24, "validationRows": 12, "testRows": 12, "rewriteSourceId": "DEMO2-01", "matchingSourceFound": true, "literalHint": false, "semanticHint": true, "pairedCharacters": 323},
+    {"name": "艺术实践", "uniqueNews": 8, "newsUploadRows": 9, "duplicateRows": 1, "pairs": 48, "trainRows": 24, "validationRows": 12, "testRows": 12, "rewriteSourceId": "DEMO3-01", "matchingSourceFound": true, "literalHint": false, "semanticHint": true, "pairedCharacters": 192}
+  ],
+  "sourceDomain": "existing campus-quality-20261028-v1 train partition only; 南京传媒学院 public news; 24 distinct sources",
+  "pairExamples": "AI paraphrases, exact copies and different-event negatives; negative partners stay inside the same demonstration partition",
+  "rewriteIsolation": "full demonstration rewrites are not training rows; each rewrite's source stays in demonstration test partition and reference-news file",
+  "verification": "existing production dataset parser, cleaner and sample preparation all passed; actual current text detector called against separate unactivated eight-news indexes",
+  "textConfigId": "text-1e6f8490873eb23b8d80ee99b9ea09e039c94fb7ca48c687f854ba3cdce149e1",
+  "modelTrainingStarted": false,
+  "webDataUploaded": false,
+  "productionReferenceLibraryChanged": false,
+  "formalGeneration": "PAUSED_BY_USER",
+  "localFullTextAndImagesUploadedToGitHub": false
+}
