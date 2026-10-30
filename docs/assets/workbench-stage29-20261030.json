@@ -19,5 +19,9 @@
   "newTrainingRuns": 0,
   "newDependencies": 0,
   "modelWeightsChanged": false,
-  "gitHub": "Pending receipt verification"
+  "gitHub": {
+    "verifiedCommit": "418d9bc76e52dc454446e873c5caca6d16bd8fe7",
+    "exactBlobReadbacks": 73,
+    "branchHeadVerified": true
+  }
 }
