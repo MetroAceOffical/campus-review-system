@@ -1,0 +1,21 @@
+{
+  "runId": "570e8ccf-d21b-4405-b7d9-6cc49dc8f8ea",
+  "flowId": "0a7c3463-9731-4b4b-ad95-b8bce970f11e",
+  "family": "bert",
+  "trainingMode": "CONTINUE",
+  "epochs": 3,
+  "trainRows": 24,
+  "validationRows": 12,
+  "warmstart": {
+    "parentManifestSha256": "4a24c5a2b691ef223a469bcea939808f6fc08153267116d9c4b2235244508ec0",
+    "initialInheritedMaxDifference": 0.0,
+    "addedTokens": 0,
+    "trainedInheritedMaxDifference": 2.09808349609375e-05
+  },
+  "reloadMaxDifference": 0.0,
+  "modelRow": "570e8ccf-d21b-4405-b7d9-6cc49dc8f8ea\t6ab244e5-824d-41e9-9863-70c9ad34731b\t6ab244e5-824d-41e9-9863-70c9ad34731b\t2",
+  "migrations": "010_workbench_flow.sql\n011_model_lineage.sql",
+  "wholeNewsBertIntegrationComplete": false,
+  "formalGenerationResumed": false,
+  "evaluation": "79e00651-e728-4715-a066-47719fd3fbfc\tCOMPLETED\t{\"f1\": 1.0, \"pr\": [[1.0, 0.5], [1.0, 0.5454545454545454], [1.0, 0.6], [1.0, 0.6666666666666666], [1.0, 0.75], [1.0, 0.8571428571428571], [1.0, 1.0], [0.8333333333333334, 1.0], [0.6666666666666666, 1.0], [0.5, 1.0], [0.3333333333333333, 1.0], [0.16666666666666666, 1.0], [0.0, 1.0]], \"roc\": [[0.0, 0.0], [0.0, 0.16666666666666666], [0.0, 1.0], [1.0, 1.0]], \"rows\": 12, \"recall\": 1.0, \"roc_auc\": 1.0, \"accuracy\": 1.0, \"macro_f1\": 1.0, \"precision\": 1.0, \"scoreType\": \"probability\", \"threshold\": 0.5, \"confusionMatrix\": [[6, 0], [0, 6]], \"average_precision\": 1.0}"
+}

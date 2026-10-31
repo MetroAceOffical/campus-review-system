@@ -46,7 +46,9 @@ public class TrainingService {
         if(!Set.of("PREPARE","GENERATE").contains(run.get("action")) || !"COMPLETED".equals(run.get("status")) || !dataset.equals(run.get("dataset_id")))throw invalid("请选择当前数据集已完成的样本划分");
         return run;
     }
-    public record Start(String datasetId,String versionId,String action,String preparationId,String modelId,String family,String name,JsonNode parameters,JsonNode rows,String resumeRunId){}
+    public record Start(String datasetId,String versionId,String action,String preparationId,String modelId,String family,String name,JsonNode parameters,JsonNode rows,String resumeRunId,String parentModelId){
+        public Start(String datasetId,String versionId,String action,String preparationId,String modelId,String family,String name,JsonNode parameters,JsonNode rows,String resumeRunId){this(datasetId,versionId,action,preparationId,modelId,family,name,parameters,rows,resumeRunId,null);}
+    }
     static void requireTrainingAccess(CurrentUser user,String action){if(action!=null&&TRAINING_ACTIONS.contains(action))AccessPolicy.requireAdmin(user);}
     public JsonNode start(CurrentUser user,Start request){
         data.role(user);requireTrainingAccess(user,request.action());
@@ -95,11 +97,23 @@ public class TrainingService {
                 if(request.action().equals("TRAIN")){
                     if(request.family()==null)throw invalid("请选择模型");
                     options.put("family",request.family());options.set("parameters",parameters(request.family(),request.parameters()));
+                    if(request.parentModelId()!=null){
+                        if(request.resumeRunId()!=null)throw invalid("断点恢复与继续训练须分别选择");
+                        var parent=model(user,request.parentModelId());
+                        if(Boolean.TRUE.equals(parent.get("archived"))||!request.family().equals(parent.get("family"))||!dataset.get("organization_id").toString().equals(parent.get("organization_id").toString()))throw invalid("起始模型与算法或部门不匹配");
+                        var parentRun=data.runRow(user,parent.get("run_id").toString());
+                        if(!"COMPLETED".equals(parentRun.get("status")))throw invalid("请选择已完成模型");
+                        var parentOptions=JsonSupport.parse(data.json,parentRun.get("options_json").toString());
+                        options.put("parentModelId",request.parentModelId()).put("parentPreparationId",parentOptions.path("preparationId").asText());
+                        options.put("parentManifestSha256",modelManifestHash(parent.get("run_id").toString()));
+                        options.put("trainingMode",Set.of("cnn","bilstm","bert").contains(request.family())?"CONTINUE":"REFIT");
+                    }
                     if(request.resumeRunId()!=null){
                         var previous=data.runRow(user,request.resumeRunId());var saved=JsonSupport.parse(data.json,previous.get("options_json").toString());
                         if(!request.datasetId().equals(previous.get("dataset_id"))||!request.versionId().equals(previous.get("input_version_id"))||!saved.path("family").equals(options.path("family"))||!saved.path("parameters").equals(options.path("parameters"))||!saved.path("preparationId").asText().equals(request.preparationId()))throw invalid("续训须使用原数据、划分、模型及参数");
                         var checkpoint=TrainingCheckpoints.inspect(data,previous);if(!checkpoint.path("available").asBoolean())throw invalid("该运行没有可核验的续训检查点，请复制参数新建训练");
                         options.put("resumeRunId",request.resumeRunId()).put("resumeMetadataSha256",checkpoint.path("metadataSha256").asText());
+                        for(String key:List.of("parentModelId","parentPreparationId","parentManifestSha256","trainingMode"))if(saved.has(key))options.set(key,saved.get(key));
                     }
                 }else bindModel(user,request.modelId(),dataset,options);
             }
@@ -122,6 +136,7 @@ public class TrainingService {
             data.insertRun(id,request.datasetId(),request.versionId(),null,request.action(),"{}",options.toString(),user.userId());
         });return data.json.createObjectNode().put("runId",id);
     }
+    String modelManifestHash(String run){try{return ReleaseService.sha(directory(run).resolve("output/manifest.json"));}catch(Exception e){throw invalid("起始模型工件不可读取");}}
     void bindModel(CurrentUser user,String id,Map<String,Object> dataset,ObjectNode options){
         var model=model(user,id);
         if(Boolean.TRUE.equals(model.get("archived")))throw invalid("请先恢复模型");
@@ -150,11 +165,24 @@ public class TrainingService {
         var result=data.json.createObjectNode().put("page",page).put("pageSize",size).put("total",data.db.queryForObject("SELECT COUNT(*)"+from,Long.class,args.toArray()));args.add(size);args.add((page-1L)*size);var items=result.putArray("items");
         for(var row:data.db.queryForList("SELECT m.*,d.name AS dataset_name,r.input_version_id"+from+" ORDER BY m.created_at DESC,m.id LIMIT ? OFFSET ?",args.toArray()))items.add(modelJson(row));return result;
     }
+    public JsonNode modelGroups(CurrentUser user,int page,int size,String q,boolean archived){
+        data.role(user);if(page<1||size<1||size>100||q.length()>120)throw invalid("查询参数无效");
+        String from=" FROM ml_model m JOIN ml_model root ON root.id=m.logical_model_id JOIN ml_dataset d ON d.id=m.dataset_id JOIN ml_run r ON r.id=m.run_id WHERE m.archived=? AND (m.name LIKE ? OR root.name LIKE ?) AND m.version_number=(SELECT MAX(x.version_number) FROM ml_model x WHERE x.logical_model_id=m.logical_model_id AND x.archived=?)";
+        var result=data.json.createObjectNode().put("total",data.db.queryForObject("SELECT COUNT(*)"+from,Long.class,archived,"%"+q+"%","%"+q+"%",archived));
+        var items=result.putArray("items");for(var row:data.db.queryForList("SELECT m.*,root.name AS logical_name,d.name AS dataset_name,r.input_version_id,(SELECT COUNT(*) FROM ml_model v WHERE v.logical_model_id=m.logical_model_id) AS version_count"+from+" ORDER BY m.created_at DESC,m.id LIMIT ? OFFSET ?",archived,"%"+q+"%","%"+q+"%",archived,size,(page-1L)*size))items.add(modelJson(row).put("logicalName",row.get("logical_name").toString()).put("versionCount",((Number)row.get("version_count")).intValue()));return result;
+    }
+    public JsonNode modelVersions(CurrentUser user,String id,int page,int size){
+        var selected=model(user,id);if(page<1||size<1||size>100)throw invalid("分页无效");String logical=selected.get("logical_model_id").toString();
+        var result=data.json.createObjectNode().put("total",data.db.queryForObject("SELECT COUNT(*) FROM ml_model WHERE logical_model_id=?",Long.class,logical));var items=result.putArray("items");
+        for(var row:data.db.queryForList("SELECT m.*,r.input_version_id FROM ml_model m JOIN ml_run r ON r.id=m.run_id WHERE m.logical_model_id=? ORDER BY m.version_number DESC LIMIT ? OFFSET ?",logical,size,(page-1L)*size))items.add(modelJson(row));return result;
+    }
     public JsonNode getModel(CurrentUser user,String id){var row=model(user,id);row.put("input_version_id",data.db.queryForObject("SELECT input_version_id FROM ml_run WHERE id=?",String.class,row.get("run_id")));return modelJson(row);}
     ObjectNode modelJson(Map<String,Object> row){
         var result=data.json.createObjectNode().put("modelId",row.get("id").toString()).put("datasetId",row.get("dataset_id").toString()).put("runId",row.get("run_id").toString()).put("name",row.get("name").toString()).put("family",row.get("family").toString()).put("organizationId",row.get("organization_id").toString()).put("archived",Boolean.TRUE.equals(row.get("archived"))).put("createdAt",row.get("created_at").toString());
         if(row.get("dataset_name")!=null)result.put("datasetName",row.get("dataset_name").toString());
         if(row.get("input_version_id")!=null)result.put("inputVersionId",row.get("input_version_id").toString());
+        result.put("logicalModelId",Objects.toString(row.get("logical_model_id"),row.get("id").toString())).put("versionNumber",row.get("version_number")==null?1:((Number)row.get("version_number")).intValue());
+        if(row.get("parent_model_id")!=null)result.put("parentModelId",row.get("parent_model_id").toString());
         result.set("manifest",JsonSupport.parse(data.json,row.get("manifest_json").toString()));return result;
     }
     public JsonNode updateModel(CurrentUser user,String id,String name,Boolean archived){

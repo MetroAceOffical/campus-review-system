@@ -35,39 +35,66 @@ def checkpoint_metadata(folder,expected_sha=None):
     best=meta.get('bestSha256')
     if best and (not isinstance(meta.get('bestFile'),str) or not __import__('re').fullmatch(r'best-epoch-[0-9]{4}\.pt',meta['bestFile'])):raise ValueError('最佳模型文件名无效')
     if best and sha(folder/meta['bestFile'])!=best:raise ValueError('续训最佳模型校验失败')
+    allowed={'vocab.json','protected-identities.json','lineage-training-identities.json','bert/tokenizer.json','bert/tokenizer_config.json','bert/special_tokens_map.json','bert/vocab.txt'}
+    for name,digest in meta.get('encoderFiles',{}).items():
+        if name not in allowed or sha(folder/name)!=digest:raise ValueError('续训编码器或隔离记录校验失败')
     return meta
 
 
-def train(folder,output,family,values,emit,resume=None):
+def train(folder,output,family,values,emit,resume=None,warmstart=None):
     if family not in ('cnn','bilstm','bert'):raise ValueError('仅神经模型支持检查点续训')
+    if resume and warmstart:raise ValueError('断点恢复与已完成模型继续训练须分别选择')
+    from . import training_warmstart as warm
+    info=warm.check_parent(warmstart,folder,family) if warmstart else None
     cfg=base.parameters(family,values);bound=identity(folder,family,cfg);source=None;meta=None
+    bound['code'][str(Path(warm.__file__).relative_to(base.ROOT))]=sha(warm.__file__)
+    if warmstart:bound['parentModelSha256']=warmstart['manifestSha256']
+
     if resume:
         source=Path(resume['folder']).resolve();meta=checkpoint_metadata(source,resume['metadataSha256'])
+        if meta.get('identity',{}).get('parentModelSha256'):bound['parentModelSha256']=meta['identity']['parentModelSha256']
         if meta.get('identity')!=bound:raise ValueError('数据、参数、代码或环境不同，请新建实验')
-    runner=lambda old,rows,dev,target,kind,parameters,notify:neural_train(old,rows,dev,target,kind,parameters,notify,bound,source,meta)
+    runner=lambda old,rows,dev,target,kind,parameters,notify:neural_train(old,rows,dev,target,kind,parameters,notify,bound,source,meta,warmstart,info)
     # One isolated CLI process owns this temporary replacement; formal jobs use
     # their unchanged module/function and are never hot patched in another process.
     with patch.object(base,'neural_train',runner):result=base.train(folder,output,family,values,emit)
+    if (Path(output)/'warmstart.json').is_file():result['warmstart']=json.loads((Path(output)/'warmstart.json').read_text(encoding='utf-8'))
     result['dependencies'][str(Path(__file__).relative_to(base.ROOT))]=sha(Path(__file__))
+    result['dependencies'][str(Path(warm.__file__).relative_to(base.ROOT))]=sha(warm.__file__)
+    if result.get('warmstart'):result['trainingMode']='CONTINUE'
+    if source:
+        for name in ['protected-identities.json','lineage-training-identities.json']:
+            if (source/name).is_file():shutil.copyfile(source/name,Path(output)/name)
+    if warmstart:
+        warm.save_lineage(output,info)
+        result['trainingMode']='CONTINUE'
+        result['artifacts'].update({name:sha(Path(output)/name) for name in ['protected-identities.json','lineage-training-identities.json']})
     result['resumedFromMetadataSha256']=resume['metadataSha256'] if resume else None
+    result['artifacts'].update({name:sha(Path(output)/name) for name in ['protected-identities.json','lineage-training-identities.json'] if (Path(output)/name).is_file()})
     write_json(Path(output)/'manifest.json',result)
     return result
 
 
-def neural_train(old,rows,dev,output,family,cfg,emit,bound,source=None,source_meta=None):
+def neural_train(old,rows,dev,output,family,cfg,emit,bound,source=None,source_meta=None,warmstart=None,warm_info=None):
     import numpy as np
     import torch
     from torch import nn
     vocab=old.make_vocab(rows) if family!='bert' else None;tokenizer=None
-    if family=='bert':
+    inherited=None;warm_evidence=None
+    if warmstart:
+        from .training_warmstart import initialize
+        model,vocab,tokenizer,inherited,warm_evidence=initialize(old,rows,family,cfg,output,warmstart,warm_info)
+        emit({'stage':'WARM_STARTED',**warm_evidence})
+    elif family=='bert':
         from transformers import AutoModelForSequenceClassification,AutoTokenizer
         model_source=base.ROOT/'validation/text/models/bert-base-chinese'
         sources=json.loads((base.ROOT/'validation/text/evidence/bert-source-manifest.json').read_text(encoding='utf-8'))
         if any(sha(model_source/item['file'])!=item['sha256'] for item in sources):raise ValueError('BERT基础权重校验失败')
-        tokenizer=AutoTokenizer.from_pretrained(model_source,local_files_only=True)
+        tokenizer=AutoTokenizer.from_pretrained(source/'bert' if source and (source/'bert/tokenizer.json').is_file() else model_source,local_files_only=True)
         model=AutoModelForSequenceClassification.from_pretrained(model_source,num_labels=2,local_files_only=True)
         tokenizer.save_pretrained(output/'bert')
     else:
+        if source and (source/'vocab.json').is_file():vocab=json.loads((source/'vocab.json').read_text(encoding='utf-8'))
         model=old.SentencePairNet(family,len(vocab)+2,cfg['width']);model.head[2]=nn.Dropout(cfg['dropout']);write_json(output/'vocab.json',vocab)
     model.to(cfg['device']);data=base.encode(rows,family,cfg,vocab,tokenizer)
     labels=torch.tensor([int(row['label']) for row in rows],device=cfg['device'])
@@ -88,6 +115,9 @@ def neural_train(old,rows,dev,output,family,cfg,emit,bound,source=None,source_me
         if cfg['device']=='cuda':torch.cuda.set_rng_state_all([value.cpu() for value in checkpoint['cudaRng']])
         if source_meta.get('bestSha256'):
             shutil.copyfile(source/source_meta['bestFile'],output/source_meta['bestFile']);shutil.copyfile(output/source_meta['bestFile'],output/'best.pt')
+        for name in ['protected-identities.json','lineage-training-identities.json']:
+            if (source/name).is_file():shutil.copyfile(source/name,output/name)
+        warm_evidence=source_meta.get('warmstart')
         emit({'stage':'RESUMED','epoch':epoch,'step':cursor//cfg['batch_size'],'processed':cursor,'total':len(rows)})
     def save():
         nonlocal checkpoint_generation
@@ -101,6 +131,9 @@ def neural_train(old,rows,dev,output,family,cfg,emit,bound,source=None,source_me
         meta={'schemaVersion':1,'taskType':'WEB_NEURAL_CHECKPOINT','identity':bound,'epoch':epoch,'completedEpochs':len(history),
             'cursor':cursor,'globalStep':global_step,'checkpointGeneration':checkpoint_generation,'checkpointFile':checkpoint_file,'checkpointSha256':sha(output/checkpoint_file),
             'bestFile':f'best-epoch-{best_epoch:04d}.pt' if best_epoch else None,'bestSha256':sha(output/f'best-epoch-{best_epoch:04d}.pt') if best_epoch else None}
+        names=['vocab.json','protected-identities.json','lineage-training-identities.json','bert/tokenizer.json','bert/tokenizer_config.json','bert/special_tokens_map.json','bert/vocab.txt']
+        meta['encoderFiles']={name:sha(output/name) for name in names if (output/name).is_file()}
+        if warm_evidence is not None:meta['warmstart']=warm_evidence
         write_json(output/'resume.json.tmp',meta);os.replace(output/'resume.json.tmp',output/'resume.json')
         emit({'stage':'CHECKPOINT_SAVED','epoch':epoch,'step':cursor//cfg['batch_size'],'processed':cursor,'total':len(rows)})
     while epoch<=cfg['epochs'] and not (cfg['patience'] and stale>=cfg['patience']):
@@ -128,8 +161,14 @@ def neural_train(old,rows,dev,output,family,cfg,emit,bound,source=None,source_me
         epoch+=1;cursor=0;order=None;loss_sum=0.;seen=0;write_json(output/'history.json',history);save()
     if not updated:raise ValueError('模型参数没有更新')
     model.load_state_dict(torch.load(output/'best.pt',map_location=cfg['device'],weights_only=True))
+    if warm_evidence is not None:
+        from .training_warmstart import inherited_difference
+        if inherited is not None:warm_evidence['trainedInheritedMaxDifference']=inherited_difference(model,inherited)
+        write_json(output/'warmstart.json',warm_evidence)
+
     reference=np.asarray(base.neural_scores(model,family,dev,cfg,vocab,tokenizer))
     if family=='bert':
+        from transformers import AutoModelForSequenceClassification
         model.save_pretrained(output/'bert');again=AutoModelForSequenceClassification.from_pretrained(output/'bert',local_files_only=True).to(cfg['device'])
     else:
         again=old.SentencePairNet(family,len(vocab)+2,cfg['width']).to(cfg['device']);again.load_state_dict(torch.load(output/'best.pt',map_location=cfg['device'],weights_only=True))

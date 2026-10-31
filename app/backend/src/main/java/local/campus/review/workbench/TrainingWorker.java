@@ -74,6 +74,11 @@ public class TrainingWorker {
         if(options.has("preparationId"))config.put("preparation",training.directory(options.path("preparationId").asText()).resolve("output").toString());
         if(options.has("resumeRunId"))config.put("resume",training.directory(options.path("resumeRunId").asText()).toString());
         if(action.equals("TRAIN")&&options.has("resumeRunId"))config.set("resumeTraining",data.json.createObjectNode().put("folder",training.directory(options.path("resumeRunId").asText()).resolve("output").toString()).put("metadataSha256",options.path("resumeMetadataSha256").asText()));
+        if(action.equals("TRAIN")&&options.has("parentModelId")&&!options.has("resumeRunId")){
+            var parent=data.db.queryForMap("SELECT run_id FROM ml_model WHERE id=?",options.path("parentModelId").asText());
+            var preparation=training.directory(options.path("parentPreparationId").asText()).resolve("output");
+            config.set("warmstart",data.json.createObjectNode().put("folder",training.directory(parent.get("run_id").toString()).resolve("output").toString()).put("manifestSha256",options.path("parentManifestSha256").asText()).put("preparation",preparation.toString()).put("preparationSha256",sha(preparation.resolve("manifest.json"))));
+        }
         if(action.equals("GENERATE")){
             var caches=config.putArray("caches");
             for(var previous:data.db.queryForList("SELECT id FROM ml_run WHERE dataset_id=? AND input_version_id=? AND action='GENERATE' AND id<>? AND status IN ('COMPLETED','CANCELLED','INTERRUPTED','FAILED') ORDER BY created_at DESC LIMIT 20",dataset,source.get("id"),id)){
@@ -121,7 +126,9 @@ public class TrainingWorker {
             if(!"RUNNING".equals(data.db.queryForObject("SELECT status FROM ml_run WHERE id=? FOR UPDATE",String.class,id)))return;
             if(action.equals("TRAIN")){
                 String org=data.db.queryForObject("SELECT organization_id FROM ml_dataset WHERE id=?",String.class,dataset);
-                data.db.update("INSERT INTO ml_model(id,organization_id,dataset_id,run_id,name,family,manifest_json,created_at) VALUES(?,?,?,?,?,?,?,UTC_TIMESTAMP(3))",id,org,dataset,id,options.path("name").asText(),options.path("family").asText(),completed.toString());
+                String parentId=options.has("parentModelId")?options.path("parentModelId").asText():null,logical=id;int versionNumber=1;
+                if(parentId!=null){logical=data.db.queryForObject("SELECT logical_model_id FROM ml_model WHERE id=?",String.class,parentId);data.db.queryForObject("SELECT id FROM ml_model WHERE id=? FOR UPDATE",String.class,logical);versionNumber=data.db.queryForObject("SELECT MAX(version_number)+1 FROM ml_model WHERE logical_model_id=?",Integer.class,logical);}
+                data.db.update("INSERT INTO ml_model(id,organization_id,dataset_id,run_id,name,family,manifest_json,logical_model_id,parent_model_id,version_number,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,UTC_TIMESTAMP(3))",id,org,dataset,id,options.path("name").asText(),options.path("family").asText(),completed.toString(),logical,parentId,versionNumber);
             }
             data.db.update("UPDATE ml_run SET status='COMPLETED',result_json=?,finished_at=UTC_TIMESTAMP(3) WHERE id=?",completed.toString(),id);data.event(id,Map.of("stage","COMPLETED","action",action));
         });

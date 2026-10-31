@@ -32,7 +32,8 @@ export const router = createRouter({
     ] },
   ],
 })
-router.beforeEach(async to => {
+router.beforeEach(async (to,from) => {
+  if (from.query.flow && !to.query.flow && ['/datasets','/training','/models','/releases','/reference-imports','/references'].includes(to.path)) return {path:to.path,query:{...to.query,flow:from.query.flow},hash:to.hash}
   if (!session.loaded) await loadSession()
   if (!session.user && to.path !== '/login') return '/login'
   if (session.user && (to.path === '/' || to.path === '/login' || (to.meta.role && to.meta.role !== session.user.role) || (Array.isArray(to.meta.roles) && !to.meta.roles.includes(session.user.role)))) return home(session.user.role)

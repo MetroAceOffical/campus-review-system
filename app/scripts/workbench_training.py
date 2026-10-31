@@ -41,8 +41,15 @@ def main():
             elif action == 'TRAIN':
                 if config['family'] in ('cnn','bilstm','bert'):
                     from campus_workbench.training_resume import train as neural_train
-                    result = neural_train(config['preparation'], config['output'], config['family'], config.get('parameters', {}), emit,config.get('resumeTraining'))
-                else:result = train(config['preparation'], config['output'], config['family'], config.get('parameters', {}), emit)
+                    result = neural_train(config['preparation'], config['output'], config['family'], config.get('parameters', {}), emit,config.get('resumeTraining'),warmstart=config.get('warmstart'))
+                else:
+                    if config.get('warmstart'):
+                        from campus_workbench.training_warmstart import check_parent,save_lineage
+                        parent=check_parent(config['warmstart'],config['preparation'],config['family'])
+                    result = train(config['preparation'], config['output'], config['family'], config.get('parameters', {}), emit)
+                    if config.get('warmstart'):
+                        save_lineage(config['output'],parent);result['trainingMode']='REFIT';result['warmstart']={'parentManifestSha256':config['warmstart']['manifestSha256'],'mode':'REFIT'}
+                        result['artifacts'].update({name:sha(Path(config['output'])/name) for name in ['protected-identities.json','lineage-training-identities.json']});write_json(Path(config['output'])/'manifest.json',result)
             elif action == 'EVALUATE':
                 result = evaluate(config['model'], config['preparation'], config['output'], emit)
             elif action == 'PREDICT':

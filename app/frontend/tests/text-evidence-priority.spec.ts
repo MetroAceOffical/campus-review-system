@@ -15,3 +15,11 @@ it('highlights actual semantic evidence and collapses unrelated retrieved candid
   expect(wrapper.get('[data-testid="other-text-candidates"]').element.hasAttribute('open')).toBe(false)
   wrapper.unmount()
 })
+
+it('keeps zero literal counters out of the main metric cards even in old cited reports',()=>{
+  const item={evidenceType:'TEXT_SIMILARITY',evidenceId:'old',sourceWorkId:'1',sourceRevisionId:'2',sourceTitle:'旧来源',sourceKind:'BODY',tfidfScore:.2,acceptedCandidate:false,fullyCited:true,literalSummary:{matched_characters:0,query_character_coverage:0,longest_match:0},matches:[],semanticWindows:[]} as TextEvidenceItem
+  const wrapper=mount(TextEvidence,{props:{evidence:[item]},global:{plugins:[ElementPlus],stubs:{OcrEvidence:true}}})
+  expect(wrapper.find('.evidence-metrics').exists()).toBe(false)
+  expect(wrapper.text()).toContain('字面重复指标')
+  wrapper.unmount()
+})

@@ -1,0 +1,15 @@
+:root{--header-height:68px;--sidebar-width:208px}
+.app-shell .page-content{padding:16px 20px 28px}
+.app-shell .page-heading{margin-bottom:12px}.app-shell .page-heading h1{font-size:23px}.app-shell .page-heading-mark{padding:7px}
+.app-shell :is(.panel,.work-panel){padding:16px;margin-bottom:14px}
+.app-shell :is(.section-heading,.work-heading){margin-bottom:12px;gap:10px}
+.app-shell :is(.section-heading,.work-heading) h2{font-size:16px}
+.app-shell .work-grid{gap:12px}.app-shell .work-actions{gap:8px;margin-top:12px}.app-shell .work-stats{margin:12px 0;gap:10px}.app-shell .work-stats>div{padding:12px}.app-shell .work-stats strong{font-size:25px;margin-top:5px}
+.app-shell .el-form-item{margin-bottom:12px}.app-shell .el-form-item__label{padding-bottom:4px}.app-shell .el-table td.el-table__cell,.app-shell .el-table th.el-table__cell{padding:8px 0}.app-shell .el-tabs__item{height:38px}.app-shell .workspace-tabs{margin-bottom:12px}
+.app-shell .experiment-grid{gap:12px}.app-shell .chart-canvas{height:250px}.app-shell .experiment-chart{margin:8px 0}.app-shell .chart-heading h3{font-size:14px}
+.app-shell .sidebar{padding-top:14px}.app-shell .sidebar nav a{min-height:38px;padding:8px 12px}.app-shell .organization-label{padding-bottom:12px}.app-shell .nav-group{margin-top:12px}
+.app-shell .task-entry-grid{gap:12px;margin-bottom:14px}.app-shell .task-entry{padding:14px;gap:12px;text-align:left;font:inherit;cursor:pointer;border-radius:0;min-width:0}.app-shell .task-entry:disabled{opacity:.6;cursor:wait}.app-shell .entry-icon{padding:10px}.app-shell .home-intro{padding:16px}.app-shell .home-intro h2{font-size:20px;margin:5px 0}.app-shell .home-stats{gap:12px}.app-shell .home-stats>a{padding:14px}.app-shell .home-stats strong{font-size:29px;margin:6px 0}.app-shell .feature-card{padding:14px}.app-shell .feature-card h3{font-size:15px;margin:10px 0 6px}.app-shell .feature-card p{font-size:12px;line-height:1.6;margin:6px 0}
+.app-shell .page-content .el-button.is-link{border-radius:0}.app-shell .page-content a.link-button{border-radius:0}
+.app-shell .page-content.in-flow .creation-steps{display:none}.app-shell .page-content.in-flow>.page-heading{margin-bottom:10px}
+.app-shell .page-content.in-flow .workspace-tabs>.el-tabs__header{margin-bottom:10px}
+@media(max-width:800px){.app-shell .page-content{padding:12px}.app-shell .chart-canvas{height:230px}}
