@@ -1,0 +1,383 @@
+{
+  "state": "SIX_MODEL_DEVELOPMENT_COMPLETE_NOT_DEPLOYED",
+  "sourceArticles": 3802,
+  "uniquePairs": 487,
+  "primaryFromValidation": "bert",
+  "primarySelectionPartition": "validation",
+  "models": [
+    {
+      "family": "lr",
+      "modelId": "50c3985c-b26f-4dbb-9a20-512964549d55",
+      "targetRecalled": true,
+      "targetAlert": true,
+      "warningSourceTitles": [
+        "从AI漫剧到通才计划，这场讲座干货满满"
+      ],
+      "targetEvidence": [
+        {
+          "semanticSummary": {
+            "suspectedReuse": true,
+            "supportingPairs": 8,
+            "matchedQueryCharacters": 231,
+            "scoreThreshold": 0.5,
+            "lexicalFloor": 0.25,
+            "minimumPairs": 2,
+            "minimumCharacters": 64,
+            "selectionMethod": "anchored-context-v1",
+            "corroborated": false,
+            "status": "EVALUATED",
+            "evaluatedPairs": 181,
+            "pairedCharacters": 195,
+            "minimumPairedCharacters": 64,
+            "beforeMutualSupportGuard": true
+          },
+          "literalSummary": {
+            "matched_characters": 0,
+            "query_character_coverage": 0.0,
+            "longest_match": 0
+          }
+        }
+      ],
+      "seconds": 0.24075599999923725,
+      "calibration": {
+        "threshold": 0.5476001406373308,
+        "macroF1": 0.7229884560508453,
+        "f1": 0.6806930693069307,
+        "precision": 0.7884174311926605,
+        "recall": 0.5988675958188153,
+        "falsePositiveRate": 0.14927184466019416,
+        "confusionMatrix": [
+          [
+            2103,
+            369
+          ],
+          [
+            921,
+            1375
+          ]
+        ],
+        "rows": 4768,
+        "scoreType": "probability",
+        "scale": 0.20221888585779157,
+        "selectionPartition": "validation",
+        "method": "shared-validation-macro-f1-v1"
+      }
+    },
+    {
+      "family": "svm",
+      "modelId": "bacfecef-7308-408f-a45d-05fdc0ab45ea",
+      "targetRecalled": true,
+      "targetAlert": true,
+      "warningSourceTitles": [
+        "从AI漫剧到通才计划，这场讲座干货满满"
+      ],
+      "targetEvidence": [
+        {
+          "semanticSummary": {
+            "suspectedReuse": true,
+            "supportingPairs": 9,
+            "matchedQueryCharacters": 252,
+            "scoreThreshold": 0.5,
+            "lexicalFloor": 0.25,
+            "minimumPairs": 2,
+            "minimumCharacters": 64,
+            "selectionMethod": "anchored-context-v1",
+            "corroborated": false,
+            "status": "EVALUATED",
+            "evaluatedPairs": 181,
+            "pairedCharacters": 218,
+            "minimumPairedCharacters": 64,
+            "beforeMutualSupportGuard": true
+          },
+          "literalSummary": {
+            "matched_characters": 0,
+            "query_character_coverage": 0.0,
+            "longest_match": 0
+          }
+        }
+      ],
+      "seconds": 0.16319149999617366,
+      "calibration": {
+        "threshold": 0.03645546567081687,
+        "macroF1": 0.7203064248812505,
+        "f1": 0.683115626511853,
+        "precision": 0.7682263329706203,
+        "recall": 0.6149825783972126,
+        "falsePositiveRate": 0.17233009708737865,
+        "confusionMatrix": [
+          [
+            2046,
+            426
+          ],
+          [
+            884,
+            1412
+          ]
+        ],
+        "rows": 4768,
+        "scoreType": "margin",
+        "scale": 0.35364017126934966,
+        "selectionPartition": "validation",
+        "method": "shared-validation-macro-f1-v1"
+      }
+    },
+    {
+      "family": "rf",
+      "modelId": "ea71b233-a1bc-469a-a7c4-66487972275d",
+      "targetRecalled": true,
+      "targetAlert": true,
+      "warningSourceTitles": [
+        "从AI漫剧到通才计划，这场讲座干货满满"
+      ],
+      "targetEvidence": [
+        {
+          "semanticSummary": {
+            "suspectedReuse": true,
+            "supportingPairs": 14,
+            "matchedQueryCharacters": 393,
+            "scoreThreshold": 0.5,
+            "lexicalFloor": 0.25,
+            "minimumPairs": 2,
+            "minimumCharacters": 64,
+            "selectionMethod": "anchored-context-v1",
+            "corroborated": false,
+            "status": "EVALUATED",
+            "evaluatedPairs": 181,
+            "pairedCharacters": 274,
+            "minimumPairedCharacters": 64,
+            "beforeMutualSupportGuard": true
+          },
+          "literalSummary": {
+            "matched_characters": 0,
+            "query_character_coverage": 0.0,
+            "longest_match": 0
+          }
+        }
+      ],
+      "seconds": 0.572567600000184,
+      "calibration": {
+        "threshold": 0.47860069911901393,
+        "macroF1": 0.7242038659126503,
+        "f1": 0.696786213320913,
+        "precision": 0.7487487487487487,
+        "recall": 0.6515679442508711,
+        "falsePositiveRate": 0.20307443365695793,
+        "confusionMatrix": [
+          [
+            1970,
+            502
+          ],
+          [
+            800,
+            1496
+          ]
+        ],
+        "rows": 4768,
+        "scoreType": "probability",
+        "scale": 0.20138927673166573,
+        "selectionPartition": "validation",
+        "method": "shared-validation-macro-f1-v1"
+      }
+    },
+    {
+      "family": "cnn",
+      "modelId": "ec5b1e81-eb49-4756-825b-08d86c502a14",
+      "targetRecalled": true,
+      "targetAlert": false,
+      "warningSourceTitles": [],
+      "targetEvidence": [
+        {
+          "semanticSummary": {
+            "suspectedReuse": false,
+            "supportingPairs": 2,
+            "matchedQueryCharacters": 45,
+            "scoreThreshold": 0.5,
+            "lexicalFloor": 0.25,
+            "minimumPairs": 2,
+            "minimumCharacters": 64,
+            "selectionMethod": "anchored-context-v1",
+            "corroborated": false,
+            "status": "EVALUATED",
+            "evaluatedPairs": 181,
+            "pairedCharacters": 43,
+            "minimumPairedCharacters": 64,
+            "beforeMutualSupportGuard": false
+          },
+          "literalSummary": {
+            "matched_characters": 0,
+            "query_character_coverage": 0.0,
+            "longest_match": 0
+          }
+        }
+      ],
+      "seconds": 1.0295250999988639,
+      "calibration": {
+        "threshold": 0.4951973855495453,
+        "macroF1": 0.6839021145819,
+        "f1": 0.6414728682170543,
+        "precision": 0.722707423580786,
+        "recall": 0.5766550522648084,
+        "falsePositiveRate": 0.20550161812297735,
+        "confusionMatrix": [
+          [
+            1964,
+            508
+          ],
+          [
+            972,
+            1324
+          ]
+        ],
+        "rows": 4768,
+        "scoreType": "probability",
+        "scale": 0.23054388165473938,
+        "selectionPartition": "validation",
+        "method": "shared-validation-macro-f1-v1"
+      }
+    },
+    {
+      "family": "bilstm",
+      "modelId": "ba610892-16ca-498f-9303-9557b4ab2420",
+      "targetRecalled": true,
+      "targetAlert": true,
+      "warningSourceTitles": [
+        "从AI漫剧到通才计划，这场讲座干货满满",
+        "数智赋能影视教育：《视听语言与AIGC实践》探索实战型数智课堂建设"
+      ],
+      "targetEvidence": [
+        {
+          "semanticSummary": {
+            "suspectedReuse": true,
+            "supportingPairs": 16,
+            "matchedQueryCharacters": 522,
+            "scoreThreshold": 0.5,
+            "lexicalFloor": 0.25,
+            "minimumPairs": 2,
+            "minimumCharacters": 64,
+            "selectionMethod": "anchored-context-v1",
+            "corroborated": false,
+            "status": "EVALUATED",
+            "evaluatedPairs": 181,
+            "pairedCharacters": 453,
+            "minimumPairedCharacters": 64,
+            "beforeMutualSupportGuard": true
+          },
+          "literalSummary": {
+            "matched_characters": 0,
+            "query_character_coverage": 0.0,
+            "longest_match": 0
+          }
+        }
+      ],
+      "seconds": 1.2082026999996742,
+      "calibration": {
+        "threshold": 0.5533188581466675,
+        "macroF1": 0.7276520377977256,
+        "f1": 0.7042899747648543,
+        "precision": 0.7440620455647116,
+        "recall": 0.6685540069686411,
+        "falsePositiveRate": 0.21359223300970873,
+        "confusionMatrix": [
+          [
+            1944,
+            528
+          ],
+          [
+            761,
+            1535
+          ]
+        ],
+        "rows": 4768,
+        "scoreType": "probability",
+        "scale": 0.3083362579345703,
+        "selectionPartition": "validation",
+        "method": "shared-validation-macro-f1-v1"
+      }
+    },
+    {
+      "family": "bert",
+      "modelId": "a1f9e07e-82c6-4085-9880-3a1ca2eaa58a",
+      "targetRecalled": true,
+      "targetAlert": true,
+      "warningSourceTitles": [
+        "从AI漫剧到通才计划，这场讲座干货满满"
+      ],
+      "targetEvidence": [
+        {
+          "semanticSummary": {
+            "suspectedReuse": true,
+            "supportingPairs": 20,
+            "matchedQueryCharacters": 613,
+            "scoreThreshold": 0.5,
+            "lexicalFloor": 0.25,
+            "minimumPairs": 2,
+            "minimumCharacters": 64,
+            "selectionMethod": "anchored-context-v1",
+            "corroborated": false,
+            "status": "EVALUATED",
+            "evaluatedPairs": 181,
+            "pairedCharacters": 535,
+            "minimumPairedCharacters": 64,
+            "beforeMutualSupportGuard": true
+          },
+          "literalSummary": {
+            "matched_characters": 0,
+            "query_character_coverage": 0.0,
+            "longest_match": 0
+          }
+        }
+      ],
+      "seconds": 239.43466099999932,
+      "calibration": {
+        "threshold": 0.789550393819809,
+        "macroF1": 0.789651763688977,
+        "f1": 0.783210731285158,
+        "precision": 0.7781599312123818,
+        "recall": 0.7883275261324042,
+        "falsePositiveRate": 0.2087378640776699,
+        "confusionMatrix": [
+          [
+            1956,
+            516
+          ],
+          [
+            486,
+            1810
+          ]
+        ],
+        "rows": 4768,
+        "scoreType": "probability",
+        "scale": 0.20345953106880188,
+        "selectionPartition": "validation",
+        "method": "shared-validation-macro-f1-v1"
+      }
+    }
+  ],
+  "scope": "One saved assistant-rewritten article against full3802 training-domain source corpus; not population accuracy",
+  "actualWebCheckCompleted": false,
+  "observedAt": "2026-11-01T00:45:28+08:00",
+  "formalTrainingSnapshot": {
+    "trained": 21,
+    "evaluated": 17,
+    "target": 24
+  },
+  "sourceReview": {
+    "importantFindingsFixed": 2,
+    "frontendChecksPassed": 9,
+    "productionBuildPassed": true,
+    "githubCommit": "861f68eda25b8c45b1ea7dde16e71a71e63f46f0"
+  },
+  "fiveModelNormalControls": {
+    "cases": 24,
+    "independentAuthoredFamilies": 8,
+    "alerts": {
+      "lr": 0,
+      "svm": 0,
+      "rf": 0,
+      "cnn": 0,
+      "bilstm": 2
+    },
+    "sixModelNormalControls": "RUNNING_CPU",
+    "scope": "Authored controls, not natural-population FPR"
+  }
+}
