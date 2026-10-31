@@ -11,6 +11,19 @@ import static org.mockito.Mockito.*;
 
 class BundleReleaseTest {
     final String id="12345678-1234-1234-1234-123456789012";
+    @Test void releaseListPaginatesIdsBeforeReadingLargeManifests(){
+        var db=mock(JdbcTemplate.class);
+        when(db.queryForObject("SELECT COUNT(*) FROM model_release",Long.class)).thenReturn(1L);
+        when(db.queryForList("SELECT id FROM model_release ORDER BY created_at DESC,id DESC LIMIT ? OFFSET ?",String.class,20,0L)).thenReturn(List.of(id));
+        when(db.queryForList("SELECT r.*,o.name AS department FROM model_release r LEFT JOIN organization o ON o.id=r.organization_id WHERE r.id=?",id)).thenReturn(List.of(Map.of("id",id,"name","正式六模型组","scene","TEXT_REUSE","status","READY","manifest_json","{\"members\":[{\"family\":\"bert\"}]}")));
+        when(db.queryForObject("SELECT COUNT(*) FROM model_release_pointer WHERE release_id=?",Integer.class,id)).thenReturn(0);
+        var data=new DatasetService(db,null,new ObjectMapper(),new DataSourceTransactionManager());
+        var actor=new CurrentUser("1","管理员",CurrentUser.Role.ADMIN,Set.of(),List.of());
+        var result=new ReleaseService(data,null,null,null).list(actor,1,20);
+        assertEquals(id,result.path("items").get(0).path("id").asText());
+        assertEquals("bert",result.path("items").get(0).path("manifest").path("members").get(0).path("family").asText());
+        verify(db,never()).queryForList(contains("SELECT r.*"),eq(20),eq(0L));
+    }
     @Test void reviewerCannotPublishTrainingGroup(){
         var service=new ReleaseService(null,null,null,null);
         var actor=new CurrentUser("2","审核员",CurrentUser.Role.REVIEWER,Set.of(),List.of());
