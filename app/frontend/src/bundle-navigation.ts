@@ -1,4 +1,5 @@
 import type {ModelBundle} from './api/training'
+import type {FlowContext} from './api/flows'
 
 export function trainingSelection(input:{dataset:string;version:string;preparation?:string;step:number;parentBundle?:string;parentModel?:string}):Record<string,string>{
  return {dataset:input.dataset,version:input.version,tab:'new',step:String(input.step),...(input.preparation?{preparation:input.preparation}:{}),...(input.parentBundle?{parentBundle:input.parentBundle}:{}),...(input.parentModel?{parentModel:input.parentModel}:{})}
@@ -10,4 +11,17 @@ export function continuationAnchor(bundle:ModelBundle):string{
  const bert=members.find(m=>m.family==='bert')
  if(!bert)throw new Error('起始模型组缺少 BERT 成员')
  return bert.modelId
+}
+
+export function bindBundleContext(context:FlowContext,bundle:ModelBundle):FlowContext{
+ const next={...context}
+ if(next.bundleId!==bundle.pipelineId){for(const key of ['preparationId','trainingRunId','modelId','evaluationRunId','releaseId'] as const)delete next[key]}
+ next.bundleId=bundle.pipelineId;next.datasetId=bundle.datasetId
+ next.versionId=bundle.state.cleanVersionId||next.versionId
+ if(bundle.state.preparationId)next.preparationId=bundle.state.preparationId
+ else delete next.preparationId
+ const canonical=bundle.state.models.find(member=>member.family==='bert')
+ if(canonical){next.trainingRunId=canonical.modelId;next.modelId=canonical.modelId;if(canonical.evaluationRunId)next.evaluationRunId=canonical.evaluationRunId;else delete next.evaluationRunId}
+ else{delete next.trainingRunId;delete next.modelId;delete next.evaluationRunId}
+ return next
 }

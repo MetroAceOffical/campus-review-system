@@ -6,7 +6,7 @@ import * as api from '../../api/training'
 import RecordPagination from '../RecordPagination.vue'
 import {continuationAnchor} from '../../bundle-navigation'
 import ExperimentChart from '../experiments/ExperimentChart.vue'
-const emit=defineEmits<{open:[modelId:string]}>()
+const emit=defineEmits<{open:[modelId:string];parent:[modelId:string]}>()
 const route=useRoute(),router=useRouter(),items=ref<api.ModelBundle[]>([]),page=ref(1),pageSize=ref(12),total=ref(0),q=ref(''),history=ref(false),error=ref(''),busy=ref(false)
 let alive=true,timer:ReturnType<typeof setInterval>|undefined
 const percent=(value?:number)=>value==null?'—':`${(value*100).toFixed(1)}%`
@@ -15,7 +15,7 @@ async function load(){if(busy.value)return;busy.value=true;try{const focus=Strin
 function chart(bundle:api.ModelBundle){return {tooltip:{trigger:'axis'},legend:{},grid:{left:45,right:15,top:35,bottom:25},xAxis:{type:'category',data:bundle.state.models.map(m=>m.family.toUpperCase())},yAxis:{type:'value',min:0,max:1},series:['recall','f1','precision'].map((key,i)=>({name:['验证召回率','验证F1','验证精确率'][i],type:'bar',data:bundle.state.models.map(m=>(m as unknown as {validation?:Record<string,number>}).validation?.[key]??null)}))}}
 async function continueBundle(bundle:api.ModelBundle){
  const modelId=continuationAnchor(bundle)
- if(route.query.selectParent==='1'&&route.query.flow){emit('open',modelId);return}
+ if(route.query.selectParent==='1'&&route.query.flow){emit('parent',modelId);return}
  await router.push({path:'/training',query:{flow:'',dataset:bundle.datasetId,version:bundle.state.cleanVersionId,parentBundle:bundle.pipelineId,step:'0',tab:'new'}})
 }
 async function retry(id:string){try{await api.controlPipeline(id,'retry');await load()}catch(e){error.value=e instanceof Error?e.message:'重试失败'}}

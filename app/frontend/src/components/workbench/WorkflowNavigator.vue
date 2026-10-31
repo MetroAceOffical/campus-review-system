@@ -9,6 +9,7 @@ import { session } from '../../session'
 import { workflowContext } from '../../workflow-context'
 import { activeFlow } from '../../flow-session'
 import { flowSteps,flowDestination } from '../../flow-navigation'
+import {bindBundleContext} from '../../bundle-navigation'
 import { versionName } from '../../workbench-guidance'
 import AppIcon from '../AppIcon.vue'
 const route=useRoute(),error=ref(''),saving=ref(false)
@@ -25,12 +26,12 @@ async function sync(){
     if(!valid())return
     if(!id)activeFlow.value=undefined
     let context:FlowContext={...flow?.context},dataset=String(route.query.dataset||context.datasetId||''),version=String(route.query.version||context.versionId||'')
-    if(flow?.kind==='CONTINUE' && !context.parentModelId && route.query.selectParent){dataset=context.datasetId||'';version=context.versionId||''}
+    if(flow?.kind==='CONTINUE' && route.query.selectParent){dataset=context.datasetId||'';version=context.versionId||''}
     if(flow&& !route.query.selectParent && ((route.query.dataset&&dataset!==context.datasetId)||(route.query.version&&version!==context.versionId)))context={...(context.parentModelId?{parentModelId:context.parentModelId}:{}),datasetId:dataset,versionId:version}
     const bundleId=String(route.query.bundle||route.query.bundleId||context.bundleId||'')
     const bundle=bundleId?await training.bundle(bundleId):undefined
     workflowContext.bundle=bundle
-    if(bundle){context.bundleId=bundle.pipelineId;dataset=bundle.datasetId;version=bundle.state.cleanVersionId||version;context.datasetId=dataset;context.versionId=version;if(bundle.state.preparationId)context.preparationId=bundle.state.preparationId;const canonical=bundle.state.models.find(m=>m.family==='bert');if(canonical){context.trainingRunId=canonical.modelId;context.modelId=canonical.modelId;if(canonical.evaluationRunId)context.evaluationRunId=canonical.evaluationRunId}else{delete context.trainingRunId;delete context.modelId;delete context.evaluationRunId}}
+    if(bundle){context=bindBundleContext(context,bundle);dataset=context.datasetId||'';version=context.versionId||''}
     let run:training.ComputeRun|undefined
     if(route.path==='/training'&&route.query.run){
       run=await training.run(String(route.query.run));dataset=run.datasetId;version=run.inputVersionId

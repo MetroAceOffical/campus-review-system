@@ -18,7 +18,6 @@ import ExperimentChart from '../components/experiments/ExperimentChart.vue'
 import NewsSampleReport from '../components/workbench/NewsSampleReport.vue'
 import FormalTrainingProgress from '../components/workbench/FormalTrainingProgress.vue'
 import AutomaticPipeline from '../components/workbench/AutomaticPipeline.vue'
-import '../styles/workbench.css'
 const route = useRoute(), router = useRouter(), error = ref(''), busy = ref(false), q = ref(''), dataPage = ref(1), dataTotal = ref(0), dataItems = ref<Dataset[]>([])
 const recoveredPreparation = ref<ComputeRun>(),parentModel=ref<Model>(),parentBundleId=ref(''),focusBundleId=ref(String(route.query.bundle||'')),parentWidths=ref<Record<string,number>>({})
 const datasetId = ref(''), versionId = ref(''), detail = ref<Detail | null>(null), preparationId = ref(''), current = ref<ComputeRun | null>(null), events = ref<ComputeEvent[]>([])
@@ -103,9 +102,11 @@ async function cancel() { if (current.value) { await datasets.cancel(current.val
 
 let initialized = false
 async function restoreRoute() {
-  const parent=String(route.query.parentModel || (route.query.flow?(await getFlow(String(route.query.flow))).context.parentModelId:'') || '')
+  const savedFlow=route.query.flow?await getFlow(String(route.query.flow)):undefined
+  const parent=String(route.query.parentModel || savedFlow?.context.parentModelId || '')
   if(parent && parentModel.value?.modelId!==parent){parentModel.value=await api.model(parent);selectedModels.value=[...api.sixFamilies];parentBundleId.value=(parentModel.value as Model & {bundleId?:string}).bundleId||'';Object.assign(config,parentModel.value.manifest.parameters);if(parentModel.value.family==='bert')config.bert_learning_rate=Number(parentModel.value.manifest.parameters.learning_rate);executionMode.value='guided'}
   if(!parent){parentModel.value=undefined;parentBundleId.value=String(route.query.parentBundle||'')}
+  parentWidths.value={}
   if(parentBundleId.value){const previous=await api.bundle(parentBundleId.value);const members=await Promise.all(previous.state.models.map(m=>api.model(m.modelId)));parentWidths.value=Object.fromEntries(members.filter(m=>['cnn','bilstm'].includes(m.family)).map(m=>[m.family,Number(m.manifest.parameters.width||64)]))}
   focusBundleId.value=String(route.query.bundle||focusBundleId.value)
 
@@ -116,6 +117,8 @@ async function restoreRoute() {
   }
   const id = String(route.query.dataset || ''), version = String(route.query.version || '')
   if (id && (datasetId.value !== id || versionId.value !== version || !detail.value)) { datasetId.value = id; versionId.value = version; await chooseDataset() }
+  const selectedPreparation=String(route.query.preparation||savedFlow?.context.preparationId||'')
+  if(selectedPreparation){await recoverPreparation(selectedPreparation);if(preparations.value.some(p=>p.runId===selectedPreparation))preparationId.value=selectedPreparation}
   activeTab.value = String(route.query.tab || 'new')
   creationStep.value = Math.max(0,Math.min(2,Number(route.query.step) || 0))
 }
@@ -151,7 +154,7 @@ onBeforeUnmount(() => { alive = false; generation++; stop() })
   <TrainingProgress v-if="current" :run="current" :events="events" @cancel="perform(cancel)" />
 
   <NewsSampleReport v-if="current?.action === 'GENERATE' && current.status === 'COMPLETED'" :run="current" />
-  <details class="work-panel" :open="!current"><summary>运行记录 · {{ runTotal }}条</summary><div class="work-heading"><h2>运行记录</h2><el-button @click="perform(loadHistory)">刷新</el-button></div><el-table :data="history"><el-table-column prop="datasetName" label="数据集" min-width="140" /><el-table-column label="任务"><template #default="{row}">{{ api.actionNames[row.action] }} {{ api.modelNames[row.options.family] || '' }}</template></el-table-column><el-table-column label="状态"><template #default="{row}">{{ api.stateNames[row.status] }}</template></el-table-column><el-table-column label="操作" min-width="150"><template #default="{row}"><el-button size="small" @click="perform(() => viewRun(row.runId))">查看</el-button><el-button v-if="row.action === 'TRAIN'" size="small" @click="perform(() => copyRun(row))">复制参数</el-button><el-button v-if="row.action === 'GENERATE' && ['CANCELLED','INTERRUPTED','FAILED'].includes(row.status)" link @click="generateSamples(row)">继续样本准备</el-button></template></el-table-column></el-table><RecordPagination v-model:current-page="runPage" v-model:page-size="runSize" :total="runTotal" @change="perform(loadHistory)" /></details>
+  <details class="work-panel" :open="!current"><summary>运行记录 · {{ runTotal }}条</summary><div class="work-heading"><h2>运行记录</h2><el-button @click="perform(loadHistory)">刷新</el-button></div><el-table :data="history"><el-table-column prop="datasetName" label="数据集" min-width="140" /><el-table-column label="任务"><template #default="{row}">{{ api.actionNames[row.action] }} {{ api.modelNames[row.options.family] || '' }}</template></el-table-column><el-table-column label="状态"><template #default="{row}">{{ api.stateNames[row.status] }}</template></el-table-column><el-table-column label="操作" min-width="150"><template #default="{row}"><el-button size="small" @click="perform(() => viewRun(row.runId))">查看</el-button><el-button v-if="row.action === 'TRAIN'" size="small" @click="perform(() => copyRun(row))">复制参数</el-button><el-button v-if="row.action === 'GENERATE' && ['CANCELLED','INTERRUPTED','FAILED'].includes(row.status)" size="small" @click="generateSamples(row)">继续样本准备</el-button></template></el-table-column></el-table><RecordPagination v-model:current-page="runPage" v-model:page-size="runSize" :total="runTotal" @change="perform(loadHistory)" /></details>
 </el-tab-pane><el-tab-pane label="校级模型与评价进度" name="school"><FormalTrainingProgress v-if="activeTab === 'school'" /></el-tab-pane></el-tabs>
   <AutomaticPipeline v-show="activeTab === 'tasks' || (activeTab === 'new' && creationStep === 2 && executionMode === 'automatic')" :setup-visible="activeTab === 'new'" :focus-id="focusBundleId" :preparation-id="preparationId" :parent-pipeline-id="parentBundleId" :dataset="detail" :version-id="versionId" :models="pipelineModels" :preparation="pipelinePreparation" :generation="{ ...generationConfig, seed: partition.seed }" :name="name" @created="id=>focusBundleId=id" @view="followRun" @open="id => { activeTab = 'tasks'; void perform(() => viewRun(id)) }" />
 </template>

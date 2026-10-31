@@ -16,6 +16,14 @@ it('keeps group training, evaluation and release on the same group across pages'
  expect(flowDestination(flow,'predict').query.bundleId).toBe('six')
  expect(flowSteps(flow,detail,{...group,status:'COMPLETED',trainedCount:6,evaluatedCount:6}).find(s=>s.key==='predict')?.enabled).toBe(true)
 })
+it('does not label training and evaluation as running while only cleaning is active',()=>{
+ const flow={flowId:'flow',kind:'TRAIN',context:{datasetId:'data',versionId:'clean',bundleId:'six'}} as Flow
+ const bundle={status:'RUNNING',trainedCount:0,evaluatedCount:0,state:{stage:'PREPARE',steps:[],models:[]}} as unknown as ModelBundle
+ const steps=flowSteps(flow,detail,bundle)
+ expect(steps.find(s=>s.key==='prepare')?.status).toBe('active')
+ expect(steps.find(s=>s.key==='train')?.status).toBe('waiting')
+ expect(steps.find(s=>s.key==='evaluate')?.status).toBe('waiting')
+})
 it('keeps this task independent of other completed models and resumes its exact objects',()=>{
   const flow:Flow={flowId:'flow',kind:'TRAIN',name:'新模型训练',revision:1,context:{datasetId:'data',versionId:'clean'},createdAt:'',updatedAt:''}
   expect(flowSteps(flow,detail).find(s=>s.key==='train')?.status).toBe('waiting')

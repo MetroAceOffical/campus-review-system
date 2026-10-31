@@ -8,6 +8,8 @@ export function flowSteps(flow:Flow,detail?:Detail,bundle?:ModelBundle):FlowStep
   const run=(id?:string)=>id?detail?.runs.find(r=>r.runId===id):undefined
   const prepared=run(c.preparationId),ready=prepared?.status==='COMPLETED' && !!(prepared.result as {trainReady?:boolean})?.trainReady
   const release=detail?.modelReleases?.find(r=>r.id===c.releaseId)
+  const trainingStarted=!!bundle&&(bundle.trainedCount>0||!!bundle.state?.steps?.some(s=>s.stage==='TRAIN'))
+  const evaluationStarted=!!bundle&&(bundle.evaluatedCount>0||!!bundle.state?.steps?.some(s=>s.stage==='EVALUATE'))
   const rows:FlowStep[]=[]
   if(flow.kind==='CONTINUE')rows.push({key:'parent',label:'起始模型',status:c.parentModelId?'done':'waiting',enabled:true})
   rows.push({key:'data',label:flow.kind==='UPLOAD'?'上传与映射':'选择数据',status:c.datasetId?'done':'waiting',enabled:flow.kind!=='CONTINUE'||!!c.parentModelId},
@@ -15,9 +17,9 @@ export function flowSteps(flow:Flow,detail?:Detail,bundle?:ModelBundle):FlowStep
   const library=flow.kind==='LIBRARY'||flow.kind==='UPLOAD'&&['LIBRARY','BOTH'].includes(detail?.purpose||'')
   const train=['TRAIN','CONTINUE'].includes(flow.kind)||flow.kind==='UPLOAD'&&['TRAIN','BOTH'].includes(detail?.purpose||'')
   if(library)rows.push({key:'library',label:'参考入库',status:taskStatus(detail?.referenceImports?.find(b=>b.id===c.importId)?.status),enabled:!!clean})
-  if(train)rows.push({key:'prepare',label:'准备样本',status:prepared?.status==='COMPLETED'&&!ready?'active':taskStatus(prepared?.status),enabled:!!clean},
-    {key:'train',label:c.bundleId?'六模型训练':'训练模型',status:bundle?(bundle.trainedCount===6?'done':taskStatus(bundle.status)):taskStatus(run(c.trainingRunId)?.status),enabled:!!ready},
-    {key:'evaluate',label:'效果评价',status:bundle?(bundle.evaluatedCount===6?'done':taskStatus(bundle.status)):taskStatus(run(c.evaluationRunId)?.status),enabled:!!c.modelId||!!c.bundleId},
+  if(train)rows.push({key:'prepare',label:'准备样本',status:ready?'done':bundle&&['PREPARE','GENERATE'].includes(bundle.state?.stage)?taskStatus(bundle.status):prepared?.status==='COMPLETED'&&!ready?'active':taskStatus(prepared?.status),enabled:!!clean},
+    {key:'train',label:c.bundleId?'六模型训练':'训练模型',status:bundle?(bundle.trainedCount===6?'done':trainingStarted?taskStatus(bundle.status):'waiting'):taskStatus(run(c.trainingRunId)?.status),enabled:!!ready},
+    {key:'evaluate',label:'效果评价',status:bundle?(bundle.evaluatedCount===6?'done':evaluationStarted?taskStatus(bundle.status):'waiting'):taskStatus(run(c.evaluationRunId)?.status),enabled:!!c.modelId||!!c.bundleId},
     {key:'predict',label:'试用与发布',status:release?.active?'done':taskStatus(release?.status),enabled:bundle?bundle.status==='COMPLETED':!!c.modelId})
   return rows
 }
