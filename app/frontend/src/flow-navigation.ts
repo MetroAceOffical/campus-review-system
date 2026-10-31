@@ -1,8 +1,9 @@
 import type { Flow } from './api/flows'
+import type {ModelBundle} from './api/training'
 import type { Detail } from './api/workbench'
 export interface FlowStep {key:string;label:string;status:'done'|'active'|'waiting'|'error';enabled:boolean}
 const taskStatus=(state?:string):FlowStep['status']=>state==='COMPLETED'?'done':['RUNNING','QUEUED','INDEXING','PENDING_APPROVAL','VERIFYING','READY'].includes(state||'')?'active':['FAILED','CANCELLED','INTERRUPTED','WAITING_INDEX'].includes(state||'')?'error':'waiting'
-export function flowSteps(flow:Flow,detail?:Detail):FlowStep[]{
+export function flowSteps(flow:Flow,detail?:Detail,bundle?:ModelBundle):FlowStep[]{
   const c=flow.context,v=detail?.versions.find(v=>v.versionId===c.versionId),clean=v?.stage==='CLEAN'&&v.status==='READY'
   const run=(id?:string)=>id?detail?.runs.find(r=>r.runId===id):undefined
   const prepared=run(c.preparationId),ready=prepared?.status==='COMPLETED' && !!(prepared.result as {trainReady?:boolean})?.trainReady
@@ -15,9 +16,9 @@ export function flowSteps(flow:Flow,detail?:Detail):FlowStep[]{
   const train=['TRAIN','CONTINUE'].includes(flow.kind)||flow.kind==='UPLOAD'&&['TRAIN','BOTH'].includes(detail?.purpose||'')
   if(library)rows.push({key:'library',label:'参考入库',status:taskStatus(detail?.referenceImports?.find(b=>b.id===c.importId)?.status),enabled:!!clean})
   if(train)rows.push({key:'prepare',label:'准备样本',status:prepared?.status==='COMPLETED'&&!ready?'active':taskStatus(prepared?.status),enabled:!!clean},
-    {key:'train',label:'训练模型',status:taskStatus(run(c.trainingRunId)?.status),enabled:!!ready},
-    {key:'evaluate',label:'效果评价',status:taskStatus(run(c.evaluationRunId)?.status),enabled:!!c.modelId},
-    {key:'predict',label:'试用与发布',status:release?.active?'done':taskStatus(release?.status),enabled:!!c.modelId})
+    {key:'train',label:c.bundleId?'六模型训练':'训练模型',status:bundle?(bundle.trainedCount===6?'done':taskStatus(bundle.status)):taskStatus(run(c.trainingRunId)?.status),enabled:!!ready},
+    {key:'evaluate',label:'效果评价',status:bundle?(bundle.evaluatedCount===6?'done':taskStatus(bundle.status)):taskStatus(run(c.evaluationRunId)?.status),enabled:!!c.modelId||!!c.bundleId},
+    {key:'predict',label:'试用与发布',status:release?.active?'done':taskStatus(release?.status),enabled:bundle?bundle.status==='COMPLETED':!!c.modelId})
   return rows
 }
 export function flowDestination(flow:Flow,step?:string):{path:string;query:Record<string,string>}{
@@ -28,6 +29,9 @@ export function flowDestination(flow:Flow,step?:string):{path:string;query:Recor
   if(step==='parent')return{path:'/models',query:{...query,selectParent:'1'}}
   if(step==='library')return{path:'/reference-imports',query:{...query,...(c.importId?{batch:c.importId,tab:'records'}:{tab:'new'})}}
   if(step==='predict'&&c.releaseId)return{path:'/releases',query:{...query,release:c.releaseId,tab:'current'}}
+  if(c.bundleId&&step==='train')return{path:'/training',query:{...query,bundle:c.bundleId,tab:'tasks'}}
+  if(c.bundleId&&step==='evaluate')return{path:'/models',query:{...query,bundleId:c.bundleId}}
+  if(c.bundleId&&step==='predict')return{path:'/releases',query:{...query,bundleId:c.bundleId,tab:'new'}}
   if(['prepare','train'].includes(step))return{path:'/training',query:{...query,...(c.parentModelId?{parentModel:c.parentModelId}:{}),...((step==='prepare'?c.preparationId:c.trainingRunId)?{run:(step==='prepare'?c.preparationId:c.trainingRunId)!}:{tab:'new',step:step==='prepare'?'0':'2'})}}
   if(['evaluate','predict'].includes(step))return{path:'/models',query:{...query,...(c.modelId?{model:c.modelId}:{}),...(step==='evaluate'&&c.evaluationRunId?{evaluation:c.evaluationRunId}:{}),tab:step==='evaluate'?'evaluation':'prediction'}}
   return{path:'/datasets',query:{...query,...(!c.datasetId&&flow.kind==='UPLOAD'?{import:'1'}:{})}}

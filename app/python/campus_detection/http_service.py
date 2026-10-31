@@ -124,6 +124,11 @@ def make_server(runtime,port=18081):
                 request=json.loads(self.rfile.read(length));runtime.active_attempt=request.get('attemptId')
                 if self.path=='/models/text':
                     from campus_detection.web_bert import register
+                    location=(ROOT/request['path']).resolve()
+                    if location.name!='adapter.json' or location.parent.parent!=ROOT/'runtime/delivery/releases' or file_sha256(location)!=request['sha256']:raise ValueError('正文适配工件身份无效')
+                    descriptor=json.loads(location.read_text(encoding='utf8'))
+                    if descriptor.get('schemaVersion')=='six-model-adapter-v1':
+                        from campus_detection.six_model_bundle import register
                     config=register(runtime.models,ROOT/request['path'],request['sha256'])
                     self.reply(200,{'configId':config['configId'],'ready':True});return
                 if self.path=='/library/build':
@@ -146,6 +151,9 @@ def make_server(runtime,port=18081):
                     from campus_detection.mutual_text import detect
                     function=detect
                 selected=runtime.models
+                if self.path=='/detect/text' and runtime.models.get('textConfigs',{}).get(request.get('configId'),{}).get('sixModelBundle'):
+                    from campus_detection.six_model_bundle import detect
+                    function=detect
                 if self.path=='/detect/text':
                     from campus_detection.web_bert import register,select_models
                     key=request.get('configId')

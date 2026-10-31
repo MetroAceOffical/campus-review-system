@@ -132,7 +132,7 @@ def prepare(input_path, output, kind, options, emit):
                         segments += 1
         files.append(output / 'segments.jsonl')
     missing = [name for name in targets if set(counts[name]) != {'0', '1'}] if kind == 'PAIRS' else []
-    manifest = {'schemaVersion': 1, 'taskType': 'PREPARATION', 'status': 'COMPLETED', 'kind': kind, 'inputSha256': data['sourceSha256'], 'seed': seed, 'ratios': ratios, 'inputRows': len(rows), 'groups': len(groups), 'groupSizeDistribution': dict(group_sizes), 'partitions': {name: {'rows': len(parts[name]), 'groups': len({r['_partitionGroup'] for r in parts[name]}), 'labels': dict(counts[name])} for name in parts}, 'trainReady': kind == 'PAIRS' and not missing, 'missingClassPartitions': missing, 'segments': segments, 'requiresLabels': kind == 'NEWS', 'artifacts': {p.name: sha(p) for p in files}}
+    manifest = {'schemaVersion': 1, 'taskType': 'PREPARATION', 'status': 'COMPLETED', 'kind': kind, 'inputSha256': data['sourceSha256'], 'seed': seed, 'ratios': ratios, 'inputRows': len(rows), 'outputRows':sum(len(values) for values in parts.values()) if kind=='PAIRS' else len(rows), 'quarantineRows':len(quarantine), 'groups': len(groups), 'groupSizeDistribution': dict(group_sizes), 'partitions': {name: {'rows': len(parts[name]), 'groups': len({r['_partitionGroup'] for r in parts[name]}), 'labels': dict(counts[name])} for name in parts}, 'trainReady': kind == 'PAIRS' and not missing, 'missingClassPartitions': missing, 'segments': segments, 'requiresLabels': kind == 'NEWS', 'artifacts': {p.name: sha(p) for p in files}}
     write_json(output / 'manifest.json', manifest)
     emit({'stage': 'PREPARED', 'processed': len(rows), 'total': len(rows), 'trainReady': manifest['trainReady']})
     return manifest

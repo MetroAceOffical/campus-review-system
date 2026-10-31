@@ -4,6 +4,8 @@ import {useRoute,useRouter} from 'vue-router'
 import {ElMessageBox} from 'element-plus'
 import ReadOnlyDocument from '../components/ReadOnlyDocument.vue'
 import TextReviewWorkspace from '../components/TextReviewWorkspace.vue'
+import SixModelResults from '../components/SixModelResults.vue'
+const selectedFamily=ref('')
 import TextEvidence from '../components/TextEvidence.vue'
 import ImageEvidence from '../components/ImageEvidence.vue'
 import OcrEvidence from '../components/OcrEvidence.vue'
@@ -21,7 +23,9 @@ const images=computed(()=>{const result:Array<{nodeId:string;fileId:string;capti
 const image=computed(()=>images.value.find(i=>i.nodeId===selectedImage.value))
 const item=computed(()=>report.value?.items.find(i=>i.type===activeTab.value&&(i.type==='TEXT'||i.targetKey===selectedImage.value)))
 const textItem=computed(()=>report.value?.items.find(i=>i.type==='TEXT'))
-const contentEvidence=computed(()=>selectedCheck.value?currentCheck.value?.result?.evidence||[]:textEvidence(textItem.value?.evidence||[]))
+const bundleResults=computed(()=>(selectedCheck.value?currentCheck.value?.result:textItem.value?.activeAttempt?.result)?.bundleResults||[])
+watch(()=>[selectedCheck.value,selected.value,bundleResults.value.map(r=>r.modelId).join('|')],()=>{selectedFamily.value=bundleResults.value.find(r=>r.primary)?.family||''})
+const contentEvidence=computed(()=>bundleResults.value.find(r=>r.family===selectedFamily.value)?.result.evidence||(selectedCheck.value?currentCheck.value?.result?.evidence||[]:textEvidence(textItem.value?.evidence||[])))
 const contentStatus=computed(()=>selectedCheck.value?currentCheck.value?.status:textItem.value?.status)
 const configuration=computed(()=>selectedCheck.value?currentCheck.value?.contentProfile?.textConfig.configId:String((report.value?.pipelineManifest?.textConfig as {configId?:string})?.configId||''))
 const library=computed(()=>selectedCheck.value?currentCheck.value?.contentProfile?.libraryGenerationId:report.value?.libraryGenerationId)
@@ -87,7 +91,7 @@ onBeforeUnmount(()=>{active=false;selection++;checkSelection++;loadTicket++;stop
     <div class="review-context"><strong>第{{snapshot.versionNo}}版 · {{snapshot.title}}</strong><span>{{selectedCheck?'当前查看复检记录':'当前查看原送审记录'}} · {{stateLabel[contentStatus||'']||contentStatus||'待检测'}}</span><small v-if="configuration">配置{{configuration.slice(0,18)}} · 参考库{{library}}</small></div>
     <el-tabs v-model="activeTab" class="review-tabs"><el-tab-pane label="正文全文对照" name="TEXT"/><el-tab-pane label="图片复用" name="IMAGE"/><el-tab-pane label="OCR文字" name="OCR_AND_TEXT"/><el-tab-pane label="语法检查" name="GRAMMAR"/><el-tab-pane label="图文一致性" name="IMAGE_TEXT"/></el-tabs>
     <template v-if="activeTab==='TEXT'">
-      <TextReviewWorkspace v-if="contentStatus==='COMPLETED'" :document="snapshot" :position-map="snapshot.positionMap" :evidence="contentEvidence" :batch="selectedCheck?undefined:report?.batchId" :check="selectedCheck||undefined"/>
+      <SixModelResults :items="bundleResults" :selected="selectedFamily" @select="family=>selectedFamily=family"/><TextReviewWorkspace v-if="contentStatus==='COMPLETED'" :document="snapshot" :position-map="snapshot.positionMap" :evidence="contentEvidence" :batch="selectedCheck?undefined:report?.batchId" :check="selectedCheck||undefined"/>
       <section v-else class="panel"><p>{{stateLabel[contentStatus||'']||contentStatus||'等待检测'}}<template v-if="currentCheck?.error"> · {{currentCheck.error}}</template></p><el-button v-if="!selectedCheck&&textItem&&['FAILED','INTERRUPTED'].includes(textItem.status)" :loading="retrying.includes(textItem.itemId)" @click="retry(textItem)">重试失败项</el-button><ReadOnlyDocument :document="snapshot"/></section>
     </template>
     <div v-else class="review-other-columns">

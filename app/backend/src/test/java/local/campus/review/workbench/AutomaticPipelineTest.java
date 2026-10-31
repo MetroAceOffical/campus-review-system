@@ -58,11 +58,12 @@ class AutomaticPipelineTest {
         var uploaded=data.upload(actor,organization,"阶段16 CPU工程检查","PAIRS",new MockMultipartFile("file","pipeline.csv","text/csv",csv.toString().getBytes(StandardCharsets.UTF_8)));
         String dataset=uploaded.path("datasetId").asText(),version=uploaded.path("versionId").asText();data.cancel(actor,uploaded.path("runId").asText());
         var pipelines=new AutomaticPipelineService(data,training,users,false);
-        var created=pipelines.create(actor,new AutomaticPipelineService.Create(dataset,version,"CPU链路检查",null,null,json.readTree("{\"seed\":20261028,\"ratios\":[0.8,0.1,0.1]}"),null,List.of(new AutomaticPipelineService.Model("lr",json.readTree("{\"device\":\"cpu\",\"max_iter\":100}"))),true));
+        var sixModels=List.of("lr","svm","rf","cnn","bilstm","bert").stream().map(f->new AutomaticPipelineService.Model(f,json.createObjectNode().put("device","cpu").put("max_iter",100).put("epochs",1).put("max_length",16).put("batch_size",8).put("width",16))).toList();
+        var created=pipelines.create(actor,new AutomaticPipelineService.Create(dataset,version,"CPU链路检查",null,null,json.readTree("{\"seed\":20261028,\"ratios\":[0.8,0.1,0.1]}"),null,sixModels,true));
         String id=created.path("pipelineId").asText();var actions=new ArrayList<String>();
         var worker=new WorkbenchWorker(data,false);var compute=new TrainingWorker(training,false);
         try{
-            for(int phase=0;phase<4;phase++){
+            for(int phase=0;phase<14;phase++){
                 pipelines.advance(id);var view=pipelines.get(actor,id);assertEquals("RUNNING",view.path("status").asText(),view.toString());
                 String run=view.path("state").path("currentRunId").asText();pipelines.advance(id);
                 assertEquals(run,pipelines.get(actor,id).path("state").path("currentRunId").asText());
@@ -75,9 +76,9 @@ class AutomaticPipelineTest {
                 pipelines=new AutomaticPipelineService(data,training,users,false);
             }
             pipelines.advance(id);var completed=pipelines.get(actor,id);assertEquals("COMPLETED",completed.path("status").asText(),completed.toString());
-            pipelines.advance(id);assertEquals(4,pipelines.get(actor,id).path("state").path("steps").size());
-            assertEquals(List.of("CLEAN","PREPARE","TRAIN","EVALUATE"),actions);
-            var repeat=new AutomaticPipelineService.Create(dataset,version,"取消重试工程检查",null,null,null,null,List.of(new AutomaticPipelineService.Model("lr",null)),true);
+            pipelines.advance(id);assertEquals(14,pipelines.get(actor,id).path("state").path("steps").size());
+            var expected=new ArrayList<>(List.of("CLEAN","PREPARE"));for(int member=0;member<6;member++)expected.addAll(List.of("TRAIN","EVALUATE"));assertEquals(expected,actions);
+            var repeat=new AutomaticPipelineService.Create(dataset,version,"取消重试工程检查",null,null,null,null,sixModels,true);
             String cancelled=pipelines.create(actor,repeat).path("pipelineId").asText();pipelines.advance(cancelled);
             String old=pipelines.get(actor,cancelled).path("state").path("currentRunId").asText();
             pipelines.control(actor,cancelled,false);assertEquals("CANCELLED",data.runRow(actor,old).get("status"));

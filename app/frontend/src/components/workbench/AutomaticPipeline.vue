@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import RecordPagination from '../RecordPagination.vue'
+import {workflowContext} from '../../workflow-context'
 const pageSize = ref(10)
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import type { Detail } from '../../api/workbench'
 import * as api from '../../api/training'
 import { modelNames } from '../../api/training'
 const props = defineProps<{ dataset: Detail | null; versionId: string; models: api.PipelineModel[]; preparation: Record<string, unknown>; generation: Record<string, unknown>; name: string; setupVisible?: boolean;focusId?:string;preparationId?:string;parentPipelineId?:string }>()
-const emit = defineEmits<{ view: [runId: string]; open: [runId: string] }>()
+const emit = defineEmits<{ view: [runId: string]; open: [runId: string];created:[id:string] }>()
 const source = ref(''), items = ref<api.ModelBundle[]>([]), error = ref(''), busy = ref(false), page = ref(1), total = ref(0)
 let openFirst = false
 const following = ref(''), displayedRun = ref('')
@@ -20,7 +21,7 @@ async function load() {
   const dataset = props.dataset?.datasetId, requested = page.value
   if (!dataset || refreshing) return
   refreshing = true
-  try { const result = await api.pipelines(dataset, requested, pageSize.value); if (alive && props.dataset?.datasetId === dataset && page.value === requested) { items.value = result.items as api.ModelBundle[]; total.value = result.total; if(props.focusId&&!items.value.some(p=>p.pipelineId===props.focusId)){const focused=await api.bundle(props.focusId);if(focused.datasetId===dataset)items.value.unshift(focused)} error.value = ''; showCurrent() } }
+  try { const result = await api.pipelines(dataset, requested, pageSize.value); if (alive && props.dataset?.datasetId === dataset && page.value === requested) { items.value = result.items as api.ModelBundle[]; total.value = result.total; if(props.focusId&&!items.value.some(p=>p.pipelineId===props.focusId)){const focused=await api.bundle(props.focusId);if(focused.datasetId===dataset)items.value.unshift(focused)} if(props.focusId)workflowContext.bundle=items.value.find(p=>p.pipelineId===props.focusId);error.value = ''; showCurrent() } }
   catch (value) { if (alive && props.dataset?.datasetId === dataset) error.value = value instanceof Error ? value.message : '流程读取失败' }
   finally { refreshing = false }
 }
@@ -29,7 +30,7 @@ async function start() { await perform(async () => {
   if (!props.dataset || !source.value || !props.models.length || !props.name.trim()) throw new Error('请选择数据版本、模型，并填写实验名称')
   const audited = props.dataset.runs.find(run => run.action === 'AUDIT' && run.inputVersionId === source.value && run.status === 'COMPLETED')
   const created = await api.startPipeline({ datasetId: props.dataset.datasetId, versionId: source.value, name: props.name, mapping: audited?.result?.mapping ?? {}, cleaning: { ...cleaning.value, auto_reference_import: props.dataset.kind === 'NEWS' && ['LIBRARY','BOTH'].includes(props.dataset.purpose || '') }, preparation: props.preparation, generation: props.generation, models: props.models, evaluate: true,parentPipelineId:props.parentPipelineId })
-  openFirst = true; following.value = created.pipelineId; displayedRun.value = ''; page.value = 1
+  emit('created',created.pipelineId);openFirst = true; following.value = created.pipelineId; displayedRun.value = ''; page.value = 1
 }) }
 const control = (id: string, action: 'cancel' | 'retry') => perform(async () => { await api.controlPipeline(id, action) })
 function showCurrent() { const run = items.value.find(item => item.pipelineId === following.value)?.state.currentRunId; if (run && run !== displayedRun.value) { displayedRun.value = run; emit('view', run); if(openFirst) { openFirst=false; emit('open',run) } } }

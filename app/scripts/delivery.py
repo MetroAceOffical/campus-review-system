@@ -7,6 +7,12 @@ sys.path.insert(0,str(ROOT/'app/python'))
 from campus_shared.contracts import file_sha256, digest_json
 
 def run(config):
+    if config['action']=='BUNDLE_PREDICT':
+        from campus_detection.six_model_bundle import predict_pairs
+        return predict_pairs(config['textAdapter'],config['rows'])
+    if config['action']=='SIX_MODEL_BUNDLE':
+        from campus_detection.six_model_bundle import prepare
+        return prepare(config,Path(config['output']),run)
     if config['action']=='WEB_BERT':
         from campus_detection.web_bert_calibration import prepare
         verified=run({**config,'action':'MODEL'})

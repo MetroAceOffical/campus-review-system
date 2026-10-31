@@ -11,7 +11,7 @@ import java.util.*;
 @Service
 public class WorkbenchFlowService {
     final DatasetService data;final TrainingService training;
-    static final Set<String> KEYS=Set.of("datasetId","versionId","preparationId","trainingRunId","evaluationRunId","modelId","parentModelId","importId","releaseId");
+    static final Set<String> KEYS=Set.of("datasetId","versionId","preparationId","trainingRunId","evaluationRunId","modelId","parentModelId","importId","releaseId","bundleId");
     public WorkbenchFlowService(DatasetService data,TrainingService training){this.data=data;this.training=training;}
     public record Create(String requestId,String kind,String name){}
     public record Edit(long revision,JsonNode context,String step){public Edit(long revision,JsonNode context){this(revision,context,null);}}
@@ -58,6 +58,12 @@ public class WorkbenchFlowService {
             if(dataset==null)throw invalid("请先选择数据集");var version=data.version(datasetId,versionId);
             if(!datasetId.equals(version.get("dataset_id").toString()))throw invalid("版本与数据集不匹配");
         }
+        if(context.has("bundleId")){
+            AccessPolicy.requireAdmin(user);var groups=data.db.queryForList("SELECT * FROM ml_pipeline WHERE id=? AND bundle_version=1",context.path("bundleId").asText());if(groups.isEmpty())throw invalid("模型组不可用");var group=groups.getFirst();
+            var state=JsonSupport.parse(data.json,group.get("state_json").toString());String expected=state.path("cleanVersionId").asText(group.get("input_version_id").toString());
+            if(dataset==null||!datasetId.equals(group.get("dataset_id").toString())||!versionId.equals(expected)||context.has("preparationId")&&!context.path("preparationId").asText().equals(state.path("preparationId").asText()))throw invalid("模型组与所选数据或样本版本不匹配");
+            if(context.has("modelId")){boolean found=false;for(var member:state.path("models"))if(context.path("modelId").asText().equals(member.path("modelId").asText()))found=true;if(!found)throw invalid("模型不属于本次训练组");}
+        }
         if(context.has("parentModelId")){
             if(!"CONTINUE".equals(kind))throw invalid("当前任务不接受起始模型");
             var parent=training.model(user,context.path("parentModelId").asText());
@@ -81,8 +87,10 @@ public class WorkbenchFlowService {
             if(!context.path("trainingRunId").asText().equals(model.get("run_id").toString())||!datasetId.equals(model.get("dataset_id").toString())||!versionId.equals(run.get("input_version_id").toString()))throw invalid("模型与当前训练不匹配");
         }
         if(context.has("releaseId")){
-            AccessPolicy.requireAdmin(user);var rows=data.db.queryForList("SELECT model_id,evaluation_run_id FROM model_release WHERE id=?",context.path("releaseId").asText());
-            if(rows.isEmpty()||!context.has("modelId")||!context.path("modelId").asText().equals(Objects.toString(rows.getFirst().get("model_id"),""))||!context.path("evaluationRunId").asText().equals(Objects.toString(rows.getFirst().get("evaluation_run_id"),"")))throw invalid("发布版本与本次模型或评价不匹配");
+            AccessPolicy.requireAdmin(user);var rows=data.db.queryForList("SELECT model_id,evaluation_run_id,bundle_id FROM model_release WHERE id=?",context.path("releaseId").asText());
+            if(rows.isEmpty())throw invalid("发布版本不可用");var released=rows.getFirst();
+            if(context.has("bundleId")){if(!context.path("bundleId").asText().equals(Objects.toString(released.get("bundle_id"),"")))throw invalid("发布版本与本次模型组不匹配");}
+            else if(!context.has("modelId")||!context.path("modelId").asText().equals(Objects.toString(released.get("model_id"),""))||!context.path("evaluationRunId").asText().equals(Objects.toString(released.get("evaluation_run_id"),"")))throw invalid("发布版本与本次模型或评价不匹配");
         }
         if(context.has("importId")){
             if(dataset==null||!"NEWS".equals(dataset.get("kind")))throw invalid("请选择新闻数据集");

@@ -14,6 +14,7 @@ public class DeliveryController {
     @GetMapping("/releases/text-profiles")Api profiles(Authentication a)throws Exception{return Api.ok(releases.textProfiles(users.require(a)));}
     @GetMapping("/releases/models/{id}/evaluations")Api evaluations(Authentication a,@PathVariable String id){return Api.ok(releases.evaluations(users.require(a),id));}
     @PostMapping("/releases")Api create(Authentication a,@RequestBody ReleaseService.Create input){return Api.ok(releases.create(users.require(a),input));}
+    @PostMapping("/releases/bundles")Api createBundle(Authentication a,@RequestBody ReleaseService.BundleCreate input){return Api.ok(releases.createBundle(users.require(a),input));}
     public record Switch(String expectedId){}
     @PostMapping("/releases/{id}/activate")Api activate(Authentication a,@PathVariable String id,@RequestBody Switch input){return Api.ok(releases.activate(users.require(a),id,input.expectedId()));}
     public record Prediction(String organizationId,JsonNode rows){}

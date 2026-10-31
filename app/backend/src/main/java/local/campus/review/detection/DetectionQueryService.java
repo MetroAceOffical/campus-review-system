@@ -47,7 +47,7 @@ public class DetectionQueryService {
             execution.set("modelConfig",JsonSupport.parse(json,attempt.get("model_config_json").toString()));execution.put("errorCode",Objects.toString(attempt.get("error_code"),"")).put("errorMessage",Objects.toString(attempt.get("error_message"),""));
             var output=JsonSupport.parse(json,attempt.get("result_json").toString());execution.set("result",output);value.set("activeAttempt",execution);
             value.set("evidence",output.path("evidence").isArray()?output.path("evidence"):output.path("textEvidence").isArray()?output.path("textEvidence"):json.createArrayNode());value.set("qualityFlags",output.path("qualityFlags").isArray()?output.path("qualityFlags"):json.createArrayNode());
-            if("TEXT".equals(item.path("type").asText()))citations.annotate(value.path("evidence"),document);
+            if("TEXT".equals(item.path("type").asText())){citations.annotate(value.path("evidence"),document);for(var member:output.path("bundleResults"))citations.annotate(member.path("result").path("evidence"),document);}
         }
         return result;
     }

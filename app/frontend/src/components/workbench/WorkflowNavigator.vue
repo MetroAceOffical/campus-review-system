@@ -27,11 +27,16 @@ async function sync(){
     let context:FlowContext={...flow?.context},dataset=String(route.query.dataset||context.datasetId||''),version=String(route.query.version||context.versionId||'')
     if(flow?.kind==='CONTINUE' && !context.parentModelId && route.query.selectParent){dataset=context.datasetId||'';version=context.versionId||''}
     if(flow&& !route.query.selectParent && ((route.query.dataset&&dataset!==context.datasetId)||(route.query.version&&version!==context.versionId)))context={...(context.parentModelId?{parentModelId:context.parentModelId}:{}),datasetId:dataset,versionId:version}
+    const bundleId=String(route.query.bundle||route.query.bundleId||context.bundleId||'')
+    const bundle=bundleId?await training.bundle(bundleId):undefined
+    workflowContext.bundle=bundle
+    if(bundle){context.bundleId=bundle.pipelineId;dataset=bundle.datasetId;version=bundle.state.cleanVersionId||version;context.datasetId=dataset;context.versionId=version;if(bundle.state.preparationId)context.preparationId=bundle.state.preparationId;const canonical=bundle.state.models.find(m=>m.family==='bert');if(canonical){context.trainingRunId=canonical.modelId;context.modelId=canonical.modelId;if(canonical.evaluationRunId)context.evaluationRunId=canonical.evaluationRunId}else{delete context.trainingRunId;delete context.modelId;delete context.evaluationRunId}}
     let run:training.ComputeRun|undefined
     if(route.path==='/training'&&route.query.run){
       run=await training.run(String(route.query.run));dataset=run.datasetId;version=run.inputVersionId
       context.datasetId=dataset;context.versionId=version
-      if(run.action==='TRAIN'){
+      if(bundle){if(!bundle.state.steps.some(s=>s.runId===run!.runId))throw new Error('该运行不属于当前模型组')}
+      else if(run.action==='TRAIN'){
         if(flow&&(flow.kind==='CONTINUE'?(run.options.parentModelId||'')!==(context.parentModelId||''):!!run.options.parentModelId))throw new Error('该训练使用了不同起始模型，请从任务首页单独打开')
         if(context.trainingRunId!==run.runId){delete context.modelId;delete context.evaluationRunId;delete context.releaseId}context.trainingRunId=run.runId;if(run.status==='COMPLETED')context.modelId=run.runId;if(run.options.preparationId)context.preparationId=run.options.preparationId
       }
@@ -67,9 +72,9 @@ async function sync(){
   }catch(e){if(valid()){error.value=e instanceof Error?e.message:'读取任务失败';activeFlow.value=undefined;workflowContext.dataset=undefined;workflowContext.version='';workflowContext.model=undefined;workflowContext.run=undefined}}finally{saving.value=false}
 }
 async function schedule(){pending=true;if(working)return;working=true;try{while(pending&&alive){pending=false;await sync()}}finally{working=false}}
-watch(()=>[route.fullPath,session.user?.userId,workflowContext.dataset?.runs.map(r=>r.runId+':'+r.status).join('|')],()=>void schedule(),{immediate:true})
+watch(()=>[route.fullPath,session.user?.userId,workflowContext.bundle?.status,workflowContext.bundle?.trainedCount,workflowContext.bundle?.evaluatedCount,workflowContext.dataset?.runs.map(r=>r.runId+':'+r.status).join('|')],()=>void schedule(),{immediate:true})
 onBeforeUnmount(()=>{alive=false})
-const steps=computed(()=>activeFlow.value?flowSteps(activeFlow.value,workflowContext.dataset).filter(s=>session.user?.role==='ADMIN'||!['parent','prepare','train'].includes(s.key)):[])
+const steps=computed(()=>activeFlow.value?flowSteps(activeFlow.value,workflowContext.dataset,workflowContext.bundle).filter(s=>session.user?.role==='ADMIN'||!['parent','prepare','train'].includes(s.key)):[])
 const current=computed(()=>String(route.query.flowStep||activeFlow.value?.currentStep||''))
 const version=computed(()=>workflowContext.dataset?.versions.find(v=>v.versionId===workflowContext.version))
 </script>
