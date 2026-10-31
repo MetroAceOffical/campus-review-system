@@ -6,7 +6,7 @@ export interface Audit {
   sourceDistribution: Record<string, number>; departmentDistribution: Record<string, number>
   dateDistribution: Record<string, number>; classDistribution: Record<string, number>
 }
-export interface Dataset { datasetId: string; organizationId: string; name: string; kind: 'NEWS' | 'PAIRS'; archived: boolean; purpose?: 'UNSET' | 'LIBRARY' | 'TRAIN' | 'BOTH' }
+export interface Dataset { datasetId: string; organizationId: string; name: string; kind: 'NEWS' | 'PAIRS'; archived: boolean; catalog?:'USER'|'FORMAL'|'HISTORY';purpose?: 'UNSET' | 'LIBRARY' | 'TRAIN' | 'BOTH' }
 export interface Version { versionId: string; stage: 'RAW' | 'CLEAN'; status: string; sha256: string; rowCount: number | null; origin?: 'COMPOSITION'; createdAt?: string; parentVersionId?: string }
 export interface RunResult { audit?: Audit; columns?: string[]; mapping?: Record<string, string>; preview?: Array<Record<string, unknown>>; outputRows?: number; quarantineRows?: number; duplicateRows?: number }
 export interface Run { runId: string; datasetId: string; inputVersionId: string; outputVersionId: string; action: string; status: string; error: string; result?: RunResult; options?: { modelId?: string }; mapping?: Record<string, string>; createdAt?: string }
@@ -15,7 +15,7 @@ export interface Progress { sequence: number; data: { stage: string; processed?:
 export interface Cleaning { before: Audit; after: Audit; inputRows: number; outputRows: number; duplicateRows: number }
 export interface Page<T> { items: T[]; total: number }
 export const organizations = () => request<Array<{ organizationId: string; name: string }>>('/api/workbench/organizations')
-export const datasets = (page: number, q: string, archived: boolean, pageSize = 12) => request<Page<Dataset>>(`/api/workbench/datasets?page=${page}&pageSize=${pageSize}&q=${encodeURIComponent(q)}&archived=${archived}`)
+export const datasets = (page: number, q: string, archived: boolean, pageSize = 12,history=false) => request<Page<Dataset>>(`/api/workbench/datasets?page=${page}&pageSize=${pageSize}&q=${encodeURIComponent(q)}&archived=${archived}&history=${history}`)
 export const dataset = (id: string) => request<Detail>(`/api/workbench/datasets/${id}`)
 export const upload = (form: FormData) => request<{ datasetId: string; versionId: string; runId: string }>('/api/workbench/datasets', { method: 'POST', body: form })
 export const update = (id: string, fields: { name?: string; archived?: boolean; purpose?: string }) => request<Detail>(`/api/workbench/datasets/${id}`, { method: 'PATCH', body: JSON.stringify(fields) })

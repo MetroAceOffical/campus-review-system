@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class TrainingController {
     private final TrainingService training;private final CurrentUserService users;
     public TrainingController(TrainingService training,CurrentUserService users){this.training=training;this.users=users;}
-    @PostMapping("/runs") Api start(Authentication auth,@RequestBody TrainingService.Start request){return Api.ok(training.start(users.require(auth),request));}
+    @PostMapping("/runs") Api start(Authentication auth,@RequestBody TrainingService.Start request){var actor=users.require(auth);TrainingService.requireTrainingAccess(actor,request.action());if("TRAIN".equals(request.action()))throw new local.campus.review.common.ApiException(400,"BUNDLE_REQUIRED","请通过六模型组开始训练或继续训练");return Api.ok(training.start(actor,request));}
     @GetMapping("/runs") Api runs(Authentication auth,@RequestParam(defaultValue="1")int page,@RequestParam(defaultValue="20")int pageSize,@RequestParam(defaultValue="")String q,@RequestParam(required=false)String modelId){return Api.ok(training.runs(users.require(auth),page,pageSize,q,modelId));}
     @GetMapping("/models") Api models(Authentication auth,@RequestParam(defaultValue="1")int page,@RequestParam(defaultValue="20")int pageSize,@RequestParam(defaultValue="")String q,@RequestParam(defaultValue="false")boolean archived){return Api.ok(training.models(users.require(auth),page,pageSize,q,archived));}
     @GetMapping("/model-groups") Api groups(Authentication auth,@RequestParam(defaultValue="1")int page,@RequestParam(defaultValue="20")int pageSize,@RequestParam(defaultValue="")String q,@RequestParam(defaultValue="false")boolean archived){return Api.ok(training.modelGroups(users.require(auth),page,pageSize,q,archived));}

@@ -40,6 +40,10 @@ export interface PipelineModel { family: string; parameters: Record<string, unkn
 export const pipelines = (datasetId: string, page = 1, pageSize = 10) => request<Page<Pipeline>>(`/api/workbench/pipelines?datasetId=${encodeURIComponent(datasetId)}&page=${page}&pageSize=${pageSize}`)
 export const startPipeline = (input: Record<string, unknown>) => request<{ pipelineId: string }>('/api/workbench/pipelines', { method: 'POST', body: JSON.stringify(input) })
 export const controlPipeline = (id: string, action: 'cancel' | 'retry') => request<Pipeline>(`/api/workbench/pipelines/${id}/${action}`, { method: 'POST' })
+export const sixFamilies=['lr','svm','rf','cnn','bilstm','bert'] as const
+export interface ModelBundle extends Pipeline {bundleVersion:number;trainedCount:number;evaluatedCount:number;parentPipelineId?:string;archived:boolean}
+export const bundles=(page=1,pageSize=12,q='',history=false)=>request<Page<ModelBundle>>(`/api/workbench/pipelines/bundles?${new URLSearchParams({page:String(page),pageSize:String(pageSize),q,history:String(history)})}`)
+export const bundle=(id:string)=>request<ModelBundle>(`/api/workbench/pipelines/${encodeURIComponent(id)}`)
 
 export const modelGroups=(page=1,q='',archived=false,pageSize=20)=>request<Page<Model>>(`/api/workbench/training/model-groups?${new URLSearchParams({page:String(page),pageSize:String(pageSize),q,archived:String(archived)})}`)
 export const modelVersions=(id:string,page=1,pageSize=12)=>request<Page<Model>>(`/api/workbench/training/models/${encodeURIComponent(id)}/versions?page=${page}&pageSize=${pageSize}`)

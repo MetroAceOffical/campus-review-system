@@ -1,0 +1,7 @@
+ALTER TABLE ml_pipeline
+ ADD COLUMN bundle_version INT NOT NULL DEFAULT 0,
+ ADD COLUMN parent_pipeline_id CHAR(36) NULL,
+ ADD COLUMN archived BOOLEAN NOT NULL DEFAULT FALSE,
+ ADD CONSTRAINT fk_pipeline_parent FOREIGN KEY(parent_pipeline_id) REFERENCES ml_pipeline(id);
+ALTER TABLE ml_dataset ADD COLUMN catalog VARCHAR(16) NOT NULL DEFAULT 'USER';
+ALTER TABLE ml_model ADD COLUMN catalog VARCHAR(16) NOT NULL DEFAULT 'USER';

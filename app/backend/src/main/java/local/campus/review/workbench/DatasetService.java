@@ -93,15 +93,18 @@ public class DatasetService {
         event(id,Map.of("stage","QUEUED"));
     }
     public JsonNode list(CurrentUser user,int page,int size,String q,boolean archived){
+        return list(user,page,size,q,archived,false);
+    }
+    public JsonNode list(CurrentUser user,int page,int size,String q,boolean archived,boolean history){
         role(user);if(page<1 || size<1 || size>100 || q.length()>120)throw new ApiException(400,"VALIDATION_ERROR","列表参数无效");
-        String from=" FROM ml_dataset d JOIN organization o ON o.id=d.organization_id WHERE o.enabled=true AND d.archived=? AND d.name LIKE ?";
+        String from=" FROM ml_dataset d JOIN organization o ON o.id=d.organization_id WHERE o.enabled=true AND d.archived=? AND d.name LIKE ? AND d.catalog"+(history?"='HISTORY'":"<>'HISTORY'");
         var args=new ArrayList<Object>(List.of(archived,"%"+q+"%"));
         var result=json.createObjectNode().put("total",db.queryForObject("SELECT COUNT(*)"+from,Long.class,args.toArray())).put("page",page).put("pageSize",size);
         args.add(size);args.add((long)(page-1)*size);var items=result.putArray("items");
         for(var row:db.queryForList("SELECT d.*,o.name AS organization_name"+from+" ORDER BY d.updated_at DESC,d.id LIMIT ? OFFSET ?",args.toArray()))items.add(summary(row));
         return result;
     }
-    JsonNode summary(Map<String,Object> row){return json.createObjectNode().put("datasetId",row.get("id").toString()).put("organizationId",row.get("organization_id").toString()).put("name",row.get("name").toString()).put("kind",row.get("kind").toString()).put("purpose",Objects.toString(row.get("purpose"),"UNSET")).put("archived",Boolean.TRUE.equals(row.get("archived"))).put("updatedAt",row.get("updated_at").toString());}
+    JsonNode summary(Map<String,Object> row){return json.createObjectNode().put("datasetId",row.get("id").toString()).put("organizationId",row.get("organization_id").toString()).put("name",row.get("name").toString()).put("kind",row.get("kind").toString()).put("catalog",Objects.toString(row.get("catalog"),"USER")).put("purpose",Objects.toString(row.get("purpose"),"UNSET")).put("archived",Boolean.TRUE.equals(row.get("archived"))).put("updatedAt",row.get("updated_at").toString());}
     public JsonNode get(CurrentUser user,String id){
         var row=dataset(user,id);var result=(com.fasterxml.jackson.databind.node.ObjectNode)summary(row);
         var versions=result.putArray("versions");for(var version:db.queryForList("SELECT v.*,p.file_name AS parent_file_name FROM ml_dataset_version v LEFT JOIN ml_dataset_version p ON p.id=v.parent_version_id WHERE v.dataset_id=? ORDER BY v.created_at DESC,v.id",id)){

@@ -19,34 +19,62 @@ public class AutomaticPipelineService {
     private final DatasetService data;private final TrainingService training;private final CurrentUserService users;private final boolean enabled;private volatile boolean ready;
     public AutomaticPipelineService(DatasetService data,TrainingService training,CurrentUserService users,@Value("${campus.workbench.enabled:true}")boolean enabled){this.data=data;this.training=training;this.users=users;this.enabled=enabled;}
     public record Model(String family,JsonNode parameters){}
-    public record Create(String datasetId,String versionId,String name,JsonNode mapping,JsonNode cleaning,JsonNode preparation,JsonNode generation,List<Model> models,boolean evaluate){}
+    public record Create(String datasetId,String versionId,String name,JsonNode mapping,JsonNode cleaning,JsonNode preparation,JsonNode generation,List<Model> models,boolean evaluate,String preparationId,String parentPipelineId){
+        public Create(String datasetId,String versionId,String name,JsonNode mapping,JsonNode cleaning,JsonNode preparation,JsonNode generation,List<Model> models,boolean evaluate){this(datasetId,versionId,name,mapping,cleaning,preparation,generation,models,evaluate,null,null);}
+    }
     public JsonNode create(CurrentUser actor,Create input){
         AccessPolicy.requireAdmin(actor);if(input==null)throw invalid("请配置自动流程");var dataset=data.dataset(actor,input.datasetId());var version=data.version(input.datasetId(),input.versionId());
         if(Boolean.TRUE.equals(dataset.get("archived"))||!"READY".equals(version.get("status"))||"sources.json".equals(version.get("file_name")))throw invalid("请选择未归档数据集的就绪数据版本");
         validateModels(input.models());String name=DatasetService.name(input.name());
-        var config=data.json.createObjectNode().put("inputSha256",version.get("sha256").toString()).put("kind",dataset.get("kind").toString()).put("evaluate",input.evaluate());
+        var config=data.json.createObjectNode().put("inputSha256",version.get("sha256").toString()).put("kind",dataset.get("kind").toString()).put("evaluate",true).put("bundleVersion",1);
         for(var entry:Map.of("mapping",node(input.mapping()),"cleaning",node(input.cleaning()),"preparation",node(input.preparation()),"generation",node(input.generation())).entrySet()){
             if(!entry.getValue().isObject()||entry.getValue().toString().length()>10000)throw invalid("流程参数格式无效");config.set(entry.getKey(),entry.getValue());
         }
         var models=config.putArray("models");for(var model:input.models())models.addObject().put("family",model.family()).set("parameters",training.parameters(model.family(),model.parameters()));
         var state=initial(data.json,"RAW".equals(version.get("stage")),input.versionId());String id=DatasetService.uuid();
+        if(input.preparationId()!=null){
+            var prepared=training.preparation(actor,input.preparationId(),input.datasetId());
+            if(!input.versionId().equals(prepared.get("input_version_id"))||!"CLEAN".equals(version.get("stage"))||!JsonSupport.parse(data.json,prepared.get("result_json").toString()).path("trainReady").asBoolean())throw invalid("请选择当前清洗版本的可训练样本");
+            state.put("preparationId",input.preparationId()).put("stage","TRAIN");
+        }
+        if(input.parentPipelineId()!=null){
+            var parent=row(actor,input.parentPipelineId());var previous=JsonSupport.parse(data.json,parent.get("state_json").toString());
+            if(((Number)parent.get("bundle_version")).intValue()!=1||!"COMPLETED".equals(parent.get("status"))||Boolean.TRUE.equals(parent.get("archived")))throw invalid("请选择已完成的六模型组继续训练");
+            if(!dataset.get("organization_id").equals(data.dataset(actor,parent.get("dataset_id").toString()).get("organization_id")))throw invalid("起始模型组须属于同一部门");
+            var parents=config.putObject("parentModels");for(var item:previous.path("models")){
+                training.model(actor,item.path("modelId").asText());parents.put(item.path("family").asText(),item.path("modelId").asText());
+            }
+            if(parents.size()!=6)throw invalid("起始模型组不完整");
+        }
         data.transactions.executeWithoutResult(tx->{
             if(Boolean.TRUE.equals(data.db.queryForObject("SELECT archived FROM ml_dataset WHERE id=? FOR UPDATE",Boolean.class,input.datasetId())))throw invalid("数据集已归档");
-            data.db.update("INSERT INTO ml_pipeline(id,dataset_id,input_version_id,name,status,config_json,state_json,created_by,actor_id,created_at,updated_at) VALUES(?,?,?,?,'QUEUED',?,?,?,?,UTC_TIMESTAMP(3),UTC_TIMESTAMP(3))",id,input.datasetId(),input.versionId(),name,config.toString(),state.toString(),actor.userId(),actor.userId());
+            data.db.update("INSERT INTO ml_pipeline(id,dataset_id,input_version_id,name,status,config_json,state_json,created_by,actor_id,bundle_version,parent_pipeline_id,created_at,updated_at) VALUES(?,?,?,?,'QUEUED',?,?,?,?,1,?,UTC_TIMESTAMP(3),UTC_TIMESTAMP(3))",id,input.datasetId(),input.versionId(),name,config.toString(),state.toString(),actor.userId(),actor.userId(),input.parentPipelineId());
         });return data.json.createObjectNode().put("pipelineId",id);
     }
     private JsonNode node(JsonNode value){return value==null?data.json.createObjectNode():value;}
-    static void validateModels(List<Model> models){if(models==null||models.isEmpty()||models.size()>6)throw invalid("请选择1—6个模型");var families=new HashSet<String>();for(var model:models)if(model==null||model.family()==null||!TrainingService.FAMILIES.contains(model.family())||!families.add(model.family()))throw invalid("模型无效或重复");}
+    static void validateModels(List<Model> models){if(models==null||models.size()!=6)throw invalid("训练须包含 LR、SVM、RF、CNN、BiLSTM、BERT 六种模型");var families=new HashSet<String>();for(var model:models)if(model==null||model.family()==null||!TrainingService.FAMILIES.contains(model.family())||!families.add(model.family()))throw invalid("模型无效或重复");}
     static ApiException invalid(String message){return new ApiException(400,"VALIDATION_ERROR",message);}
     static ObjectNode initial(ObjectMapper json,boolean raw,String version){var state=json.createObjectNode().put("stage",raw?"CLEAN":"PREPARE").put("modelIndex",0);state.putArray("steps");state.putArray("models");if(!raw)state.put("cleanVersionId",version);return state;}
     private Map<String,Object> row(CurrentUser actor,String id){data.role(actor);DatasetService.identity(id);var rows=data.db.queryForList("SELECT * FROM ml_pipeline WHERE id=?",id);if(rows.isEmpty())throw DatasetService.missing();data.dataset(actor,rows.getFirst().get("dataset_id").toString());return rows.getFirst();}
     public JsonNode get(CurrentUser actor,String id){return view(row(actor,id));}
-    private ObjectNode view(Map<String,Object> row){var result=data.json.createObjectNode().put("pipelineId",row.get("id").toString()).put("datasetId",row.get("dataset_id").toString()).put("name",row.get("name").toString()).put("status",row.get("status").toString()).put("error",Objects.toString(row.get("error_message"),"")).put("updatedAt",row.get("updated_at").toString());var state=(ObjectNode)JsonSupport.parse(data.json,row.get("state_json").toString());
+    ObjectNode view(Map<String,Object> row){var result=data.json.createObjectNode().put("pipelineId",row.get("id").toString()).put("datasetId",row.get("dataset_id").toString()).put("name",row.get("name").toString()).put("status",row.get("status").toString()).put("error",Objects.toString(row.get("error_message"),"")).put("updatedAt",row.get("updated_at").toString()).put("bundleVersion",((Number)row.getOrDefault("bundle_version",0)).intValue()).put("archived",Boolean.TRUE.equals(row.get("archived")));var state=(ObjectNode)JsonSupport.parse(data.json,row.get("state_json").toString());
+        if(row.get("parent_pipeline_id")!=null)result.put("parentPipelineId",row.get("parent_pipeline_id").toString());
         for(var step:state.withArray("steps")){var jobs=data.db.queryForList("SELECT status,error_message FROM ml_run WHERE id=?",step.path("runId").asText());if(!jobs.isEmpty())((ObjectNode)step).put("status",jobs.getFirst().get("status").toString()).put("error",Objects.toString(jobs.getFirst().get("error_message"),""));}
-        result.set("state",state);return result;
+        int evaluated=0;for(var member:state.withArray("models")){
+            var saved=data.db.queryForList("SELECT manifest_json FROM ml_model WHERE id=?",member.path("modelId").asText());
+            if(!saved.isEmpty()){var manifest=JsonSupport.parse(data.json,saved.getFirst().get("manifest_json").toString());((ObjectNode)member).set("validation",manifest.path("validation"));((ObjectNode)member).put("trainRows",manifest.path("trainRows").asLong());}
+            if(member.hasNonNull("evaluationRunId")){var evaluation=data.db.queryForList("SELECT status,result_json FROM ml_run WHERE id=?",member.path("evaluationRunId").asText());if(!evaluation.isEmpty()&&"COMPLETED".equals(evaluation.getFirst().get("status"))){evaluated++;((ObjectNode)member).set("test",JsonSupport.parse(data.json,evaluation.getFirst().get("result_json").toString()).path("metrics"));}}
+        }
+        result.put("trainedCount",state.withArray("models").size()).put("evaluatedCount",evaluated);result.set("state",state);return result;
+    }
+    public JsonNode bundles(CurrentUser actor,int page,int size,String q,boolean history){
+        data.role(actor);if(page<1||size<1||size>100)throw invalid("分页无效");
+        String from=" FROM ml_pipeline p JOIN ml_dataset d ON d.id=p.dataset_id JOIN organization o ON o.id=d.organization_id WHERE o.enabled=true AND p.bundle_version=1 AND p.archived=? AND p.name LIKE ?";
+        var result=data.json.createObjectNode().put("total",data.db.queryForObject("SELECT COUNT(*)"+from,Long.class,history,"%"+q+"%")).put("page",page).put("pageSize",size);var items=result.putArray("items");
+        for(var row:data.db.queryForList("SELECT p.*"+from+" ORDER BY p.created_at DESC,p.id LIMIT ? OFFSET ?",history,"%"+q+"%",size,(page-1L)*size))items.add(view(row));return result;
     }
     public JsonNode list(CurrentUser actor,String dataset,int page){return list(actor,dataset,page,10);}
-    public JsonNode list(CurrentUser actor,String dataset,int page,int size){data.dataset(actor,dataset);if(page<1 || size<1 || size>100)throw invalid("分页无效");var result=data.json.createObjectNode().put("page",page).put("pageSize",size).put("total",data.db.queryForObject("SELECT COUNT(*) FROM ml_pipeline WHERE dataset_id=?",Long.class,dataset));var items=result.putArray("items");for(var row:data.db.queryForList("SELECT * FROM ml_pipeline WHERE dataset_id=? ORDER BY created_at DESC,id LIMIT ? OFFSET ?",dataset,size,(page-1L)*size))items.add(view(row));return result;}
+    public JsonNode list(CurrentUser actor,String dataset,int page,int size){data.dataset(actor,dataset);if(page<1 || size<1 || size>100)throw invalid("分页无效");var result=data.json.createObjectNode().put("page",page).put("pageSize",size).put("total",data.db.queryForObject("SELECT COUNT(*) FROM ml_pipeline WHERE dataset_id=? AND archived=false",Long.class,dataset));var items=result.putArray("items");for(var row:data.db.queryForList("SELECT * FROM ml_pipeline WHERE dataset_id=? AND archived=false ORDER BY created_at DESC,id LIMIT ? OFFSET ?",dataset,size,(page-1L)*size))items.add(view(row));return result;}
     public JsonNode control(CurrentUser actor,String id,boolean retry){AccessPolicy.requireAdmin(actor);row(actor,id);data.transactions.executeWithoutResult(tx->{
         var current=data.db.queryForMap("SELECT * FROM ml_pipeline WHERE id=? FOR UPDATE",id);var state=(ObjectNode)JsonSupport.parse(data.json,current.get("state_json").toString());String status=current.get("status").toString();
         if(retry){if(!Set.of("FAILED","CANCELLED").contains(status))throw invalid("仅失败或已取消流程可重试");if(state.hasNonNull("currentRunId")&&!"COMPLETED".equals(data.runRow(actor,state.path("currentRunId").asText()).get("status"))){state.put("retryRunId",state.path("currentRunId").asText());state.remove("currentRunId");}data.db.update("UPDATE ml_pipeline SET status='QUEUED',state_json=?,error_message=NULL,actor_id=?,updated_at=UTC_TIMESTAMP(3) WHERE id=?",state.toString(),actor.userId(),id);}
@@ -79,7 +107,8 @@ public class AutomaticPipelineService {
                 String family=stage.equals("TRAIN")?model.path("family").asText():null,modelId=stage.equals("EVALUATE")?state.path("latestModelId").asText():null;
                 JsonNode parameters=stage.equals("PREPARE")?config.path("preparation"):stage.equals("GENERATE")?config.path("generation"):stage.equals("TRAIN")?model.path("parameters"):null;
                 if(stage.equals("GENERATE"))preparation=state.path("groupingRunId").asText();
-                started=training.start(actor,new TrainingService.Start(dataset,version,stage,preparation,modelId,family,childName,parameters,null,resume));
+                String parent=stage.equals("TRAIN")&&resume==null?config.path("parentModels").path(family).asText(null):null;
+                started=training.start(actor,new TrainingService.Start(dataset,version,stage,preparation,modelId,family,childName,parameters,null,resume,parent));
             }
             String run=started.path("runId").asText();state.put("currentRunId",run);state.remove("retryRunId");state.withArray("steps").addObject().put("stage",stage).put("runId",run).put("family",stage.equals("TRAIN")||stage.equals("EVALUATE")?model.path("family").asText():"");
             data.db.update("UPDATE ml_pipeline SET status='RUNNING',state_json=?,error_message=NULL,updated_at=UTC_TIMESTAMP(3) WHERE id=?",state.toString(),id);

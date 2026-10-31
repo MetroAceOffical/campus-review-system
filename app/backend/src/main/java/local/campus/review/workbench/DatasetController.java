@@ -15,7 +15,7 @@ public class DatasetController {
     private final DatasetService datasets;private final CurrentUserService users;
     public DatasetController(DatasetService datasets,CurrentUserService users){this.datasets=datasets;this.users=users;}
     @GetMapping("/organizations") Api organizations(Authentication auth){return Api.ok(datasets.organizations(users.require(auth)));}
-    @GetMapping("/datasets") Api list(Authentication auth,@RequestParam(defaultValue="1")int page,@RequestParam(defaultValue="20")int pageSize,@RequestParam(defaultValue="")String q,@RequestParam(defaultValue="false")boolean archived){return Api.ok(datasets.list(users.require(auth),page,pageSize,q,archived));}
+    @GetMapping("/datasets") Api list(Authentication auth,@RequestParam(defaultValue="1")int page,@RequestParam(defaultValue="20")int pageSize,@RequestParam(defaultValue="")String q,@RequestParam(defaultValue="false")boolean archived,@RequestParam(defaultValue="false")boolean history){return Api.ok(datasets.list(users.require(auth),page,pageSize,q,archived,history));}
     @PostMapping("/datasets") Api upload(Authentication auth,@RequestParam String organizationId,@RequestParam String name,@RequestParam String kind,@RequestParam MultipartFile file,@RequestParam(required=false) String purpose)throws Exception{return Api.ok(datasets.upload(users.require(auth),organizationId,name,kind,file,purpose));}
     @GetMapping("/datasets/{id}") Api get(Authentication auth,@PathVariable String id){return Api.ok(datasets.get(users.require(auth),id));}
     public record Edit(String name,Boolean archived,String purpose){}

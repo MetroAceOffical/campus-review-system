@@ -176,7 +176,7 @@ public class TrainingService {
         var result=data.json.createObjectNode().put("total",data.db.queryForObject("SELECT COUNT(*) FROM ml_model WHERE logical_model_id=?",Long.class,logical));var items=result.putArray("items");
         for(var row:data.db.queryForList("SELECT m.*,r.input_version_id FROM ml_model m JOIN ml_run r ON r.id=m.run_id WHERE m.logical_model_id=? ORDER BY m.version_number DESC LIMIT ? OFFSET ?",logical,size,(page-1L)*size))items.add(modelJson(row));return result;
     }
-    public JsonNode getModel(CurrentUser user,String id){var row=model(user,id);row.put("input_version_id",data.db.queryForObject("SELECT input_version_id FROM ml_run WHERE id=?",String.class,row.get("run_id")));return modelJson(row);}
+    public JsonNode getModel(CurrentUser user,String id){var row=model(user,id);row.put("input_version_id",data.db.queryForObject("SELECT input_version_id FROM ml_run WHERE id=?",String.class,row.get("run_id")));var result=modelJson(row);var bundles=data.db.queryForList("SELECT id FROM ml_pipeline WHERE bundle_version=1 AND JSON_SEARCH(state_json,'one',?,NULL,'$.models[*].modelId') IS NOT NULL ORDER BY created_at DESC LIMIT 1",String.class,id);if(!bundles.isEmpty())result.put("bundleId",bundles.getFirst());return result;}
     public JsonNode experiments(CurrentUser user,String id,int page,int size){
         var selected=model(user,id);if(page<1||size<1||size>100)throw invalid("分页参数无效");
         String from=" FROM ml_model m JOIN ml_run r ON r.id=m.run_id JOIN ml_dataset d ON d.id=m.dataset_id WHERE m.organization_id=? AND m.family=? AND m.archived=FALSE";

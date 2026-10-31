@@ -103,9 +103,18 @@ def prepare(input_path, output, kind, options, emit):
         group_sizes[len(group)] += 1
         if (index + 1) % max(1, len(components) // 100) == 0 or index + 1 == len(components):
             emit({'stage': 'SPLITTING', 'processed': index + 1, 'total': len(components), 'rows': {key: len(value) for key, value in parts.items()}})
+    quarantine=[]
+    if kind=='PAIRS':
+        from .curated_bundles import exclude_near_training
+        isolated,quarantine,_=exclude_near_training([row for values in parts.values() for row in values])
+        parts={name:[row for row in isolated if row['split']==name] for name in parts}
+        counts={name:Counter(str(row['label']) for row in values) for name,values in parts.items()}
+        if quarantine:emit({'stage':'PARTITION_ISOLATION','quarantined':len(quarantine),'message':'隔离与保留分区近重复的样本'})
     output = Path(output)
     output.mkdir(parents=True, exist_ok=False)
     files = []
+    if quarantine:
+        path=output/'quarantine.jsonl';path.write_text(''.join(json.dumps(row,ensure_ascii=False)+'\n' for row in quarantine),encoding='utf8');files.append(path)
     for name, values in parts.items():
         path = output / f'{name}.jsonl'
         path.write_text(''.join(json.dumps(row, ensure_ascii=False) + '\n' for row in values), encoding='utf-8')

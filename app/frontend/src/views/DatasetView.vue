@@ -20,7 +20,7 @@ const showUpload = ref(route.query.import === '1')
 
 const organizations = ref<Array<{ organizationId: string; name: string }>>([]), items = ref<Dataset[]>([])
 const detail = ref<Detail | null>(null), currentRun = ref<Run | null>(null), audit = ref<Audit | null>(null), cleaning = ref<Cleaning | null>(null)
-const error = ref(''), busy = ref(false), loading = ref(false), q = ref(''), archived = ref(false), page = ref(1), total = ref(0)
+const error = ref(''), busy = ref(false), loading = ref(false), q = ref(''), archived = ref(false), historyCatalog=ref(false),page = ref(1), total = ref(0)
 const form = reactive({ name: '', kind: 'NEWS', organizationId: '', purpose: 'LIBRARY' }), file = ref<File | null>(null)
 const inputVersion = ref(''), mapping = reactive<Record<string, string>>({}), events = ref<Progress[]>([]), columns = ref<string[]>([])
 const options = reactive({ strip_html: true, normalize_whitespace: true, remove_duplicates: true, min_text_length: 1, max_text_length: 1000000 })
@@ -46,7 +46,7 @@ const latestProgress = computed(() => [...events.value].reverse().find(e => e.da
 const percent = computed(() => { const value = latestProgress.value?.data; return value?.total ? Math.min(100, Math.round((value.processed ?? 0) / value.total * 100)) : 0 })
 function stop() { stream?.close(); stream = undefined; if (timer) clearInterval(timer); timer = undefined }
 function message(value: unknown) { error.value = value instanceof Error ? value.message : '操作未完成，请重试' }
-async function refreshList() { const result = await api.datasets(page.value, q.value, archived.value, listSize.value); if (!alive) return; items.value = result.items; total.value = result.total; if (!result.total && !q.value && !archived.value) showUpload.value = true }
+async function refreshList() { const result = await api.datasets(page.value, q.value, archived.value, listSize.value,historyCatalog.value); if (!alive) return; items.value = result.items; total.value = result.total; if (!result.total && !q.value && !archived.value && !historyCatalog.value) showUpload.value = true }
 async function initialize() {
   loading.value = true; error.value = ''
   try { const [departments] = await Promise.all([api.organizations(), refreshList()]); if (!alive) return; organizations.value = departments; form.organizationId ||= departments[0]?.organizationId ?? ''; if (!detail.value && typeof route.query.dataset === 'string') await select(route.query.dataset, typeof route.query.version === 'string' ? route.query.version : undefined) }
@@ -152,7 +152,7 @@ onMounted(() => { void initialize(); journeyTimer=setInterval(async () => { if (
   <div v-if="error" class="dataset-error" role="alert"><el-alert :title="error" type="error" :closable="false" /><el-button @click="initialize">重试</el-button></div>
   <div class="dataset-layout" v-loading="loading">
     <section class="dataset-list">
-      <div class="section-heading"><h2>我的数据集</h2><el-checkbox v-model="archived" @change="page = 1; initialize()">归档</el-checkbox></div>
+      <div class="section-heading"><h2>数据集</h2><div><el-checkbox v-model="historyCatalog" @change="page=1;initialize()">历史与演示</el-checkbox><el-checkbox v-model="archived" @change="page = 1; initialize()">归档</el-checkbox></div></div>
       <el-input v-model="q" placeholder="搜索名称" clearable aria-label="搜索数据集" @change="page = 1; initialize()" />
       <button v-for="item in items" :key="item.datasetId" class="dataset-choice" :class="{ selected: detail?.datasetId === item.datasetId }" @click="select(item.datasetId)"><strong>{{ item.name }}</strong><span>{{ item.kind === 'NEWS' ? '原始新闻' : '标签句对' }}</span></button>
       <el-empty v-if="!items.length" description="上传一批数据开始处理" :image-size="70" />
