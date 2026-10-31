@@ -1,15 +1,9 @@
 """Verified completed-model initialization, separate from interrupted-job recovery."""
-import hashlib,json
+import json
 from pathlib import Path
 from .preparation import prepared,sha,write_json
 from .training import ROOT
-
-def identities(rows):
-    return {'sentences':{hashlib.sha256(row[key].encode()).hexdigest() for row in rows for key in ('sentence1','sentence2')},
-            'groups':{row['_partitionGroup'] for row in rows}}
-
-def merge(*values):
-    return {key:set().union(*(value.get(key,[]) for value in values)) for key in ('sentences','groups')}
+from .training_identities import collect as identities,merge,ancestry,require_disjoint
 
 def check_parent(descriptor,preparation,family):
     folder=Path(descriptor['folder']).resolve()
@@ -25,10 +19,12 @@ def check_parent(descriptor,preparation,family):
     if not parent_preparation.is_relative_to(ROOT/'runtime') or sha(parent_preparation/'manifest.json')!=descriptor['preparationSha256']:raise ValueError('起始样本划分已变化')
     _,old=prepared(parent_preparation);_,new=prepared(preparation)
     def optional(name):return json.loads((folder/name).read_text(encoding='utf-8')) if (folder/name).is_file() else {}
-    protected=merge(identities([row for name,rows in old.items() if name!='train' for row in rows]),optional('protected-identities.json'))
-    trained=merge(identities(old['train']),optional('lineage-training-identities.json'))
+    history=ancestry(folder)
+    protected=merge(identities([row for name,rows in old.items() if name!='train' for row in rows]),optional('protected-identities.json'),history['holdout'])
+    trained=merge(identities(old['train']),optional('lineage-training-identities.json'),history['train'])
     new_train=identities(new['train']);new_holdout=identities([row for name,rows in new.items() if name!='train' for row in rows])
-    if any(new_train[key]&protected[key] or new_holdout[key]&trained[key] for key in protected):raise ValueError('继续训练材料与历史验证/测试材料不隔离，请调整划分')
+    require_disjoint(new_train,protected,'继续训练材料与历史验证/测试来源或近重复材料不隔离，请调整划分')
+    require_disjoint(new_holdout,trained,'新评价材料与祖先训练来源或近重复材料不隔离，请调整划分')
     return {**manifest,'protected':merge(protected,new_holdout),'lineageTraining':merge(trained,new_train)}
 
 def save_lineage(output,info):

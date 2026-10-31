@@ -27,5 +27,10 @@ class WorkbenchFlowTest {
         doReturn(Map.of("id",dataset,"organization_id",1L,"kind","NEWS")).when(data).dataset(admin,dataset);
         doReturn(Map.of("dataset_id","another-dataset","stage","CLEAN")).when(data).version(dataset,version);
         assertEquals(400,assertThrows(ApiException.class,()->flows.validateContext(admin,"TRAIN",json.createObjectNode().put("datasetId",dataset).put("versionId",version))).status);
+        doReturn(Map.of("dataset_id",dataset,"stage","CLEAN")).when(data).version(dataset,version);
+        String preparation="44444444-4444-4444-8444-444444444444",run="55555555-5555-4555-8555-555555555555";
+        doReturn(Map.of("action","PREPARE","dataset_id",dataset,"input_version_id",version,"options_json","{}")).when(data).runRow(admin,preparation);
+        doReturn(Map.of("action","TRAIN","dataset_id",dataset,"input_version_id",version,"options_json","{\"preparationId\":\"different\"}")).when(data).runRow(admin,run);
+        assertEquals(400,assertThrows(ApiException.class,()->flows.validateContext(admin,"TRAIN",json.createObjectNode().put("datasetId",dataset).put("versionId",version).put("preparationId",preparation).put("trainingRunId",run))).status);
     }
 }

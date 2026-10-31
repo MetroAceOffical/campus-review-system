@@ -12,8 +12,17 @@ it('keeps this task independent of other completed models and resumes its exact 
   const trained={...flow,context:{...flow.context,trainingRunId:'own',modelId:'own'}}
   expect(flowDestination(trained,'evaluate')).toEqual({path:'/models',query:{flow:'flow',dataset:'data',version:'clean',model:'own',tab:'evaluation'}})
   expect(flowDestination({...flow,kind:'CONTINUE'},'parent').path).toBe('/models')
+  const published={...trained,context:{...trained.context,releaseId:'own-release'}}
+  const withOther={...detail,modelReleases:[{id:'other-release',versionId:'clean',status:'READY',active:true}]}
+  expect(flowSteps(published,withOther).find(s=>s.key==='predict')?.status).toBe('waiting')
+  expect(flowSteps(published,{...withOther,modelReleases:[{id:'own-release',versionId:'clean',status:'READY',active:true}]}).find(s=>s.key==='predict')?.status).toBe('done')
+  expect(flowDestination(published,'predict')).toEqual({path:'/releases',query:{flow:'flow',dataset:'data',version:'clean',release:'own-release',tab:'current'}})
   activeFlow.value=flow;workflowContext.dataset=detail;workflowContext.version='clean';workflowContext.run='other-model';workflowContext.model='other-model'
   expect(contextualLink('/training')).toEqual(flowDestination(flow,'prepare'))
-  expect(contextualLink('/models')).toEqual(flowDestination(flow,'evaluate'))
+  expect(contextualLink('/models')).toEqual({path:'/models',query:{flow:''}})
+  activeFlow.value={...flow,kind:'CONTINUE'}
+  expect(contextualLink('/models')).toEqual(flowDestination(activeFlow.value,'parent'))
+  activeFlow.value={...flow,kind:'LIBRARY'}
+  expect(contextualLink('/training')).toEqual({path:'/training',query:{flow:''}})
   activeFlow.value=undefined
 })

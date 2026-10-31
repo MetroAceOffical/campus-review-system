@@ -1,11 +1,12 @@
 import type { Flow } from './api/flows'
 import type { Detail } from './api/workbench'
 export interface FlowStep {key:string;label:string;status:'done'|'active'|'waiting'|'error';enabled:boolean}
-const taskStatus=(state?:string):FlowStep['status']=>state==='COMPLETED'?'done':['RUNNING','QUEUED','INDEXING','PENDING_APPROVAL'].includes(state||'')?'active':['FAILED','CANCELLED','INTERRUPTED','WAITING_INDEX'].includes(state||'')?'error':'waiting'
+const taskStatus=(state?:string):FlowStep['status']=>state==='COMPLETED'?'done':['RUNNING','QUEUED','INDEXING','PENDING_APPROVAL','VERIFYING','READY'].includes(state||'')?'active':['FAILED','CANCELLED','INTERRUPTED','WAITING_INDEX'].includes(state||'')?'error':'waiting'
 export function flowSteps(flow:Flow,detail?:Detail):FlowStep[]{
   const c=flow.context,v=detail?.versions.find(v=>v.versionId===c.versionId),clean=v?.stage==='CLEAN'&&v.status==='READY'
   const run=(id?:string)=>id?detail?.runs.find(r=>r.runId===id):undefined
   const prepared=run(c.preparationId),ready=prepared?.status==='COMPLETED' && !!(prepared.result as {trainReady?:boolean})?.trainReady
+  const release=detail?.modelReleases?.find(r=>r.id===c.releaseId)
   const rows:FlowStep[]=[]
   if(flow.kind==='CONTINUE')rows.push({key:'parent',label:'起始模型',status:c.parentModelId?'done':'waiting',enabled:true})
   rows.push({key:'data',label:flow.kind==='UPLOAD'?'上传与映射':'选择数据',status:c.datasetId?'done':'waiting',enabled:flow.kind!=='CONTINUE'||!!c.parentModelId},
@@ -16,7 +17,7 @@ export function flowSteps(flow:Flow,detail?:Detail):FlowStep[]{
   if(train)rows.push({key:'prepare',label:'准备样本',status:prepared?.status==='COMPLETED'&&!ready?'active':taskStatus(prepared?.status),enabled:!!clean},
     {key:'train',label:'训练模型',status:taskStatus(run(c.trainingRunId)?.status),enabled:!!ready},
     {key:'evaluate',label:'效果评价',status:taskStatus(run(c.evaluationRunId)?.status),enabled:!!c.modelId},
-    {key:'predict',label:'试用与发布',status:'waiting',enabled:!!c.modelId})
+    {key:'predict',label:'试用与发布',status:release?.active?'done':taskStatus(release?.status),enabled:!!c.modelId})
   return rows
 }
 export function flowDestination(flow:Flow,step?:string):{path:string;query:Record<string,string>}{
@@ -26,7 +27,8 @@ export function flowDestination(flow:Flow,step?:string):{path:string;query:Recor
   step ||= flow.kind==='CONTINUE'&&!c.parentModelId?'parent':!c.datasetId?'data':'quality'
   if(step==='parent')return{path:'/models',query:{...query,selectParent:'1'}}
   if(step==='library')return{path:'/reference-imports',query:{...query,...(c.importId?{batch:c.importId,tab:'records'}:{tab:'new'})}}
+  if(step==='predict'&&c.releaseId)return{path:'/releases',query:{...query,release:c.releaseId,tab:'current'}}
   if(['prepare','train'].includes(step))return{path:'/training',query:{...query,...(c.parentModelId?{parentModel:c.parentModelId}:{}),...((step==='prepare'?c.preparationId:c.trainingRunId)?{run:(step==='prepare'?c.preparationId:c.trainingRunId)!}:{tab:'new',step:step==='prepare'?'0':'2'})}}
-  if(['evaluate','predict'].includes(step))return{path:'/models',query:{...query,...(c.modelId?{model:c.modelId}:{}),tab:step==='evaluate'?'evaluation':'prediction'}}
+  if(['evaluate','predict'].includes(step))return{path:'/models',query:{...query,...(c.modelId?{model:c.modelId}:{}),...(step==='evaluate'&&c.evaluationRunId?{evaluation:c.evaluationRunId}:{}),tab:step==='evaluate'?'evaluation':'prediction'}}
   return{path:'/datasets',query:{...query,...(!c.datasetId&&flow.kind==='UPLOAD'?{import:'1'}:{})}}
 }

@@ -3,6 +3,7 @@ import { computed,ref,watch,onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import * as datasets from '../../api/workbench'
 import * as training from '../../api/training'
+import * as delivery from '../../api/delivery'
 import { getFlow,updateFlow,type FlowContext } from '../../api/flows'
 import { session } from '../../session'
 import { workflowContext } from '../../workflow-context'
@@ -30,15 +31,18 @@ async function sync(){
     if(route.path==='/training'&&route.query.run){
       run=await training.run(String(route.query.run));dataset=run.datasetId;version=run.inputVersionId
       context.datasetId=dataset;context.versionId=version
-      if(run.action==='TRAIN'){if(context.trainingRunId!==run.runId){delete context.modelId;delete context.evaluationRunId}context.trainingRunId=run.runId;if(run.status==='COMPLETED')context.modelId=run.runId;if(run.options.preparationId)context.preparationId=run.options.preparationId}
-      else if(['PREPARE','GENERATE'].includes(run.action))context.preparationId=run.runId
-      else if(run.action==='EVALUATE'){context.evaluationRunId=run.runId;context.modelId=run.options.modelId}
+      if(run.action==='TRAIN'){
+        if(flow&&(flow.kind==='CONTINUE'?(run.options.parentModelId||'')!==(context.parentModelId||''):!!run.options.parentModelId))throw new Error('该训练使用了不同起始模型，请从任务首页单独打开')
+        if(context.trainingRunId!==run.runId){delete context.modelId;delete context.evaluationRunId;delete context.releaseId}context.trainingRunId=run.runId;if(run.status==='COMPLETED')context.modelId=run.runId;if(run.options.preparationId)context.preparationId=run.options.preparationId
+      }
+      else if(['PREPARE','GENERATE'].includes(run.action)){if(context.preparationId!==run.runId){delete context.trainingRunId;delete context.modelId;delete context.evaluationRunId;delete context.releaseId}context.preparationId=run.runId}
+      else if(run.action==='EVALUATE'){if(flow&&context.modelId!==run.options.modelId)throw new Error('该评价不属于当前任务模型');if(context.evaluationRunId!==run.runId)delete context.releaseId;context.evaluationRunId=run.runId;context.modelId=run.options.modelId}
     }
     if(route.path==='/models'&&route.query.model&&!route.query.selectParent){
       const model=await training.model(String(route.query.model));dataset=model.datasetId;version=model.inputVersionId||(await training.run(model.runId)).inputVersionId
       if(!flow||context.trainingRunId===model.runId){context.datasetId=dataset;context.versionId=version;context.modelId=model.modelId;context.trainingRunId=model.runId}
     }
-    if(route.query.preparation)context.preparationId=String(route.query.preparation)
+    if(route.query.preparation){const preparation=String(route.query.preparation);if(run?.action==='TRAIN'&&run.options.preparationId!==preparation)throw new Error('该训练与所选样本划分不一致');if(context.preparationId!==preparation){delete context.trainingRunId;delete context.modelId;delete context.evaluationRunId;delete context.releaseId}context.preparationId=preparation}
     if(route.path==='/reference-imports'&&route.query.batch)context.importId=String(route.query.batch)
     if(flow&&!dataset){workflowContext.dataset=undefined;workflowContext.version='';workflowContext.run=undefined;workflowContext.model=undefined}
     if(dataset){
@@ -49,17 +53,18 @@ async function sync(){
       const bound=[context.preparationId,context.trainingRunId,context.evaluationRunId].filter((id):id is string=>!!id&&!data.runs.some(r=>r.runId===id))
       const missing=await Promise.all(bound.map(id=>training.run(id)));if(!valid())return
       data.runs.push(...missing as unknown as datasets.Run[])
+      if(context.releaseId){const release=await delivery.release(context.releaseId);if(!valid())return;data.modelReleases=[...(data.modelReleases||[]).filter(r=>r.id!==release.id),{id:release.id,versionId:context.versionId||'',status:release.status,active:release.active}]}
       workflowContext.dataset=data;workflowContext.version=version
       if(flow){workflowContext.run=context.trainingRunId;workflowContext.model=context.modelId}
       if(run?.action==='TRAIN'){workflowContext.run=run.runId;workflowContext.model=run.status==='COMPLETED'?run.runId:undefined}
       if(context.modelId){workflowContext.model=context.modelId;workflowContext.run=context.trainingRunId}
     }
     if(flow&&valid()){
-      const step=String(route.query.flowStep||({'/datasets':context.datasetId?'quality':'data','/training':run?(['PREPARE','GENERATE'].includes(run.action)?'prepare':'train'):route.query.step==='1'?'prepare':route.query.step==='2'?'train':'data','/models':route.query.selectParent?'parent':route.query.tab==='prediction'?'predict':'evaluate','/reference-imports':'library'} as Record<string,string>)[route.path]||flow.currentStep||'data')
+      const step=String(route.query.flowStep||({'/datasets':context.datasetId?'quality':'data','/training':run?(['PREPARE','GENERATE'].includes(run.action)?'prepare':'train'):route.query.step==='1'?'prepare':route.query.step==='2'?'train':'data','/models':route.query.selectParent?'parent':route.query.tab==='prediction'?'predict':'evaluate','/reference-imports':'library','/releases':'predict'} as Record<string,string>)[route.path]||flow.currentStep||'data')
       if(JSON.stringify(context)!==JSON.stringify(flow.context)||step!==flow.currentStep){saving.value=true;const updated=await updateFlow(flow,context,step);if(valid())activeFlow.value=updated}
       else activeFlow.value=flow
     }
-  }catch(e){if(valid()){error.value=e instanceof Error?e.message:'读取任务失败';activeFlow.value=undefined}}finally{saving.value=false}
+  }catch(e){if(valid()){error.value=e instanceof Error?e.message:'读取任务失败';activeFlow.value=undefined;workflowContext.dataset=undefined;workflowContext.version='';workflowContext.model=undefined;workflowContext.run=undefined}}finally{saving.value=false}
 }
 async function schedule(){pending=true;if(working)return;working=true;try{while(pending&&alive){pending=false;await sync()}}finally{working=false}}
 watch(()=>[route.fullPath,session.user?.userId,workflowContext.dataset?.runs.map(r=>r.runId+':'+r.status).join('|')],()=>void schedule(),{immediate:true})
@@ -70,7 +75,7 @@ const version=computed(()=>workflowContext.dataset?.versions.find(v=>v.versionId
 </script>
 <template>
   <section v-if="visible" class="task-flow" aria-label="当前任务流程">
-    <div class="flow-heading"><div><AppIcon name="data" :size="17"/><strong>{{activeFlow?.name||'读取任务'}}</strong><span v-if="workflowContext.dataset">{{workflowContext.dataset.name}}</span><small v-if="version">{{versionName(version)}}</small></div><span v-if="saving" class="muted">保存中</span><RouterLink v-else class="link-button" to="/home">任务首页</RouterLink></div>
+    <div class="flow-heading"><div><AppIcon name="data" :size="17"/><strong>{{activeFlow?.name||'读取任务'}}</strong><span v-if="workflowContext.dataset">{{workflowContext.dataset.name}}</span><small v-if="version" :title="versionName(version)">{{version.stage==='CLEAN'?'清洗':'原始'}} · {{version.rowCount??'—'}}条</small></div><span v-if="saving" class="muted">保存中</span><RouterLink v-else class="link-button" to="/home">任务首页</RouterLink></div>
     <p v-if="error" class="work-error" role="alert">{{error}} <el-button size="small" @click="schedule">重新读取</el-button></p>
     <ol v-if="activeFlow" class="flow-steps"><li v-for="(step,index) in steps" :key="step.key" :class="[step.status,{current:current===step.key}]"><RouterLink v-if="step.enabled" :to="{...flowDestination(activeFlow,step.key),query:{...flowDestination(activeFlow,step.key).query,flowStep:step.key}}" :aria-current="current===step.key?'step':undefined"><span class="step-number"><AppIcon v-if="step.status==='done'" name="check" :size="14"/><template v-else>{{index+1}}</template></span><span>{{step.label}}</span><small>{{({done:'已完成',active:'进行中',waiting:'待进行',error:'需处理'})[step.status]}}</small></RouterLink><span v-else class="disabled-step"><span class="step-number">{{index+1}}</span>{{step.label}}</span></li></ol>
   </section>

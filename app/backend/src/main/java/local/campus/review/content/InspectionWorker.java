@@ -59,14 +59,20 @@ public class InspectionWorker {
         finally{timeout.cancel(false);cancellation.cancel(false);checks.processes.remove(id,process);if(process.isAlive())InspectionService.stop(process);}
     }
     private JsonNode content(String id,ObjectNode payload){
-        var health=detector.health(false);String generation=libraries.currentId();
-        if(!health.path("ready").asBoolean() || health.path("busy").asBoolean() || generation==null){checks.db.update("UPDATE document_check SET status='WAITING_SERVICE',error_message='等待内容检测服务',retry_after=DATE_ADD(UTC_TIMESTAMP(3),INTERVAL 30 SECOND) WHERE id=? AND status='RUNNING'",id);checks.event(id,Map.of("stage","WAITING_SERVICE"));return null;}
-        String libraryHash=checks.db.queryForObject("SELECT manifest_sha256 FROM library_generation WHERE id=?",String.class,generation);
-        String org=checks.db.queryForObject("SELECT organization_id FROM manuscript WHERE id=?",String.class,payload.path("manuscriptId").asText());var selected=releases.textSelection(org,health.path("configs").path("textConfig"),generation,libraryHash);
-        var request=checks.json.createObjectNode().put("taskId",id).put("attemptId",id).put("scene","PRECHECK").put("versionId",id).put("inputSnapshotKey","check:"+id).put("inputSha256",payload.path("inputHash").asText()).put("libraryGenerationId",generation).put("libraryManifestSha256",libraryHash).put("excludeManuscriptId",payload.path("manuscriptId").asText()).put("text",payload.path("plainText").asText()).put("configId",health.path("configs").path("textConfig").path("configId").asText());
-        request.put("configId",selected.path("textConfig").path("configId").asText());var output=(ObjectNode)detector.call(false,"/detect/text",request,"text");output.put("inputHash",payload.path("inputHash").asText());if(selected.has("releaseId"))output.set("releaseId",selected.get("releaseId"));
+        var health=detector.health(false);
+        if(!health.path("ready").asBoolean() || health.path("busy").asBoolean()){checks.db.update("UPDATE document_check SET status='WAITING_SERVICE',error_message='等待内容检测服务',retry_after=DATE_ADD(UTC_TIMESTAMP(3),INTERVAL 30 SECOND) WHERE id=? AND status='RUNNING'",id);checks.event(id,Map.of("stage","WAITING_SERVICE"));return null;}
+        if(!payload.hasNonNull("contentProfile")){
+            var captured=checks.contentProfiles.capture(payload.path("manuscriptId").asText(),false);
+            if(captured==null)throw new DetectorClient.DetectorFailure("LIBRARY_UNAVAILABLE");
+            payload.set("contentProfile",captured);checks.db.update("UPDATE document_check SET payload_json=? WHERE id=? AND status='RUNNING'",payload.toString(),id);
+        }
+        var selected=payload.path("contentProfile");String generation=selected.path("libraryGenerationId").asText(),libraryHash=selected.path("libraryManifestSha256").asText();
+        var manifest=libraries.lockedManifest(generation);if(!libraryHash.equals(checks.db.queryForObject("SELECT manifest_sha256 FROM library_generation WHERE id=?",String.class,generation)))throw new DetectorClient.DetectorFailure("LIBRARY_HASH_MISMATCH");
+        detector.ensureTextAdapter(selected);
+        var request=checks.json.createObjectNode().put("taskId",id).put("attemptId",id).put("scene","PRECHECK").put("versionId",id).put("inputSnapshotKey","check:"+id).put("inputSha256",payload.path("inputHash").asText()).put("libraryGenerationId",generation).put("libraryManifestSha256",libraryHash).put("excludeManuscriptId",payload.path("manuscriptId").asText()).put("text",payload.path("plainText").asText());
+        request.put("configId",selected.path("textConfig").path("configId").asText());var output=(ObjectNode)detector.call(false,"/detect/text",request,"text");output.put("inputHash",payload.path("inputHash").asText());output.set("contentProfile",selected);if(selected.has("releaseId"))output.set("releaseId",selected.get("releaseId"));
         var document=checks.json.convertValue(payload.path("document"),DocumentModels.DocumentInput.class);checks.citations.annotate(output.path("evidence"),checks.codec.validateAndExtract(document));
-        var images=output.putArray("imageResults");for(var image:payload.path("images")){var input=request.deepCopy();input.remove("text");input.put("fileId",image.path("fileId").asText()).put("fileSha256",image.path("sha256").asText()).put("path",image.path("path").asText()).put("configId",health.path("configs").path("imageConfig").path("configId").asText());var result=(ObjectNode)detector.call(false,"/detect/image",input,"image");result.put("nodeId",image.path("nodeId").asText());images.add(result);}
+        var images=output.putArray("imageResults");for(var image:payload.path("images")){var input=request.deepCopy();input.remove("text");input.put("fileId",image.path("fileId").asText()).put("fileSha256",image.path("sha256").asText()).put("path",image.path("path").asText()).put("configId",selected.path("imageConfig").path("configId").asText());var result=(ObjectNode)detector.call(false,"/detect/image",input,"image");result.put("nodeId",image.path("nodeId").asText());images.add(result);}
         return output;
     }
     @PreDestroy public void close(){ready=false;checks.processes.values().forEach(InspectionService::stop);executor.shutdownNow();monitor.shutdownNow();}

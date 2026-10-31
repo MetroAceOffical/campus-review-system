@@ -11,7 +11,7 @@ import java.util.*;
 @Service
 public class WorkbenchFlowService {
     final DatasetService data;final TrainingService training;
-    static final Set<String> KEYS=Set.of("datasetId","versionId","preparationId","trainingRunId","evaluationRunId","modelId","parentModelId","importId");
+    static final Set<String> KEYS=Set.of("datasetId","versionId","preparationId","trainingRunId","evaluationRunId","modelId","parentModelId","importId","releaseId");
     public WorkbenchFlowService(DatasetService data,TrainingService training){this.data=data;this.training=training;}
     public record Create(String requestId,String kind,String name){}
     public record Edit(long revision,JsonNode context,String step){public Edit(long revision,JsonNode context){this(revision,context,null);}}
@@ -70,11 +70,19 @@ public class WorkbenchFlowService {
             if(!compatible||!"evaluationRunId".equals(key)&&(!datasetId.equals(run.get("dataset_id").toString())||!versionId.equals(run.get("input_version_id").toString())))throw invalid("运行任务与所选数据版本不匹配");
             if("evaluationRunId".equals(key))data.dataset(user,run.get("dataset_id").toString());
             if("evaluationRunId".equals(key)&&!context.path("modelId").asText().equals(JsonSupport.parse(data.json,run.get("options_json").toString()).path("modelId").asText()))throw invalid("评价与当前模型不匹配");
+            if("trainingRunId".equals(key)){
+                var options=JsonSupport.parse(data.json,run.get("options_json").toString());
+                if(!context.path("preparationId").asText().equals(options.path("preparationId").asText())||!context.path("parentModelId").asText().equals(options.path("parentModelId").asText())||"CONTINUE".equals(kind)&&!context.has("parentModelId"))throw invalid("训练记录的样本或起始模型与当前任务不一致");
+            }
         }
         if(context.has("modelId")){
             if(dataset==null||versionId.isEmpty()||!context.has("trainingRunId"))throw invalid("请关联本次模型的训练记录");
             var model=training.model(user,context.path("modelId").asText());var run=data.runRow(user,model.get("run_id").toString());
             if(!context.path("trainingRunId").asText().equals(model.get("run_id").toString())||!datasetId.equals(model.get("dataset_id").toString())||!versionId.equals(run.get("input_version_id").toString()))throw invalid("模型与当前训练不匹配");
+        }
+        if(context.has("releaseId")){
+            AccessPolicy.requireAdmin(user);var rows=data.db.queryForList("SELECT model_id,evaluation_run_id FROM model_release WHERE id=?",context.path("releaseId").asText());
+            if(rows.isEmpty()||!context.has("modelId")||!context.path("modelId").asText().equals(Objects.toString(rows.getFirst().get("model_id"),""))||!context.path("evaluationRunId").asText().equals(Objects.toString(rows.getFirst().get("evaluation_run_id"),"")))throw invalid("发布版本与本次模型或评价不匹配");
         }
         if(context.has("importId")){
             if(dataset==null||!"NEWS".equals(dataset.get("kind")))throw invalid("请选择新闻数据集");

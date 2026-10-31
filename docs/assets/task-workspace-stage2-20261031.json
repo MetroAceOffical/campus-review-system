@@ -1,0 +1,62 @@
+{
+  "submissionId": "35",
+  "contentCheckId": "5442644d-4b79-4444-a132-5037597ec051",
+  "status": "COMPLETED",
+  "inputMatchesImmutableSubmission": true,
+  "modelBinding": {
+    "modelId": "570e8ccf-d21b-4405-b7d9-6cc49dc8f8ea",
+    "maxTokens": 128,
+    "evaluationId": "79e00651-e728-4715-a066-47719fd3fbfc",
+    "scoreMeaning": "MONOTONE_CALIBRATED_DECISION_SCORE",
+    "weightSha256": "7ce1fee9ac2c9a6339ea6a3d62152dfb71d52f14a8b8b1d53c21e6d879b76d73",
+    "adapterSha256": "48d63858b91b43865bd4810bb2cd1fae939b7fb0abcbabfbc2415a88c9023dac",
+    "positiveLabel": 1,
+    "tokenizerSha256": "48cea5d44424912a6fd1ea647bf4fe50b55ab8b1e5879c3275f80e339e8fae26",
+    "calibrationSha256": "995f0350b64946fe412cc28b73bc59d61dc26d641906181c6840ad8cd6fe4b5a",
+    "modelManifestSha256": "fcac68c06f0d65a1ba2170d79e56a450a721a9fda4355e86b423564949afda54"
+  },
+  "configurationId": "text-f82091aec8ec338fbe3b2f4ab84e661554c6c235474ceac4f4be5fdc7c503415",
+  "releaseId": "cccf94c8-4acd-42a5-8036-e8f74729ccf0",
+  "releaseStatus": "READY",
+  "development": {
+    "status": "COMPLETED",
+    "baseline": {
+      "known": {
+        "correctSources": 13,
+        "expectedSources": 13,
+        "normalDocuments": 4,
+        "positiveDocuments": 12,
+        "scopedNormalAlerts": 0,
+        "unjudgedSourceAlerts": 4,
+        "normalAnySourceAlerts": 0,
+        "completeCorrectSourceDocuments": 12
+      },
+      "realNewsAlertedDocuments": 17
+    },
+    "requests": 96,
+    "candidate": {
+      "known": {
+        "correctSources": 12,
+        "expectedSources": 13,
+        "normalDocuments": 4,
+        "positiveDocuments": 12,
+        "scopedNormalAlerts": 0,
+        "unjudgedSourceAlerts": 3,
+        "normalAnySourceAlerts": 0,
+        "completeCorrectSourceDocuments": 11
+      },
+      "realNewsAlertedDocuments": 18
+    },
+    "knownCases": 16,
+    "sourceScope": "EXISTING_DEVELOPMENT",
+    "finalTestUsed": false,
+    "realNewsCases": 32,
+    "elapsedSeconds": 79.10899999999947
+  },
+  "departmentPointerRestored": true,
+  "lifecycleStatus": "PENDING",
+  "humanDecisions": 0,
+  "checkHistoryCount": 2,
+  "formalGenerationResumed": false,
+  "newDependencies": false
+}

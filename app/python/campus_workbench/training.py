@@ -123,7 +123,7 @@ def metric_report(rows, scores, family):
 
 
 def dependencies():
-    return {str(path.relative_to(ROOT)): sha(path) for path in (ROOT / 'validation/text/round2.py', ROOT / 'validation/text/run_validation.py', Path(__file__), Path(__file__).with_name('preparation.py'))}
+    return {str(path.relative_to(ROOT)): sha(path) for path in (ROOT / 'validation/text/round2.py', ROOT / 'validation/text/run_validation.py', Path(__file__), Path(__file__).with_name('preparation.py'),Path(__file__).with_name('training_identities.py'))}
 
 
 def train(folder, output, family, values, emit):
@@ -189,7 +189,8 @@ def train(folder, output, family, values, emit):
     if difference > 1e-5:
         raise ValueError('模型保存重载校验失败')
     write_json(output / 'history.json', history)
-    write_json(output / 'train-identities.json', {'sentences': sorted({hashlib.sha256(row[key].encode()).hexdigest() for row in train_rows for key in ('sentence1', 'sentence2')}), 'groups': sorted({row['_partitionGroup'] for row in train_rows})})
+    from .training_identities import collect
+    write_json(output / 'train-identities.json', {key:sorted(values) for key,values in collect(train_rows).items()})
     result = {'schemaVersion': 1, 'taskType': 'TRAINING', 'status': 'COMPLETED', 'family': family, 'parameters': cfg,
               'preparationSha256': sha(Path(folder) / 'manifest.json'), 'inputSha256': manifest['inputSha256'],
               'trainRows': len(train_rows), 'validationRows': len(dev), 'validation': met, 'history': history,
@@ -367,12 +368,9 @@ def predict(folder, rows, emit, device_override=None):
 
 
 def evaluate(model_folder, prepared_folder, output, emit):
-    _, splits = prepared(prepared_folder)
     model = load_model(model_folder)
-    identities = json.loads((Path(model_folder) / 'train-identities.json').read_text(encoding='utf-8'))
-    sentences = set(identities['sentences']); groups = set(identities['groups'])
-    if any(row['_partitionGroup'] in groups or any(hashlib.sha256(row[key].encode()).hexdigest() in sentences for key in ('sentence1', 'sentence2')) for row in splits['test']):
-        raise ValueError('评价集与模型训练数据存在来源/句子重合，请选择独立数据版本')
+    from .training_identities import require_evaluation
+    _,splits=require_evaluation(model_folder,prepared_folder)
     predictions = predict(model_folder, splits['test'], emit)
     result, _ = metric_report(splits['test'], [row['score'] for row in predictions], model['family'])
     output = Path(output); output.mkdir(parents=True, exist_ok=False)

@@ -15,9 +15,9 @@ import static local.campus.review.content.DocumentModels.*;
 @Service
 public class InspectionService {
     final JdbcTemplate db;final ObjectMapper json;final RuntimeSettings settings;final DocumentCodec codec;final CitationService citations;
-    private final DraftService drafts;private final FileService files;
+    private final DraftService drafts;private final FileService files;final ContentProfileService contentProfiles;
     final Map<String,Process> processes=new ConcurrentHashMap<>();
-    public InspectionService(JdbcTemplate db,ObjectMapper json,RuntimeSettings settings,DocumentCodec codec,CitationService citations,DraftService drafts,FileService files){this.db=db;this.json=json;this.settings=settings;this.codec=codec;this.citations=citations;this.drafts=drafts;this.files=files;}
+    public InspectionService(JdbcTemplate db,ObjectMapper json,RuntimeSettings settings,DocumentCodec codec,CitationService citations,DraftService drafts,FileService files,ContentProfileService contentProfiles){this.db=db;this.json=json;this.settings=settings;this.codec=codec;this.citations=citations;this.drafts=drafts;this.files=files;this.contentProfiles=contentProfiles;}
     static final Set<String> KINDS=Set.of("CONTENT","GRAMMAR_RULES","GRAMMAR_MODEL","IMAGE_TEXT");
     static final Set<String> DONE=Set.of("COMPLETED","FAILED","CANCELLED","INTERRUPTED");
     private ApiException missing(){return new ApiException(404,"RESOURCE_NOT_FOUND","未找到可访问的稿件检查");}
@@ -39,10 +39,12 @@ public class InspectionService {
         JsonNode modelProfile=null;
         if(Set.of("GRAMMAR_MODEL","IMAGE_TEXT").contains(kind)&&Files.isRegularFile(settings.documentConfiguration()))try{modelProfile=json.readTree(Files.readString(settings.documentConfiguration()));}catch(Exception error){throw new ApiException(503,"MODEL_PROFILE_UNAVAILABLE","文稿模型配置暂不可读取");}
         String profileId=modelProfile==null?"":modelProfile.path("profileId").asText();
-        var active=db.queryForList("SELECT id FROM document_check WHERE manuscript_id=? AND kind=? AND input_sha256=? AND COALESCE(JSON_UNQUOTE(JSON_EXTRACT(payload_json,'$.modelProfile.profileId')),'')=? AND status IN ('QUEUED','RUNNING','WAITING_SERVICE','WAITING_RESOURCE') ORDER BY created_at DESC LIMIT 1",manuscript,kind,document.contentHash(),profileId);if(!active.isEmpty())return get(user,active.getFirst().get("id").toString());
+        var contentProfile="CONTENT".equals(kind)?contentProfiles.capture(manuscript,version!=null):null;
+        var active=db.queryForList("SELECT id FROM document_check WHERE manuscript_id=? AND submission_version_id <=> ? AND kind=? AND input_sha256=? AND COALESCE(JSON_UNQUOTE(JSON_EXTRACT(payload_json,'$.modelProfile.profileId')),'')=? AND COALESCE(JSON_UNQUOTE(JSON_EXTRACT(payload_json,'$.contentProfile.identity')),'')=? AND status IN ('QUEUED','RUNNING','WAITING_SERVICE','WAITING_RESOURCE') ORDER BY created_at DESC LIMIT 1",manuscript,version,kind,document.contentHash(),profileId,contentProfile==null?"":contentProfile.path("identity").asText());if(!active.isEmpty())return get(user,active.getFirst().get("id").toString());
         String id=UUID.randomUUID().toString();
         var payload=json.createObjectNode().put("checkId",id).put("kind",kind).put("inputHash",document.contentHash()).put("title",input.title()).put("plainText",document.plainText()).put("manuscriptId",manuscript).put("runtime",settings.runtime().toString());
         if(modelProfile!=null)payload.set("modelProfile",modelProfile);
+        if(contentProfile!=null)payload.set("contentProfile",contentProfile);
         if("IMAGE_TEXT".equals(kind))payload.set("ocrConfig",modelProfile!=null?modelProfile.path("ocrConfiguration"):json.readTree(Files.readString(settings.ocrConfiguration())));
         payload.set("document",json.valueToTree(document.document()));payload.set("positionMap",json.valueToTree(document.positionMap()));payload.set("citations",json.valueToTree(document.citations()));
         var blocks=new ArrayList<JsonNode>();collect(document.document().content(),blocks);var images=payload.putArray("images");
@@ -71,8 +73,13 @@ public class InspectionService {
         boolean found=false;for(var issue:JsonSupport.parse(json,row.get("result_json").toString()).path("issues"))if(issueId.equals(issue.path("id").asText()))found=true;if(!found)throw new ApiException(400,"VALIDATION_ERROR","未找到该检查建议");
         event(id,Map.of("stage","FEEDBACK","actorId",user.userId(),"issueId",issueId,"action",action));return json.createObjectNode().put("saved",true);
     }
-    JsonNode response(Map<String,Object> row){var payload=JsonSupport.parse(json,row.get("payload_json").toString());var result=json.createObjectNode().put("checkId",row.get("id").toString()).put("kind",row.get("kind").toString()).put("status",row.get("status").toString()).put("inputHash",row.get("input_sha256").toString()).put("error",Objects.toString(row.get("error_message"),""));result.set("positionMap",payload.path("positionMap"));result.set("document",payload.path("document"));if(row.get("result_json")!=null)result.set("result",JsonSupport.parse(json,row.get("result_json").toString()));return result;}
-    public JsonNode list(CurrentUser user,String manuscript,String version){access(user,manuscript,version!=null);String sql="SELECT * FROM document_check WHERE manuscript_id=?";var args=new ArrayList<Object>(List.of(manuscript));if(version!=null){sql+=" AND submission_version_id=?";args.add(version);}sql+=" ORDER BY created_at DESC LIMIT 30";var result=json.createArrayNode();for(var row:db.queryForList(sql,args.toArray()))result.add(response(row));return result;}
+    JsonNode response(Map<String,Object> row){var payload=JsonSupport.parse(json,row.get("payload_json").toString());var result=json.createObjectNode().put("checkId",row.get("id").toString()).put("kind",row.get("kind").toString()).put("status",row.get("status").toString()).put("inputHash",row.get("input_sha256").toString()).put("error",Objects.toString(row.get("error_message"),""));result.set("positionMap",payload.path("positionMap"));result.set("document",payload.path("document"));if(payload.has("contentProfile"))result.set("contentProfile",payload.get("contentProfile"));if(row.get("submission_version_id")!=null)result.put("submissionId",row.get("submission_version_id").toString());for(String field:List.of("created_at","finished_at"))if(row.get(field)!=null)result.put(field.equals("created_at")?"createdAt":"finishedAt",((java.time.LocalDateTime)row.get(field)).atOffset(java.time.ZoneOffset.UTC).toString());if(row.get("result_json")!=null)result.set("result",JsonSupport.parse(json,row.get("result_json").toString()));return result;}
+    private List<Map<String,Object>> orderedChecks(String query,Object... args){
+        // Sort small identifiers before loading JSON evidence. Sorting full reports
+        // can exceed MySQL's sort buffer even with only a few large reports.
+        var result=new ArrayList<Map<String,Object>>();for(var id:db.queryForList(query,args))result.add(db.queryForMap("SELECT * FROM document_check WHERE id=?",id.get("id")));return result;
+    }
+    public JsonNode list(CurrentUser user,String manuscript,String version){access(user,manuscript,version!=null);String sql="SELECT id FROM document_check WHERE manuscript_id=?";var args=new ArrayList<Object>(List.of(manuscript));if(version!=null){sql+=" AND submission_version_id=?";args.add(version);}sql+=" ORDER BY created_at DESC,id DESC LIMIT 30";var result=json.createArrayNode();for(var row:orderedChecks(sql,args.toArray()))result.add(response(row));return result;}
     public JsonNode history(CurrentUser user,String manuscript,String version,int page,int size){
         return history(user,manuscript,version,page,size,"");
     }
@@ -81,7 +88,7 @@ public class InspectionService {
         String from=" FROM document_check WHERE manuscript_id=?";var args=new ArrayList<Object>(List.of(manuscript));if(version!=null){from+=" AND submission_version_id=?";args.add(version);}
         from+=switch(Objects.toString(panel,"")){case ""->"";case "content"->" AND kind='CONTENT'";case "grammar"->" AND kind IN ('GRAMMAR_RULES','GRAMMAR_MODEL')";case "image"->" AND kind='IMAGE_TEXT'";default->throw new ApiException(400,"VALIDATION_ERROR","检查类型无效");};
         var result=json.createObjectNode().put("page",page).put("pageSize",size).put("total",db.queryForObject("SELECT COUNT(*)"+from,Long.class,args.toArray()));
-        args.add(size);args.add((page-1L)*size);var items=result.putArray("items");for(var row:db.queryForList("SELECT *"+from+" ORDER BY created_at DESC,id DESC LIMIT ? OFFSET ?",args.toArray()))items.add(response(row));return result;
+        args.add(size);args.add((page-1L)*size);var items=result.putArray("items");for(var row:orderedChecks("SELECT id"+from+" ORDER BY created_at DESC,id DESC LIMIT ? OFFSET ?",args.toArray()))items.add(response(row));return result;
     }
     void event(String id,Object value){db.update("INSERT INTO document_check_event(check_id,payload_json,created_at) VALUES(?,?,UTC_TIMESTAMP(3))",id,JsonSupport.encode(json,value));}
     public JsonNode events(CurrentUser user,String id,long after){require(user,id);var result=json.createArrayNode();for(var row:db.queryForList("SELECT id,payload_json FROM document_check_event WHERE check_id=? AND id>? ORDER BY id LIMIT 500",id,Math.max(0,after)))result.addObject().put("sequence",((Number)row.get("id")).longValue()).set("data",JsonSupport.parse(json,row.get("payload_json").toString()));return result;}

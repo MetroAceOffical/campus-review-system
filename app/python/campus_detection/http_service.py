@@ -108,7 +108,7 @@ def make_server(runtime,port=18081):
             self.reply(200,runtime.health())
         def do_POST(self):
             if not self.authorized():return
-            if self.path not in ('/detect/text','/detect/image','/library/build'):
+            if self.path not in ('/detect/text','/detect/image','/library/build','/models/text'):
                 self.reply(404,{'errorCode':'ENDPOINT_NOT_FOUND'});return
             if runtime.models is None:self.reply(503,{'status':'FAILED','errorCode':'MODELS_NOT_READY'});return
             if not runtime.compute.acquire(blocking=False):self.reply(409,{'status':'FAILED','errorCode':'PROCESS_BUSY','runId':runtime.run_id});return
@@ -122,6 +122,10 @@ def make_server(runtime,port=18081):
                 length=int(self.headers.get('Content-Length','0'))
                 if length<=0 or length>4*1024*1024:raise ContractError('INVALID_REQUEST_SIZE','Invalid request size')
                 request=json.loads(self.rfile.read(length));runtime.active_attempt=request.get('attemptId')
+                if self.path=='/models/text':
+                    from campus_detection.web_bert import register
+                    config=register(runtime.models,ROOT/request['path'],request['sha256'])
+                    self.reply(200,{'configId':config['configId'],'ready':True});return
                 if self.path=='/library/build':
                     from campus_detection.library import build_library
                     location=Path(request.get('manifestPath','')).resolve()
@@ -141,7 +145,16 @@ def make_server(runtime,port=18081):
                 if self.path=='/detect/text' and runtime.models.get('textConfigs',{}).get(request.get('configId'),{}).get('mutualEvidencePolicy'):
                     from campus_detection.mutual_text import detect
                     function=detect
-                result=function(request,library,runtime.models);validate_result(result,request)
+                selected=runtime.models
+                if self.path=='/detect/text':
+                    from campus_detection.web_bert import register,select_models
+                    key=request.get('configId')
+                    if key in runtime.models.get('textAdapterDescriptors',{}) and key not in runtime.models.get('webBertModels',{}):
+                        saved=runtime.models['textAdapterDescriptors'][key];register(runtime.models,saved['path'],saved['sha256'])
+                    selected=select_models(runtime.models,key)
+                result=function(request,library,selected);validate_result(result,request)
+                if self.path=='/detect/text' and selected['textConfigs'].get(request.get('configId'),{}).get('webBert'):
+                    result['modelBinding']=selected['textConfigs'][request['configId']]['webBert']
                 result['processRunId']=runtime.run_id
                 self.reply(200,result)
             except (ContractError,ValueError,KeyError,FileNotFoundError) as error:

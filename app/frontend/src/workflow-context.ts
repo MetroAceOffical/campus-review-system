@@ -20,15 +20,19 @@ export function contextualLink(path: string) {
     const flow=activeFlow.value
     const stage=({'/datasets':'quality','/training':'train','/models':'evaluate','/reference-imports':'library'} as Record<string,string>)[path]
     if(stage){
-      const target=stage==='train'&&!flowSteps(flow,workflowContext.dataset).find(s=>s.key==='train')?.enabled?'prepare':stage
+      const steps=flowSteps(flow,workflowContext.dataset)
+      if(path==='/models'&&!flow.context.modelId)return flow.kind==='CONTINUE'?flowDestination(flow,'parent'):{path,query:{flow:''}}
+      if(!steps.some(s=>s.key===stage))return{path,query:{flow:''}}
+      const target=stage==='train'&&!steps.find(s=>s.key==='train')?.enabled?'prepare':stage
       return flowDestination(flow,target)
     }
-    if(['/references','/releases'].includes(path))return{path,query:{flow:flow.flowId,...(flow.context.datasetId?{dataset:flow.context.datasetId}:{}),...(flow.context.versionId?{version:flow.context.versionId}:{})}}
+    if(path==='/releases'&&flow.context.modelId)return{path,query:{flow:flow.flowId,modelId:flow.context.modelId,...(flow.context.releaseId?{release:flow.context.releaseId}:{}),...(flow.context.evaluationRunId?{evaluation:flow.context.evaluationRunId}:{})}}
+    return{path,query:{flow:''}}
   }
   const { dataset, version } = workflowContext
   if (!dataset || !version) return path
   const stage = ({ '/datasets': 'clean', '/training': 'train', '/models': 'evaluate', '/reference-imports': 'library' } as Record<string, string>)[path]
-  if (stage) { const to=currentDestination(stage);if(activeFlow.value)to.query.flow=activeFlow.value.flowId;return to }
-  if (['/references', '/releases'].includes(path)) return { path, query: { dataset: dataset.datasetId, version,...(activeFlow.value?{flow:activeFlow.value.flowId}:{}) } }
+  if (stage) return currentDestination(stage)
+  if (['/references', '/releases'].includes(path)) return { path, query: { dataset: dataset.datasetId, version } }
   return path
 }

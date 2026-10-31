@@ -7,6 +7,13 @@ sys.path.insert(0,str(ROOT/'app/python'))
 from campus_shared.contracts import file_sha256, digest_json
 
 def run(config):
+    if config['action']=='WEB_BERT':
+        from campus_detection.web_bert_calibration import prepare
+        verified=run({**config,'action':'MODEL'})
+        return prepare(config,Path(config['output']),verified)
+    if config['action']=='WEB_BERT_DEVELOPMENT':
+        from campus_detection.web_bert_development import evaluate
+        return evaluate(config)
     if config['action']=='PROFILE_CANDIDATES':
         from campus_detection.service_profile import candidates
         return candidates()
@@ -27,6 +34,13 @@ def run(config):
         folder=Path(config['model']);manifest=load_model(folder)
         evaluation=json.loads(Path(config['evaluation']).read_text(encoding='utf-8'))
         if evaluation.get('taskType')!='EVALUATION' or evaluation.get('status')!='COMPLETED' or evaluation.get('modelSha256')!=file_sha256(folder/'manifest.json'):raise ValueError('独立评价与模型版本不匹配')
+        from campus_workbench.training_identities import require_evaluation
+        preparation=config.get('evaluationPreparation')
+        if not preparation:
+            saved=Path(config['evaluation']).parent.parent/'config.json'
+            preparation=json.loads(saved.read_text(encoding='utf-8')).get('preparation') if saved.is_file() else None
+        if not preparation or file_sha256(Path(preparation)/'manifest.json')!=evaluation.get('preparationSha256'):raise ValueError('独立评价缺少可核验的样本划分，请重新评价')
+        require_evaluation(folder,preparation)
         for name,sha in evaluation['artifacts'].items():
             target=(Path(config['evaluation']).parent/name).resolve()
             if not target.is_relative_to(Path(config['evaluation']).parent.resolve()) or file_sha256(target)!=sha:raise ValueError('评价产物校验失败')

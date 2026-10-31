@@ -28,7 +28,7 @@ const samplePage = ref(1), sampleTotal = ref(0), samples = ref<Array<Record<stri
 const detailTab=ref('quality'), taskPage=ref(1),taskSize=ref(20),taskTotal=ref(0),taskRows=ref<Run[]>([])
 async function readTaskHistory(){if(!detail.value)return;const id=detail.value.datasetId;try{const result=await api.datasetRuns(id,taskPage.value,taskSize.value);if(detail.value?.datasetId===id){taskRows.value=result.items;taskTotal.value=result.total}}catch(value){message(value)}}
 watch(detailTab,tab=>{if(tab==='tasks')void readTaskHistory()})
-watch(detail, data => { if (data && workflowContext.dataset?.datasetId === data.datasetId) workflowContext.dataset = data })
+watch(detail, data => { if (data) workflowContext.dataset = data })
 const composed = ref<api.Composition>()
 watch(() => form.kind, kind => { form.purpose = kind === 'PAIRS' ? 'TRAIN' : 'LIBRARY' })
 async function setPurpose(value: string) { if (!detail.value) return; detail.value = await api.update(detail.value.datasetId, { purpose: value }); await refreshList() }

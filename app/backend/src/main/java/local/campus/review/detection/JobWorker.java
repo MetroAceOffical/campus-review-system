@@ -80,6 +80,7 @@ public class JobWorker {
             pin.set("imageConfig",main.path("configs").path("imageConfig"));pin.set("ocrConfig",client.frozenOcrConfig());pin.put("libraryGenerationId",generation).put("libraryManifestSha256",libraryHash);
             pipeline=detection.pin(batchId,generation,pin);
         }else pipeline=JsonSupport.parse(json,batch.get("pipeline_manifest_json").toString());
+        client.ensureTextAdapter(pipeline);
         db.update("UPDATE detection_batch SET status='RUNNING',started_at=COALESCE(started_at,UTC_TIMESTAMP(3)) WHERE id=?",batchId);
         var items=db.queryForList("SELECT * FROM detection_item WHERE batch_id=? AND status='QUEUED' ORDER BY CASE type WHEN 'TEXT' THEN 0 WHEN 'IMAGE' THEN 1 ELSE 2 END,id",batchId);
         for(var item:items){

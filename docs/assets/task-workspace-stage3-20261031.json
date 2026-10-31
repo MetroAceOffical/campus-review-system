@@ -1,0 +1,302 @@
+{
+  "commonComparison": [
+    {
+      "runId": "01a2aef0-e569-41cf-b7bc-bfd2fe8bd7cb",
+      "status": "COMPLETED",
+      "modelId": "570e8ccf-d21b-4405-b7d9-6cc49dc8f8ea",
+      "role": "CHILD",
+      "preparationId": "cf544c30-fff0-4b7d-b1d0-05e303fdd97f",
+      "metrics": {
+        "f1": 1.0,
+        "pr": [
+          [
+            1.0,
+            0.5
+          ],
+          [
+            1.0,
+            0.5454545454545454
+          ],
+          [
+            1.0,
+            0.6
+          ],
+          [
+            1.0,
+            0.6666666666666666
+          ],
+          [
+            1.0,
+            0.75
+          ],
+          [
+            1.0,
+            0.8571428571428571
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            0.8333333333333334,
+            1.0
+          ],
+          [
+            0.6666666666666666,
+            1.0
+          ],
+          [
+            0.5,
+            1.0
+          ],
+          [
+            0.3333333333333333,
+            1.0
+          ],
+          [
+            0.16666666666666666,
+            1.0
+          ],
+          [
+            0.0,
+            1.0
+          ]
+        ],
+        "roc": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.16666666666666666
+          ],
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ]
+        ],
+        "rows": 12,
+        "recall": 1.0,
+        "roc_auc": 1.0,
+        "accuracy": 1.0,
+        "macro_f1": 1.0,
+        "precision": 1.0,
+        "scoreType": "probability",
+        "threshold": 0.5,
+        "confusionMatrix": [
+          [
+            6,
+            0
+          ],
+          [
+            0,
+            6
+          ]
+        ],
+        "average_precision": 1.0
+      }
+    },
+    {
+      "runId": "dd1b8a64-2337-445d-a8a9-66b79084a566",
+      "status": "COMPLETED",
+      "modelId": "6ab244e5-824d-41e9-9863-70c9ad34731b",
+      "role": "PARENT",
+      "preparationId": "cf544c30-fff0-4b7d-b1d0-05e303fdd97f",
+      "metrics": {
+        "f1": 1.0,
+        "pr": [
+          [
+            1.0,
+            0.5
+          ],
+          [
+            1.0,
+            0.5454545454545454
+          ],
+          [
+            1.0,
+            0.6
+          ],
+          [
+            1.0,
+            0.6666666666666666
+          ],
+          [
+            1.0,
+            0.75
+          ],
+          [
+            1.0,
+            0.8571428571428571
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            0.8333333333333334,
+            1.0
+          ],
+          [
+            0.6666666666666666,
+            1.0
+          ],
+          [
+            0.5,
+            1.0
+          ],
+          [
+            0.3333333333333333,
+            1.0
+          ],
+          [
+            0.16666666666666666,
+            1.0
+          ],
+          [
+            0.0,
+            1.0
+          ]
+        ],
+        "roc": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.16666666666666666
+          ],
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ]
+        ],
+        "rows": 12,
+        "recall": 1.0,
+        "roc_auc": 1.0,
+        "accuracy": 1.0,
+        "macro_f1": 1.0,
+        "precision": 1.0,
+        "scoreType": "probability",
+        "threshold": 0.5,
+        "confusionMatrix": [
+          [
+            6,
+            0
+          ],
+          [
+            0,
+            6
+          ]
+        ],
+        "average_precision": 1.0
+      }
+    }
+  ],
+  "releaseId": "269e4b48-8cac-462a-857d-841a8a9d68c3",
+  "releaseStatus": "READY",
+  "configurationId": "text-5349a5f0150fcf3bfcb6d4a2c503a43c5a2be4850dc2a55f527b4c8cfe18903f",
+  "calibration": {
+    "rows": 12,
+    "method": "inference-128-validation-midpoint-v2",
+    "recall": 1.0,
+    "macroF1": 1.0,
+    "padding": "longest",
+    "batchSize": 8,
+    "maxTokens": 128,
+    "precision": 1.0,
+    "threshold": 0.4246980547904968,
+    "dataSha256": "7d39436d534898de7a5bf058c0241746afc6695a634a31411afd337d7c9d2e1a",
+    "scoreMeaning": "MONOTONE_CALIBRATED_DECISION_SCORE",
+    "precisionMode": "FP32",
+    "selectionPartition": "validation",
+    "modelManifestSha256": "fcac68c06f0d65a1ba2170d79e56a450a721a9fda4355e86b423564949afda54",
+    "minimumValidationMargin": 0.06705868244171143
+  },
+  "development": {
+    "status": "COMPLETED",
+    "baseline": {
+      "known": {
+        "correctSources": 13,
+        "expectedSources": 13,
+        "normalDocuments": 4,
+        "positiveDocuments": 12,
+        "scopedNormalAlerts": 0,
+        "unjudgedSourceAlerts": 4,
+        "normalAnySourceAlerts": 0,
+        "completeCorrectSourceDocuments": 12
+      },
+      "realNewsAlertedDocuments": 17
+    },
+    "requests": 96,
+    "candidate": {
+      "known": {
+        "correctSources": 13,
+        "expectedSources": 13,
+        "normalDocuments": 4,
+        "positiveDocuments": 12,
+        "scopedNormalAlerts": 0,
+        "unjudgedSourceAlerts": 4,
+        "normalAnySourceAlerts": 0,
+        "completeCorrectSourceDocuments": 12
+      },
+      "realNewsAlertedDocuments": 23
+    },
+    "knownCases": 16,
+    "sourceScope": "EXISTING_DEVELOPMENT",
+    "finalTestUsed": false,
+    "realNewsCases": 32,
+    "elapsedSeconds": 82.42200000000048
+  },
+  "recheck": {
+    "checkId": "62d29513-e02d-435c-ae20-ee0d84f34e59",
+    "submissionId": 35,
+    "status": "COMPLETED",
+    "inputMatchesImmutableSubmission": true,
+    "modelBinding": {
+      "modelId": "570e8ccf-d21b-4405-b7d9-6cc49dc8f8ea",
+      "maxTokens": 128,
+      "evaluationId": "01a2aef0-e569-41cf-b7bc-bfd2fe8bd7cb",
+      "scoreMeaning": "MONOTONE_CALIBRATED_DECISION_SCORE",
+      "weightSha256": "7ce1fee9ac2c9a6339ea6a3d62152dfb71d52f14a8b8b1d53c21e6d879b76d73",
+      "adapterSha256": "48d63858b91b43865bd4810bb2cd1fae939b7fb0abcbabfbc2415a88c9023dac",
+      "positiveLabel": 1,
+      "tokenizerSha256": "48cea5d44424912a6fd1ea647bf4fe50b55ab8b1e5879c3275f80e339e8fae26",
+      "calibrationSha256": "20085b432fc021ce01ce7d5e214742b52be839f1af9ddf3492ace0eaebf1499e",
+      "calibrationProtocol": "inference-128-validation-midpoint-v2",
+      "modelManifestSha256": "fcac68c06f0d65a1ba2170d79e56a450a721a9fda4355e86b423564949afda54",
+      "calibrationProtocolSha256": "82440838a010eef76f71dbe3babf34a6a405a0c93550b091a38620d8c96cb6a8"
+    },
+    "humanDecisions": 0,
+    "historyRecords": 3
+  },
+  "departmentDefaultRestored": true,
+  "historicalAdapterFilesUnchanged": true,
+  "newsUpload": {
+    "flowId": "1807bcc6-d731-4a91-8719-1640b397d68f",
+    "datasetId": "d8f1e29b-cc9f-4713-8ab6-b0b123f6db68",
+    "cleanVersionId": "9e06ef3d-8f68-4c4f-8979-abf95face5e4",
+    "rawRows": 9,
+    "cleanRows": 8,
+    "referenceImportId": "f7fbb145-1f84-46a8-b594-510d6a69e0ae",
+    "status": "COMPLETED",
+    "processed": 8,
+    "inserted": 0,
+    "duplicates": 8,
+    "rejected": 0,
+    "generationId": "21"
+  },
+  "formalGenerationResumed": false,
+  "newDependencies": false,
+  "newAuthorSubmissionCreated": false
+}

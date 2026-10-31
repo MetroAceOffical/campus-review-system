@@ -1,4 +1,15 @@
 :root{--header-height:68px;--sidebar-width:208px}
+.app-shell .el-button.is-link{border:1px solid var(--line);background:var(--canvas);padding:6px 10px;min-height:28px;border-radius:0}
+.app-shell .el-button.is-link:hover{background:var(--soft);border-color:var(--el-color-primary)}
+.app-shell .el-button.is-link.is-disabled{opacity:.5;cursor:not-allowed}
+.app-shell .data-chooser{border:1px solid var(--line);padding:10px 12px;margin-bottom:12px}
+.app-shell .data-chooser>summary{font-size:12px;cursor:pointer;margin-bottom:4px}
+.app-shell .raw-evidence pre{max-height:260px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}
+.app-shell .task-flow .flow-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));overflow-x:visible;gap:6px}
+.app-shell .task-flow .flow-steps li{min-width:0}.app-shell .task-flow .flow-heading>div>span{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app-shell .model-data-selection{padding:8px 12px}.app-shell .model-data-selection .data-chooser{border:0;padding:0;margin:0}.model-data-selection .data-chooser>summary{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.model-header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+@media(max-width:1200px){.app-shell .task-flow .flow-steps small{display:none}}
 .app-shell .page-content{padding:16px 20px 28px}
 .app-shell .page-heading{margin-bottom:12px}.app-shell .page-heading h1{font-size:23px}.app-shell .page-heading-mark{padding:7px}
 .app-shell :is(.panel,.work-panel){padding:16px;margin-bottom:14px}

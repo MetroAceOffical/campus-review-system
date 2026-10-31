@@ -17,7 +17,7 @@ class PaginationTest {
         var db=new RecordingDatabase();var json=new ObjectMapper();
         CurrentUser[] actor={new CurrentUser("1","创作者",CurrentUser.Role.MEMBER,Set.of("1"),List.of())};
         var users=new CurrentUserService(null){@Override public CurrentUser require(org.springframework.security.core.Authentication authentication){return actor[0];}};
-        var service=new InspectionService(db,json,null,null,null,null,null);
+        var service=new InspectionService(db,json,null,null,null,null,null,null);
         var mvc=MockMvcBuilders.standaloneSetup(new InspectionController(service,users,db)).setControllerAdvice(new ApiAdvice()).build();
         for(String kind:List.of("manuscripts","submissions")){
             String path="/api/"+kind+"/9/checks/history";

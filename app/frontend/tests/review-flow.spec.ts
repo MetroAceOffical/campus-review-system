@@ -14,12 +14,14 @@ it('shows a semantic warning separately from literal acceptance and supports old
     semanticSummary: { suspectedReuse: true, supportingPairs: 2, matchedQueryCharacters: 80, status: 'EVALUATED' } }
   const wrapper = mount(TextEvidence, { props: { evidence: [evidence] }, global: { plugins: [ElementPlus] } })
   expect(wrapper.text()).toContain('疑似语义复用')
-  expect(wrapper.text()).toContain('尚无符合条件的字面片段')
+  expect(wrapper.find('.evidence-metrics').text()).toContain('80')
+  expect(wrapper.find('.evidence-metrics').text()).not.toContain('字面重复')
   expect(wrapper.text()).not.toContain('符合字面证据条件')
   wrapper.unmount()
   const old = { ...evidence, semanticSummary: undefined }
   const previous = mount(TextEvidence, { props: { evidence: [old] }, global: { plugins: [ElementPlus] } })
-  expect(previous.text()).toContain('召回候选，未达字面条件')
+  expect(previous.text()).toContain('相近来源')
+  expect(previous.get('[data-testid="other-text-candidates"]').element.hasAttribute('open')).toBe(false)
   expect(previous.findAll('.el-tag').some(tag => tag.text() === '疑似语义复用')).toBe(false)
   previous.unmount()
 })
