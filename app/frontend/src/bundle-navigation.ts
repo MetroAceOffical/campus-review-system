@@ -15,9 +15,11 @@ export function continuationAnchor(bundle:ModelBundle):string{
 
 export function bindBundleContext(context:FlowContext,bundle:ModelBundle):FlowContext{
  const next={...context}
+ const version=bundle.state.cleanVersionId||bundle.inputVersionId||(context.datasetId===bundle.datasetId?context.versionId:undefined)
+ if(context.datasetId!==bundle.datasetId||context.versionId!==version)delete next.importId
  if(next.bundleId!==bundle.pipelineId){for(const key of ['preparationId','trainingRunId','modelId','evaluationRunId','releaseId'] as const)delete next[key]}
  next.bundleId=bundle.pipelineId;next.datasetId=bundle.datasetId
- next.versionId=bundle.state.cleanVersionId||next.versionId
+ if(version)next.versionId=version;else delete next.versionId
  if(bundle.state.preparationId)next.preparationId=bundle.state.preparationId
  else delete next.preparationId
  const canonical=bundle.state.models.find(member=>member.family==='bert')

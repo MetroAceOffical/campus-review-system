@@ -8,6 +8,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SixModelBundleTest {
     final ObjectMapper json=new ObjectMapper();
+    @Test void rawGroupExposesItsOwnInputVersionBeforeCleaning(){
+        var data=new DatasetService(null,null,json,null);
+        var service=new AutomaticPipelineService(data,null,null,false);
+        var row=new HashMap<String,Object>(Map.of("id","group","dataset_id","news","input_version_id","raw-version","name","新闻组","status","QUEUED","updated_at","2026-10-31","state_json",AutomaticPipelineService.initial(json,true,"raw-version").toString()));
+        assertEquals("raw-version",service.view(row).path("inputVersionId").asText());
+    }
     @Test void newTrainingRequiresExactlyTheSixFamilies(){
         var models=TrainingService.FAMILIES.stream().map(f->new AutomaticPipelineService.Model(f,null)).toList();
         assertDoesNotThrow(()->AutomaticPipelineService.validateModels(models));

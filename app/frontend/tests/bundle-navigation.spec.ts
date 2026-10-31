@@ -15,3 +15,12 @@ it('switches to a pending group without carrying another group model, split or r
  expect(context.bundleId).toBe('new');expect(context.parentModelId).toBe('parent-bert')
  expect(context.preparationId).toBeUndefined();expect(context.modelId).toBeUndefined();expect(context.releaseId).toBeUndefined()
 })
+it('keeps a reference import only for the same dataset and clean version',()=>{
+ const previous={datasetId:'news',versionId:'clean-a',importId:'old-import'}
+ for(const [datasetId,cleanVersionId] of [['other-news','clean-a'],['news','clean-b']]){
+  expect(bindBundleContext(previous,{pipelineId:'new',datasetId,state:{cleanVersionId,models:[]}} as unknown as ModelBundle).importId).toBeUndefined()
+ }
+ expect(bindBundleContext(previous,{pipelineId:'new',datasetId:'news',state:{cleanVersionId:'clean-a',models:[]}} as unknown as ModelBundle).importId).toBe('old-import')
+ const raw=bindBundleContext(previous,{pipelineId:'raw-group',datasetId:'new-news',inputVersionId:'raw-b',state:{stage:'CLEAN',models:[]}} as unknown as ModelBundle)
+ expect(raw.versionId).toBe('raw-b');expect(raw.importId).toBeUndefined()
+})
