@@ -1,0 +1,82 @@
+{
+  "task": "training-visualization",
+  "plannedChartViews": 30,
+  "trainingRunId": "b1a6d6f6-a277-4738-a99e-d3befbb49302",
+  "initialTimingRunId": "cd347e92-0751-4778-a70d-e272c37f025f",
+  "trainingStatus": "COMPLETED",
+  "sameParametersAsOriginalCNN": true,
+  "preparationId": "cf544c30-fff0-4b7d-b1d0-05e303fdd97f",
+  "inputRows": 48,
+  "trainRows": 24,
+  "validationRows": 12,
+  "epochsConfigured": 3,
+  "epochsCompleted": 3,
+  "parameters": {
+    "seed": 20261028,
+    "C": 1,
+    "max_iter": 1000,
+    "class_weight": "none",
+    "n_estimators": 100,
+    "max_depth": 20,
+    "min_samples_leaf": 1,
+    "epochs": 3,
+    "batch_size": 32,
+    "learning_rate": 0.001,
+    "width": 64,
+    "dropout": 0.2,
+    "max_length": 128,
+    "patience": 2,
+    "weight_decay": 0.01,
+    "gradient_accumulation": 1,
+    "device": "cuda"
+  },
+  "processSampleCount": 3,
+  "batchSeconds": [
+    1.1097109000038472,
+    0.007639200004632585,
+    0.007520200000726618
+  ],
+  "samplesPerSecond": [
+    21.627254449710097,
+    3141.690227438194,
+    3191.4044836149396
+  ],
+  "cudaAllocatedBytes": [
+    20394496,
+    20394496,
+    20394496
+  ],
+  "initialization": {
+    "weightsSha256": "0602ef8b944cd1ee73ef030895cc99b3d498c18cf62fccce9221848f2c7026cb",
+    "encoderSha256": "8e4da39d75a774cbd072a519d3d8d315a832b8e1bb08cef8a8210248b510f081"
+  },
+  "checkpointTimingHistoryMatches": true,
+  "allNewArtifactsShaVerified": true,
+  "historicalAdapterReleasesShaVerified": [
+    "cccf94c8-4acd-42a5-8036-e8f74729ccf0",
+    "269e4b48-8cac-462a-857d-841a8a9d68c3"
+  ],
+  "newDependencies": false,
+  "formalGenerationResumedByThisChange": false,
+  "defaultModelChangedByThisChange": false,
+  "automatedHyperparameterSearchStarted": false,
+  "targetedChecks": {
+    "python": 2,
+    "java": 8,
+    "frontend": 6
+  },
+  "validationThresholdSweepOnly": true,
+  "independentCodeReview": {
+    "importantFindings": 5,
+    "minorFindings": 1,
+    "concentratedFixPass": true
+  },
+  "browserVerified": {
+    "sixModelsSamePartition": true,
+    "trainingAndResourceCharts": true,
+    "validationScoreAndThresholdCharts": true,
+    "existingTestDistributionAndReliability": true,
+    "parentSlopeAndSankey": true,
+    "experimentSelectorsAndHeatmap": true
+  }
+}

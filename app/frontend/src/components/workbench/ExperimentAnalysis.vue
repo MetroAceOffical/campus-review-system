@@ -1,0 +1,23 @@
+<script setup lang="ts">
+import {computed,onBeforeUnmount,ref,watch} from 'vue'
+import {modelExperiments,modelNames,type Model} from '../../api/training'
+import {comparableGroups,experimentCharts,numericParameters,heatmapGroups,parameterNames} from '../../experiment-charts'
+import ChartDeck from './ChartDeck.vue'
+import RecordPagination from '../RecordPagination.vue'
+const props=defineProps<{modelId?:string;models?:Model[]}>()
+const items=ref<Model[]>([]),page=ref(1),pageSize=ref(20),total=ref(0),error=ref(''),busy=ref(false),family=ref(''),groupId=ref('0'),x=ref(''),y=ref(''),condition=ref('0')
+let alive=true,ticket=0
+async function load(){const token=++ticket;busy.value=true;error.value='';try{const value=props.modelId?await modelExperiments(props.modelId,page.value,pageSize.value):{items:props.models||[],total:props.models?.length||0};if(alive&&token===ticket){items.value=value.items;total.value=value.total}}catch(e){if(alive&&token===ticket)error.value=e instanceof Error?e.message:'读取实验记录失败'}finally{if(alive&&token===ticket)busy.value=false}}
+watch(()=>[props.modelId,props.models],()=>{items.value=[];total.value=0;family.value='';groupId.value='0';x.value='';y.value='';page.value=1;void load()},{immediate:true});onBeforeUnmount(()=>{alive=false;ticket++})
+const families=computed(()=>[...new Set(items.value.map(m=>m.family))]),familyModels=computed(()=>items.value.filter(m=>m.family===family.value)),groups=computed(()=>comparableGroups(familyModels.value))
+watch(families,values=>{if(!values.includes(family.value))family.value=values[0]||''},{immediate:true})
+watch(groups,values=>{if(Number(groupId.value)>=values.length)groupId.value='0'})
+const selected=computed(()=>groups.value[Number(groupId.value)]||[]),parameters=computed(()=>numericParameters(selected.value))
+watch(parameters,values=>{if(!values.includes(x.value))x.value=values.includes('learning_rate')?'learning_rate':values.includes('C')?'C':values[0]||'';if(!values.includes(y.value)||y.value===x.value)y.value=values.includes('batch_size')&&x.value!=='batch_size'?'batch_size':values.find(k=>k!==x.value)||''},{immediate:true})
+// The size curve may cross train-size variants only when the holdout and all other conditions match.
+const conditions=computed(()=>heatmapGroups(selected.value,x.value,y.value))
+watch(()=>[x.value,y.value,groupId.value,family.value],()=>condition.value='0')
+const charts=computed(()=>experimentCharts(selected.value,x.value,y.value,Number(condition.value)).map(c=>c.key==='learning-size'?experimentCharts(familyModels.value,x.value,y.value).find(v=>v.key==='learning-size')!:c))
+</script>
+<template><section class="work-panel" v-loading="busy"><div class="work-heading"><div><h2>调参实验分析</h2><span class="muted">选择同算法、同数据划分的历史实验</span></div></div><el-alert v-if="error" :title="error" type="error" :closable="false"/><div class="experiment-controls"><el-select v-model="family" aria-label="实验算法"><el-option v-for="f in families" :key="f" :value="f" :label="modelNames[f]"/></el-select><el-select v-model="groupId" aria-label="实验数据划分"><el-option v-for="(g,i) in groups" :key="i" :value="String(i)" :label="`划分${i+1} · ${g.length}个实验`"/></el-select><el-select v-model="x" aria-label="横轴参数"><el-option v-for="p in parameters" :key="p" :value="p" :label="parameterNames[p]||p"/></el-select><el-select v-model="y" aria-label="纵轴参数"><el-option v-for="p in parameters.filter(p=>p!==x)" :key="p" :value="p" :label="parameterNames[p]||p"/></el-select></div><el-select v-if="conditions.length>1" v-model="condition" class="condition-select" aria-label="双参数固定条件组"><el-option v-for="(g,i) in conditions" :key="i" :value="String(i)" :label="`固定条件组${i+1} · ${g.length}次实验`"/></el-select><ChartDeck :charts="charts"/><template v-if="modelId"><details><summary>实验记录 · 本页{{items.length}}条</summary><el-table :data="items" empty-text="暂无已完成实验"><el-table-column prop="name" label="模型" min-width="200"/><el-table-column prop="manifest.trainRows" label="训练样本" width="100"/><el-table-column label="验证Macro-F1" width="140"><template #default="{row}">{{(row.manifest.validation.macro_f1*100).toFixed(2)}}%</template></el-table-column><el-table-column label="参数" min-width="240"><template #default="{row}">{{JSON.stringify(row.manifest.parameters)}}</template></el-table-column></el-table></details><RecordPagination v-model:current-page="page" v-model:page-size="pageSize" :total="total" @change="load"/></template></section></template>
+<style scoped>.condition-select{max-width:300px;margin-bottom:10px}.experiment-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:8px}@media(max-width:900px){.experiment-controls{grid-template-columns:1fr 1fr}}</style>

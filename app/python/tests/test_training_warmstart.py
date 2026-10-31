@@ -28,6 +28,15 @@ class WarmstartTest(unittest.TestCase):
             descriptor=dict(folder=str(parent),manifestSha256=sha(parent/'manifest.json'),preparation=str(first),preparationSha256=sha(first/'manifest.json'))
             self.assertEqual('cnn',check_parent(descriptor,second,'cnn')['family'])
             events=[];result=train(second,root/'child','cnn',cfg,events.append,warmstart=descriptor)
+            epoch_event=next(e for e in events if e['stage']=='EPOCH')
+            self.assertGreater(epoch_event['validationLoss'],0)
+            self.assertIn('accuracy',epoch_event['trainMetrics'])
+            self.assertGreater(epoch_event['trainSeconds'],0)
+            self.assertTrue(any('gradientNorm' in e and e['hostRssBytes']>0 for e in events if e['stage']=='TRAINING'))
+            self.assertTrue((root/'child/validation-predictions.jsonl').is_file())
+            self.assertEqual(64,len(result['initialization']['weightsSha256']))
+            timings=json.loads((root/'child/resume.json').read_text(encoding='utf-8'))['historyTimings'][0]
+            self.assertEqual(epoch_event['checkpointSeconds'],timings['checkpointSeconds'])
             self.assertEqual(0,result['warmstart']['initialInheritedMaxDifference'])
             self.assertGreater(result['warmstart']['trainedInheritedMaxDifference'],0)
             rows=[]

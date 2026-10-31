@@ -1,0 +1,18 @@
+import type {Metrics,PredictionAnalytics} from './api/training'
+import {chartBase,finite,type ChartSpec} from './training-charts'
+export function evaluationCharts(metrics:Metrics,analytics?:PredictionAnalytics):ChartSpec[]{
+ const m=analytics?.available?analytics.confusionMatrix:metrics.confusionMatrix
+ const matrix=(normal:boolean)=>({...chartBase,tooltip:{trigger:'item',formatter:(p:any)=>`实际${p.value[1]?'复用':'非复用'} / 预测${p.value[0]?'复用':'非复用'}：${normal?(p.value[2]*100).toFixed(1)+'%':p.value[2]+'条'}`},xAxis:{type:'category',name:'预测',data:['非复用','复用']},yAxis:{type:'category',name:'实际',data:['非复用','复用']},visualMap:{min:0,max:normal?1:Math.max(1,...m.flat()),show:false},series:[{type:'heatmap',label:{show:true,fontSize:22,formatter:(p:any)=>normal?(p.value[2]*100).toFixed(1)+'%':p.value[2]},data:m.flatMap((r,y)=>r.flatMap((v,x)=>normal&&r.reduce((a,b)=>a+b,0)===0?[]:[[x,y,normal?v/r.reduce((a,b)=>a+b,0):v]]))}]})
+ const curve=(name:string,data:number[][],x:string,y:string)=>({...chartBase,xAxis:{type:'value',name:x,min:0,max:1},yAxis:{type:'value',name:y,min:0,max:1},series:[{name,type:'line',showSymbol:false,data}]})
+ const a=analytics?.available?analytics:undefined
+ return [
+ {key:'matrix',title:'混淆矩阵 · 样本数量',group:'分类表现',ready:true,option:matrix(false)},
+ {key:'matrix-normalized',title:'混淆矩阵 · 类别识别比例',group:'分类表现',ready:true,option:matrix(true)},
+ {key:'roc',title:'ROC曲线',group:'分类表现',ready:metrics.roc.length>0,empty:'评价包含两种类别后显示',option:curve('ROC',metrics.roc,'误报率 FPR','召回率 TPR')},
+ {key:'pr',title:'PR曲线',group:'分类表现',ready:metrics.pr.length>0,empty:'评价包含两种类别后显示',option:curve('PR',metrics.pr,'召回率 Recall','精确率 Precision')},
+ {key:'score-distribution',title:`真实类别的${a?.scoreType==='margin'?'间隔':'预测'}得分分布`,group:'得分与阈值',ready:!!a,option:{...chartBase,legend:{},xAxis:{type:'category',name:'得分区间',data:a?.histogram.map(b=>`${b.lower.toFixed(2)}–${b.upper.toFixed(2)}`)||[],axisLabel:{rotate:25}},yAxis:{type:'value',name:'样本数',minInterval:1},series:[['非复用','negative'],['复用','positive']].map(([n,k])=>({name:n,type:'bar',data:a?.histogram.map(b=>(b as any)[k!])||[]}))}},
+ ...(a?.partition==='test'?[]:[{key:'threshold',title:'验证集阈值与指标',group:'得分与阈值',ready:!!a?.thresholdSweep.length,empty:'训练保存验证集得分后显示',option:{...chartBase,legend:{},xAxis:{type:'value',name:a?.scoreType==='margin'?'间隔阈值':'阈值'},yAxis:{type:'value',min:0,max:1,name:'指标'},series:[['精确率','precision'],['召回率','recall'],['F1','f1'],['误报率','falsePositiveRate']].map(([n,k])=>({name:n,type:'line',showSymbol:false,data:a?.thresholdSweep.map(p=>[p.threshold,(p as any)[k!]])||[],...(k==='f1'?{markLine:{symbol:'none',label:{formatter:'训练默认阈值'},data:[{xAxis:a?.savedThreshold}]}}:{})}))}}]),
+ ...(a?.scoreType==='margin'?[]:[{key:'reliability',title:'概率可靠性曲线',group:'得分与阈值',ready:!!a?.reliability.length,option:{...chartBase,legend:{},xAxis:{type:'value',name:'平均预测概率',min:0,max:1},yAxis:{type:'value',name:'实际正例比例',min:0,max:1},series:[{name:'理想校准',type:'line',showSymbol:false,lineStyle:{type:'dashed'},data:[[0,0],[1,1]]},{name:'模型分箱',type:'line',symbolSize:9,data:a?.reliability.filter(b=>b.count>0&&finite(b.predicted)&&finite(b.observed)).map(b=>[b.predicted,b.observed,b.count])||[]}]}}]),
+ {key:'length-errors',title:'文本长度与错误分布',group:'错误分析',ready:!!a,option:{...chartBase,legend:{},xAxis:{type:'category',data:a?.lengthErrors.map(b=>b.bucket)||[]},yAxis:[{type:'value',name:'错误条数',minInterval:1},{type:'value',name:'错误率',min:0,max:1}],series:[{name:'误报 FP',type:'bar',stack:'errors',data:a?.lengthErrors.map(b=>b.FP)||[]},{name:'漏报 FN',type:'bar',stack:'errors',data:a?.lengthErrors.map(b=>b.FN)||[]},{name:'错误率',type:'line',yAxisIndex:1,data:a?.lengthErrors.map(b=>b.errorRate)||[]}]}}
+ ]
+}

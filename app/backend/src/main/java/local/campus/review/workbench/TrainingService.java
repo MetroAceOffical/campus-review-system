@@ -177,13 +177,25 @@ public class TrainingService {
         for(var row:data.db.queryForList("SELECT m.*,r.input_version_id FROM ml_model m JOIN ml_run r ON r.id=m.run_id WHERE m.logical_model_id=? ORDER BY m.version_number DESC LIMIT ? OFFSET ?",logical,size,(page-1L)*size))items.add(modelJson(row));return result;
     }
     public JsonNode getModel(CurrentUser user,String id){var row=model(user,id);row.put("input_version_id",data.db.queryForObject("SELECT input_version_id FROM ml_run WHERE id=?",String.class,row.get("run_id")));return modelJson(row);}
+    public JsonNode experiments(CurrentUser user,String id,int page,int size){
+        var selected=model(user,id);if(page<1||size<1||size>100)throw invalid("分页参数无效");
+        String from=" FROM ml_model m JOIN ml_run r ON r.id=m.run_id JOIN ml_dataset d ON d.id=m.dataset_id WHERE m.organization_id=? AND m.family=? AND m.archived=FALSE";
+        var result=data.json.createObjectNode().put("total",data.db.queryForObject("SELECT COUNT(*)"+from,Long.class,selected.get("organization_id"),selected.get("family")));var items=result.putArray("items");
+        for(String modelId:data.db.queryForList("SELECT m.id"+from+" ORDER BY m.created_at DESC,m.id LIMIT ? OFFSET ?",String.class,selected.get("organization_id"),selected.get("family"),size,(page-1L)*size))items.add(getModel(user,modelId));
+        return result;
+    }
     ObjectNode modelJson(Map<String,Object> row){
         var result=data.json.createObjectNode().put("modelId",row.get("id").toString()).put("datasetId",row.get("dataset_id").toString()).put("runId",row.get("run_id").toString()).put("name",row.get("name").toString()).put("family",row.get("family").toString()).put("organizationId",row.get("organization_id").toString()).put("archived",Boolean.TRUE.equals(row.get("archived"))).put("createdAt",row.get("created_at").toString());
         if(row.get("dataset_name")!=null)result.put("datasetName",row.get("dataset_name").toString());
         if(row.get("input_version_id")!=null)result.put("inputVersionId",row.get("input_version_id").toString());
         result.put("logicalModelId",Objects.toString(row.get("logical_model_id"),row.get("id").toString())).put("versionNumber",row.get("version_number")==null?1:((Number)row.get("version_number")).intValue());
         if(row.get("parent_model_id")!=null)result.put("parentModelId",row.get("parent_model_id").toString());
-        result.set("manifest",JsonSupport.parse(data.json,row.get("manifest_json").toString()));return result;
+        result.set("manifest",JsonSupport.parse(data.json,row.get("manifest_json").toString()));
+        try{var folder=directory(row.get("run_id").toString()).resolve("output");long bytes=0;
+            if("bert".equals(row.get("family"))&&Files.isDirectory(folder.resolve("bert"))){try(var paths=Files.walk(folder.resolve("bert"))){bytes=paths.filter(Files::isRegularFile).filter(p->p.toString().endsWith(".safetensors")||p.toString().endsWith("pytorch_model.bin")).mapToLong(p->{try{return Files.size(p);}catch(IOException e){return 0;}}).sum();}}
+            else {var weights=folder.resolve(Set.of("lr","svm","rf").contains(row.get("family"))?"model.joblib":"best.pt");if(Files.isRegularFile(weights))bytes=Files.size(weights);}
+            if(bytes>0)result.put("modelBytes",bytes);
+        }catch(IOException ignored){}return result;
     }
     public JsonNode updateModel(CurrentUser user,String id,String name,Boolean archived){
         model(user,id);if(name==null && archived==null)throw invalid("请填写修改内容");String label=name==null?null:DatasetService.name(name);
@@ -207,7 +219,7 @@ public class TrainingService {
         Path output=directory(id).resolve("output"),manifestFile=output.resolve("manifest.json"),file=output.resolve("predictions.jsonl");
         if(!Files.isRegularFile(manifestFile)||!Files.isRegularFile(file)||!manifestFile.toRealPath().startsWith(output.toRealPath())||!file.toRealPath().startsWith(output.toRealPath()))throw DatasetService.missing();
         var manifest=data.json.readTree(Files.readString(manifestFile));
-        if(!manifest.equals(JsonSupport.parse(data.json,task.get("result_json").toString())))throw new ApiException(409,"ARTIFACT_CHANGED","结果工件发生变化，请重新执行任务");
+        if(!TrainingAnalyticsService.sameArtifactIdentity(manifest,JsonSupport.parse(data.json,task.get("result_json").toString())))throw new ApiException(409,"ARTIFACT_CHANGED","结果工件发生变化，请重新执行任务");
         return predictionPage(data.json,file,manifest,page,size,q,predicted,outcome);
     }
     public JsonNode predictFile(CurrentUser user,String modelId,MultipartFile file)throws Exception{
@@ -269,7 +281,7 @@ public class TrainingService {
         if(count!=expectedRows||!HexFormat.of().formatHex(digest.digest()).equals(expected))throw resultChanged();
         result.put("count",count).put("total",total).put("scoreType",type);return result;
     }
-    private static String predictionLine(Reader reader)throws IOException{
+    static String predictionLine(Reader reader)throws IOException{
         // Uploaded batches are capped at100k rows; one oversized/corrupt row must not grow memory unboundedly.
         var line=new StringBuilder();int value;
         while((value=reader.read())!=-1){if(value=='\n')return line.toString();if(line.length()>=8*1024*1024)throw resultChanged();line.append((char)value);}

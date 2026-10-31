@@ -6,6 +6,7 @@ import local.campus.review.common.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 /** Two ordinary evaluation runs over one immutable test partition. */
@@ -57,8 +58,10 @@ public class ModelComparisonService {
         if(!"COMPLETED".equals(parent.get("status"))||!"COMPLETED".equals(child.get("status")))throw new ApiException(409,"COMPARISON_NOT_READY","两次评价完成后可查看错误变化");
         var a=JsonSupport.parse(data.json,parent.get("result_json").toString());var b=JsonSupport.parse(data.json,child.get("result_json").toString());
         if(!a.path("preparationSha256").equals(b.path("preparationSha256")))throw new ApiException(409,"COMPARISON_DATA_CHANGED","父子评价的数据划分不一致");
+        Path parentFile=training.artifact(actor,parent.get("id").toString(),"predictions.jsonl"),childFile=training.artifact(actor,childId,"predictions.jsonl");
+        for(var item:List.of(Map.entry(parentFile,a),Map.entry(childFile,b))){String expected=item.getValue().path("artifacts").path("predictions.jsonl").asText();if(!expected.matches("[0-9a-f]{64}")||!TrainingAnalyticsService.hash(item.getKey()).equals(expected))throw TrainingAnalyticsService.changed();}
         var result=data.json.createObjectNode();var items=result.putArray("items");long total=0,improved=0,regressed=0,changed=0;
-        try(var left=Files.newBufferedReader(training.artifact(actor,parent.get("id").toString(),"predictions.jsonl"));var right=Files.newBufferedReader(training.artifact(actor,childId,"predictions.jsonl"))){
+        try(var left=Files.newBufferedReader(parentFile);var right=Files.newBufferedReader(childFile)){
             String line;while((line=left.readLine())!=null){String other=right.readLine();if(other==null)throw new IllegalStateException("共同测试记录数量不一致");var p=data.json.readTree(line);var c=data.json.readTree(other);
                 for(String key:List.of("id","sentence1","sentence2","label"))if(!p.path(key).equals(c.path(key)))throw new IllegalStateException("共同测试样本身份不一致");
                 boolean goodP=p.path("predicted").asInt()==p.path("label").asInt(),goodC=c.path("predicted").asInt()==c.path("label").asInt(),different=p.path("predicted").asInt()!=c.path("predicted").asInt();

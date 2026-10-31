@@ -2,7 +2,7 @@
 import RecordPagination from '../RecordPagination.vue'
 import { onBeforeUnmount, ref, watch } from 'vue'
 import { predictions, artifact, type PredictionPage } from '../../api/training'
-const props = defineProps<{ runId: string; action: string; inputName?: string }>()
+const props = defineProps<{ runId: string; action: string; inputName?: string;initialOutcome?:string }>()
 const result = ref<PredictionPage>(), page = ref(1), pageSize = ref(20), q = ref(''), predicted = ref(''), outcome = ref('all'), error = ref(''), loading = ref(false)
 let sequence = 0, alive = true
 const outcomes: Record<string, string> = { TP: '正确检出 TP', FP: '误报 FP', TN: '正确排除 TN', FN: '漏报 FN' }
@@ -15,7 +15,7 @@ async function load(reset = false) {
   } catch (value) { if (alive && token === sequence) error.value = value instanceof Error ? value.message : '读取结果失败，请重试' }
   finally { if (alive && token === sequence) loading.value = false }
 }
-watch(() => props.runId, () => { result.value = undefined; q.value = ''; predicted.value = ''; outcome.value = 'all'; void load(true) }, { immediate: true })
+watch(() => [props.runId,props.initialOutcome], () => { result.value = undefined; q.value = ''; predicted.value = ''; outcome.value = props.initialOutcome||'all'; void load(true) }, { immediate: true })
 onBeforeUnmount(() => { alive = false; sequence++ })
 </script>
 <template>

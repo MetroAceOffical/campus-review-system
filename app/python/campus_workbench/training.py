@@ -189,11 +189,15 @@ def train(folder, output, family, values, emit):
     if difference > 1e-5:
         raise ValueError('模型保存重载校验失败')
     write_json(output / 'history.json', history)
+    validation_predictions=[{'id':row.get('id',str(i+1)),'sentence1':row['sentence1'],'sentence2':row['sentence2'],'label':int(row['label']),'score':float(score),'predicted':int(score>=(0 if family=='svm' else .5)),'scoreType':'margin' if family=='svm' else 'probability'} for i,(row,score) in enumerate(zip(dev,scores))]
+    (output/'validation-predictions.jsonl').write_text(''.join(json.dumps(row,ensure_ascii=False)+'\n' for row in validation_predictions),encoding='utf-8')
     from .training_identities import collect
     write_json(output / 'train-identities.json', {key:sorted(values) for key,values in collect(train_rows).items()})
     result = {'schemaVersion': 1, 'taskType': 'TRAINING', 'status': 'COMPLETED', 'family': family, 'parameters': cfg,
               'preparationSha256': sha(Path(folder) / 'manifest.json'), 'inputSha256': manifest['inputSha256'],
               'trainRows': len(train_rows), 'validationRows': len(dev), 'validation': met, 'history': history,
+              'validationDataSha256': sha(Path(folder)/'validation.jsonl'),
+              'modelBytes':sum(p.stat().st_size for p in output.rglob('*.safetensors')) if family=='bert' else (output/('model.joblib' if family in ('lr','svm','rf') else 'best.pt')).stat().st_size,
               'bestEpoch': best_epoch, 'iterations': iterations, 'converged': converged, 'reloadMaxDifference': difference,
               'elapsedSeconds': time.monotonic() - started, 'rssBytes': psutil.Process().memory_info().rss,
               'dependencies': dependencies(), 'artifacts': {str(p.relative_to(output)).replace('\\', '/'): sha(p) for p in output.rglob('*') if p.is_file()}}
@@ -371,11 +375,13 @@ def evaluate(model_folder, prepared_folder, output, emit):
     model = load_model(model_folder)
     from .training_identities import require_evaluation
     _,splits=require_evaluation(model_folder,prepared_folder)
+    prediction_started=time.monotonic()
     predictions = predict(model_folder, splits['test'], emit)
+    prediction_seconds=time.monotonic()-prediction_started
     result, _ = metric_report(splits['test'], [row['score'] for row in predictions], model['family'])
     output = Path(output); output.mkdir(parents=True, exist_ok=False)
     path = output / 'predictions.jsonl'
     path.write_text(''.join(json.dumps(row, ensure_ascii=False) + '\n' for row in predictions), encoding='utf-8')
-    result = {'taskType': 'EVALUATION', 'status': 'COMPLETED', 'metrics': result, 'modelSha256': sha(Path(model_folder) / 'manifest.json'), 'preparationSha256': sha(Path(prepared_folder) / 'manifest.json'), 'artifacts': {'predictions.jsonl': sha(path)}}
+    result = {'taskType': 'EVALUATION', 'status': 'COMPLETED', 'metrics': result,'predictionSeconds':prediction_seconds, 'modelSha256': sha(Path(model_folder) / 'manifest.json'), 'preparationSha256': sha(Path(prepared_folder) / 'manifest.json'), 'artifacts': {'predictions.jsonl': sha(path)}}
     write_json(output / 'manifest.json', result)
     return result
