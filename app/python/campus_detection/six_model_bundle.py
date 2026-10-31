@@ -8,6 +8,26 @@ from campus_shared.contracts import digest_json,file_sha256
 ROOT=Path(__file__).resolve().parents[3]
 FAMILIES=('lr','svm','rf','cnn','bilstm','bert')
 
+def verify_member_reload(manifest,saved,actual,repeat=None):
+    if not saved or len(saved)!=len(actual):raise ValueError('模型重载样本数量不一致')
+    expected=[float(row['score']) for row in saved];observed=[float(row['score']) for row in actual]
+    if not all(math.isfinite(s) for s in expected+observed):raise ValueError('模型重载得分无效')
+    family=manifest['family'];device=str(manifest['parameters']['device'])
+    cross=device.startswith('cuda') and family in ('cnn','bilstm')
+    tolerance=1e-3 if cross else 1e-4
+    difference=max(abs(a-b) for a,b in zip(expected,observed));threshold=0.0 if family=='svm' else .5
+    if difference>tolerance or any((a>=threshold)!=(b>=threshold) for a,b in zip(expected,observed)):raise ValueError('模型重载得分或分类结果不一致')
+    repeated=None
+    if cross:
+        # cuDNN/CPU kernels can differ numerically. A bounded cross-device
+        # difference also requires unchanged decisions and a strict CPU reload.
+        if repeat is None or len(repeat)!=len(actual):raise ValueError('跨设备重载缺少CPU重复核验')
+        values=[float(row['score']) for row in repeat]
+        if not all(math.isfinite(s) for s in values):raise ValueError('CPU重复重载得分无效')
+        repeated=max(abs(a-b) for a,b in zip(observed,values))
+        if repeated>1e-6:raise ValueError('CPU重复重载结果不一致')
+    return dict(schemaVersion='cross-device-reload-v1',savedDevice=device,verificationDevice='cpu',rows=len(saved),maxScoreDifference=difference,tolerance=tolerance,nativeDecisionsEqual=True,cpuRepeatMaxDifference=repeated,cpuRepeatTolerance=1e-6 if cross else None)
+
 def fit_threshold(labels,scores,family):
     if len(labels)!=len(scores) or set(labels)!={0,1} or any(not math.isfinite(s) for s in scores):raise ValueError('验证材料须含两个类别的有效分数')
     if family!='svm' and any(not 0<=s<=1 for s in scores):raise ValueError('概率分数超出范围')
@@ -69,7 +89,7 @@ def prepare(config,output,verify_member):
         if common is not None and common!=identity:raise ValueError('六模型须使用同一数据及样本划分')
         common=identity
         if file_sha256(preparation/'manifest.json')!=manifest['preparationSha256']:raise ValueError('模型准备版本已变化')
-        verification=verify_member({**item,'action':'MODEL','evaluationPreparation':str(preparation)})
+        verification=verify_member({**item,'action':'MODEL','evaluationPreparation':str(preparation),'reloadPolicy':'six-model-cpu-v1'})
         path=folder/'validation-predictions.jsonl'
         if manifest['artifacts'].get(path.name)!=file_sha256(path):raise ValueError('验证逐条预测不可核验')
         rows=[json.loads(s) for s in path.read_text(encoding='utf8').splitlines() if s]
@@ -80,7 +100,7 @@ def prepare(config,output,verify_member):
         fit=fit_threshold([int(r['label']) for r in rows],[r['score'] for r in rows],item['family'])
         test_rows=[json.loads(s) for s in (Path(item['evaluation']).parent/'predictions.jsonl').read_text(encoding='utf8').splitlines() if s]
         calibrated_test=calibrated_metrics(test_rows,fit)
-        members.append(dict(family=item['family'],modelId=item['modelId'],evaluationId=item['evaluationId'],modelFolder=folder.relative_to(ROOT).as_posix(),modelManifestSha256=file_sha256(folder/'manifest.json'),calibration=fit,validation=manifest['validation'],test=verification['metrics'],calibratedTest=calibrated_test))
+        members.append(dict(family=item['family'],modelId=item['modelId'],evaluationId=item['evaluationId'],modelFolder=folder.relative_to(ROOT).as_posix(),modelManifestSha256=file_sha256(folder/'manifest.json'),calibration=fit,validation=manifest['validation'],test=verification['metrics'],calibratedTest=calibrated_test,reloadVerification=verification.get('reloadVerification')))
         files.update(verification['verifiedFiles'])
         for p in (preparation/'manifest.json',preparation/'validation.jsonl',preparation/'test.jsonl'):files[p.relative_to(ROOT).as_posix()]=file_sha256(p)
     primary=recommend(members);write_json(output/'bundle-calibration.json',dict(members=members,primaryFamily=primary,selectionPartition='validation'))

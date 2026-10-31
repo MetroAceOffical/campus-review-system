@@ -58,9 +58,15 @@ def run(config):
         # Saved validation predictions contain original sentences and raw scores.
         if not rows:raise ValueError('缺少重载核验样本')
         actual=predict(folder,rows,lambda _:None,device_override='cpu')
-        if max(abs(a['score']-b['score']) for a,b in zip(actual,rows))>1e-4:raise ValueError('模型重载结果不一致')
+        reload=None
+        if config.get('reloadPolicy')=='six-model-cpu-v1':
+            from campus_detection.six_model_bundle import verify_member_reload
+            cross=str(manifest['parameters']['device']).startswith('cuda') and manifest['family'] in ('cnn','bilstm')
+            repeat=predict(folder,rows,lambda _:None,device_override='cpu') if cross else None
+            reload=verify_member_reload(manifest,rows,actual,repeat)
+        elif max(abs(a['score']-b['score']) for a,b in zip(actual,rows))>1e-4:raise ValueError('模型重载结果不一致')
         files=[folder/'manifest.json',Path(config['evaluation']),*(folder/name for name in manifest['artifacts'])]
-        return {'scene':'PAIR_PREDICTION','modelManifestSha256':file_sha256(folder/'manifest.json'),'evaluationSha256':file_sha256(config['evaluation']),'metrics':evaluation['metrics'],'family':manifest['family'],'scoreType':'margin' if manifest['family']=='svm' else 'probability','threshold':0 if manifest['family']=='svm' else .5,'reloadRows':len(rows),'verifiedFiles':{p.relative_to(ROOT).as_posix():file_sha256(p) for p in files}}
+        return {'scene':'PAIR_PREDICTION','modelManifestSha256':file_sha256(folder/'manifest.json'),'evaluationSha256':file_sha256(config['evaluation']),'metrics':evaluation['metrics'],'family':manifest['family'],'scoreType':'margin' if manifest['family']=='svm' else 'probability','threshold':0 if manifest['family']=='svm' else .5,'reloadRows':len(rows),**({'reloadVerification':reload} if reload else {}),'verifiedFiles':{p.relative_to(ROOT).as_posix():file_sha256(p) for p in files}}
     if config['action']=='PREDICT':
         from campus_workbench.training import predict
         if file_sha256(Path(config['model'])/'manifest.json')!=config['modelManifestSha256']:raise ValueError('发布工件已变化')

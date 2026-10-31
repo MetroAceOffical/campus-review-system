@@ -1,0 +1,120 @@
+{
+  "observedAt": "2026-10-31T17:10:55.135157+00:00",
+  "state": "REAL_ARTIFACT_PREFLIGHT_PASSED_NOT_PUBLISHED",
+  "bundleId": "3a694202-0374-4635-9567-0de08253efaa",
+  "primaryFamily": "bert",
+  "verifiedFileCount": 85,
+  "wallSecondsUpperBound": 88.71,
+  "reloadChecks": [
+    {
+      "family": "lr",
+      "modelId": "50c3985c-b26f-4dbb-9a20-512964549d55",
+      "evaluationId": "df0c09dc-b218-4df7-bb17-8725be9caf39",
+      "reloadVerification": {
+        "schemaVersion": "cross-device-reload-v1",
+        "savedDevice": "cpu",
+        "verificationDevice": "cpu",
+        "rows": 3,
+        "maxScoreDifference": 2.220446049250313e-16,
+        "tolerance": 0.0001,
+        "nativeDecisionsEqual": true,
+        "cpuRepeatMaxDifference": null,
+        "cpuRepeatTolerance": null
+      }
+    },
+    {
+      "family": "svm",
+      "modelId": "bacfecef-7308-408f-a45d-05fdc0ab45ea",
+      "evaluationId": "f6e2a92b-2053-41d1-9fc2-80e357e5ce29",
+      "reloadVerification": {
+        "schemaVersion": "cross-device-reload-v1",
+        "savedDevice": "cpu",
+        "verificationDevice": "cpu",
+        "rows": 3,
+        "maxScoreDifference": 4.440892098500626e-16,
+        "tolerance": 0.0001,
+        "nativeDecisionsEqual": true,
+        "cpuRepeatMaxDifference": null,
+        "cpuRepeatTolerance": null
+      }
+    },
+    {
+      "family": "rf",
+      "modelId": "ea71b233-a1bc-469a-a7c4-66487972275d",
+      "evaluationId": "b1c2c77c-4ec8-43f4-a9a8-359c1f31f77c",
+      "reloadVerification": {
+        "schemaVersion": "cross-device-reload-v1",
+        "savedDevice": "cpu",
+        "verificationDevice": "cpu",
+        "rows": 3,
+        "maxScoreDifference": 0.0,
+        "tolerance": 0.0001,
+        "nativeDecisionsEqual": true,
+        "cpuRepeatMaxDifference": null,
+        "cpuRepeatTolerance": null
+      }
+    },
+    {
+      "family": "cnn",
+      "modelId": "ec5b1e81-eb49-4756-825b-08d86c502a14",
+      "evaluationId": "0e7c0f37-c008-463f-9228-e7f762a1bdbb",
+      "reloadVerification": {
+        "schemaVersion": "cross-device-reload-v1",
+        "savedDevice": "cuda",
+        "verificationDevice": "cpu",
+        "rows": 3,
+        "maxScoreDifference": 0.00021854043006896973,
+        "tolerance": 0.001,
+        "nativeDecisionsEqual": true,
+        "cpuRepeatMaxDifference": 0.0,
+        "cpuRepeatTolerance": 1e-06
+      }
+    },
+    {
+      "family": "bilstm",
+      "modelId": "ba610892-16ca-498f-9303-9557b4ab2420",
+      "evaluationId": "c3a71d9f-1338-4a10-8f8a-745cb4cd2eda",
+      "reloadVerification": {
+        "schemaVersion": "cross-device-reload-v1",
+        "savedDevice": "cuda",
+        "verificationDevice": "cpu",
+        "rows": 3,
+        "maxScoreDifference": 0.00015273690223693848,
+        "tolerance": 0.001,
+        "nativeDecisionsEqual": true,
+        "cpuRepeatMaxDifference": 0.0,
+        "cpuRepeatTolerance": 1e-06
+      }
+    },
+    {
+      "family": "bert",
+      "modelId": "a1f9e07e-82c6-4085-9880-3a1ca2eaa58a",
+      "evaluationId": "726245a5-4623-4ab2-804b-7553f00db5ae",
+      "reloadVerification": {
+        "schemaVersion": "cross-device-reload-v1",
+        "savedDevice": "cuda",
+        "verificationDevice": "cpu",
+        "rows": 3,
+        "maxScoreDifference": 0.0,
+        "tolerance": 0.0001,
+        "nativeDecisionsEqual": true,
+        "cpuRepeatMaxDifference": null,
+        "cpuRepeatTolerance": null
+      }
+    }
+  ],
+  "policy": {
+    "scope": "New six-model release verification only; default MODEL strict check retained",
+    "cudaCnnBilstmMaxDifference": 0.001,
+    "cpuRepeatMaxDifference": 1e-06,
+    "otherModelsMaxDifference": 0.0001,
+    "sameNativeDecisionsRequired": true,
+    "engineeringChoice": "Explicit bounded verification tolerance; not a changed detection threshold",
+    "reference": "https://docs.pytorch.org/docs/main/notes/numerical_accuracy.html"
+  },
+  "globalEnvironmentChanged": false,
+  "weightsOrEvaluationFilesChanged": false,
+  "databaseReleaseCreated": false,
+  "detectorConfigRegistered": false,
+  "deployed": false
+}

@@ -4,6 +4,22 @@ from copy import deepcopy
 from campus_detection.six_model_bundle import fit_threshold,decision_scores,recommend
 
 class SixModelBundleTest(unittest.TestCase):
+    def test_cross_device_reload_requires_bounded_scores_same_decision_and_exact_cpu_repeat(self):
+        from campus_detection.six_model_bundle import verify_member_reload
+        gpu={'family':'cnn','parameters':{'device':'cuda'}}
+        saved=[{'score':.2876206338405609}];actual=[{'score':.28740209341049194}]
+        checked=verify_member_reload(gpu,saved,actual,actual)
+        self.assertAlmostEqual(.00021854043006896973,checked['maxScoreDifference'])
+        self.assertEqual(0.0,checked['cpuRepeatMaxDifference']);self.assertEqual(.001,checked['tolerance'])
+        for manifest,expected,observed,repeat in [
+            ({'family':'cnn','parameters':{'device':'cpu'}},saved,actual,None),
+            ({'family':'bert','parameters':{'device':'cuda'}},saved,actual,None),
+            (gpu,saved,[{'score':.28}],[{'score':.28}]),
+            (gpu,[{'score':.5001}],[{'score':.4999}],[{'score':.4999}]),
+            (gpu,saved,actual,[{'score':.2875}]),
+            (gpu,saved,[{'score':float('nan')}],actual),
+        ]:
+            with self.assertRaises(ValueError):verify_member_reload(manifest,expected,observed,repeat)
     def test_release_metrics_are_an_object_and_inference_sources_are_pinned(self):
         from campus_detection.six_model_bundle import calibrated_metrics,inference_dependencies
         rows=[dict(label=0,score=.1),dict(label=1,score=.9)]
