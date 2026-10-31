@@ -24,7 +24,7 @@ import ModelComparison from '../components/workbench/ModelComparison.vue'
 import ModelBundles from '../components/workbench/ModelBundles.vue'
 const catalogView=ref('bundles')
 async function openBundleModel(id:string){await perform(async()=>choose(await api.model(id),'overview',true))}
-async function selectBundleParent(id:string){await perform(async()=>{const flow=await getFlow(String(route.query.flow));if(flow.kind!=='CONTINUE')throw new Error('当前任务不是继续训练');const model=await api.model(id);if(!model.bundleId)throw new Error('请选择完整模型组');const canonical=continuationAnchor(await api.bundle(model.bundleId));const bound=await updateFlow(flow,{parentModelId:canonical},'data');activeFlow.value=bound;await router.push(flowDestination(bound,'data'))})}
+async function selectBundleParent(id:string){const flow=await getFlow(String(route.query.flow));if(flow.kind!=='CONTINUE')throw new Error('当前任务不是继续训练');const model=await api.model(id);if(!model.bundleId)throw new Error('请选择完整模型组');const canonical=continuationAnchor(await api.bundle(model.bundleId));const bound=await updateFlow(flow,{parentModelId:canonical},'data');activeFlow.value=bound;await router.push(flowDestination(bound,'data'))}
 import PredictionResults from '../components/workbench/PredictionResults.vue'
 import ParentModelComparison from '../components/workbench/ParentModelComparison.vue'
 const route = useRoute(), router = useRouter(), detailTab = ref('overview')
@@ -48,9 +48,7 @@ async function chooseData() { detail.value = await datasets.dataset(datasetId.va
 function chooseVersion() { preparationId.value = preparations.value[0]?.runId ?? '' }
 function stop() { if (timer) clearInterval(timer); timer = undefined }
 async function choose(model: Model, tab = 'overview', inspect=false) {
-  if(!inspect && route.query.selectParent==='1' && activeFlow.value?.kind==='CONTINUE'){
-    const flow=await updateFlow(activeFlow.value,{parentModelId:model.modelId});activeFlow.value=flow;await router.push(flowDestination(flow,'data'));return
-  }
+  if(!inspect && route.query.selectParent==='1' && route.query.flow){await selectBundleParent(model.modelId);return}
 
   ticket++; stop(); originalPreparation.value = undefined; selected.value = model; current.value = null; events.value = []; predictionFile.value = null; past.value = []; runPage.value = 1; runTotal.value = 0; detailTab.value = tab; datasetId.value = model.datasetId
   const [data, trainingRun] = await Promise.all([datasets.dataset(model.datasetId), api.run(model.runId)])
@@ -102,7 +100,7 @@ async function cancel() { if (current.value) { await datasets.cancel(current.val
 let initialized = false, restoredPath = ''
 async function restoreRoute() {
   const id = String(route.query.model || ''), tab = ['overview','evaluation','prediction','history','versions','comparison','experiments'].includes(String(route.query.tab)) ? String(route.query.tab) : 'overview'
-  if (id && selected.value?.modelId !== id) await choose(items.value.find(m => m.modelId === id) || await api.model(id), tab)
+  if (id && selected.value?.modelId !== id) await choose(items.value.find(m => m.modelId === id) || await api.model(id), tab, true)
   else if (id) detailTab.value = tab
   else { selected.value = null; ticket++; stop();if(route.query.bundleId)catalogView.value='bundles' }
   if(id&&tab==='evaluation'&&route.query.evaluation){const run=await api.run(String(route.query.evaluation));if(run.options.modelId!==id||run.action!=='EVALUATE')throw new Error('评价记录与当前模型不一致');if(run.options.comparisonRole==='CHILD'){detailTab.value='comparison';await router.replace({query:{...route.query,tab:'comparison',comparison:run.runId}})}else if(current.value?.runId!==run.runId)await observe(run.runId)}
@@ -118,7 +116,7 @@ onBeforeUnmount(() => { alive = false; ticket++; stop() })
 <template>
   <p v-if="error" class="work-error" role="alert">{{ error }}</p>
   <el-radio-group v-if="!selected&&!route.query.selectParent" v-model="catalogView" class="model-catalog-switch"><el-radio-button value="bundles">正式模型组</el-radio-button><el-radio-button value="history">历史模型与实验</el-radio-button></el-radio-group>
-  <ModelBundles v-if="!selected&&catalogView==='bundles'" @open="openBundleModel" @parent="selectBundleParent"/>
+  <ModelBundles v-if="!selected&&catalogView==='bundles'" @open="openBundleModel" @parent="id=>perform(()=>selectBundleParent(id))"/>
   <section v-show="!selected&&catalogView==='history'&&!route.query.selectParent" class="work-panel"><div class="work-heading"><div><h2>{{route.query.selectParent?'选择起始模型':'已训练模型'}}</h2><span class="muted">{{route.query.selectParent?'选择一个已完成的模型版本继续训练':'选择模型查看评价和试用结果'}}</span></div><RouterLink v-if="session.user?.role === 'ADMIN' && !route.query.flow" :to="{path:'/training',query:{dataset:route.query.dataset,version:route.query.version,tab:'new'}}" class="link-button">新建训练</RouterLink></div><div class="work-search"><el-input v-model="q" placeholder="搜索模型名称" @change="page = 1; perform(load)" /><el-checkbox v-model="archived" @change="page = 1; perform(load)">归档</el-checkbox><el-button @click="perform(load)">刷新</el-button></div>
     <el-table :data="items" highlight-current-row @current-change="(row: Model | null) => row && perform(() => choose(row))"><el-table-column label="比较" width="70"><template #default="{ row }"><span @click.stop><el-checkbox :model-value="compared.some(item => item.modelId === row.modelId)" :disabled="compared.length >= 6 && !compared.some(item => item.modelId === row.modelId)" :aria-label="`比较${row.name}`" @change="(value: unknown) => toggleCompare(row, Boolean(value))" /></span></template></el-table-column><el-table-column prop="name" label="模型" min-width="180"><template #default="{row}"><el-button @click.stop="perform(() => choose(row))">{{ row.name }} · v{{row.versionNumber||1}}</el-button><el-button v-if="route.query.selectParent" size="small" @click.stop="perform(()=>choose(row,'versions',true))">历史版本</el-button></template></el-table-column><el-table-column label="算法" min-width="130"><template #default="{row}">{{ api.modelNames[row.family] }}</template></el-table-column><el-table-column label="训练样本"><template #default="{row}">{{ row.manifest.trainRows.toLocaleString() }}</template></el-table-column><el-table-column label="验证 Macro-F1"><template #default="{row}">{{ (row.manifest.validation.macro_f1 * 100).toFixed(2) }}%</template></el-table-column><el-table-column label="操作" min-width="150"><template #default="{row}"><el-button size="small" @click.stop="perform(() => rename(row))">重命名</el-button><el-button size="small" @click.stop="perform(() => archive(row))">{{ row.archived ? '恢复' : '归档' }}</el-button></template></el-table-column></el-table><RecordPagination v-model:current-page="page" v-model:page-size="modelSize" :total="total" @change="perform(load)" />
   </section>

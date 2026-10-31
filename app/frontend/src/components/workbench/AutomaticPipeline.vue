@@ -39,7 +39,7 @@ function showCurrent() { const run = items.value.find(item => item.pipelineId ==
 function follow(id: string) { openFirst = true; following.value = following.value === id ? '' : id; displayedRun.value = ''; showCurrent() }
 watch(() => props.dataset?.datasetId, () => { page.value = 1; items.value = []; total.value = 0; source.value = versions.value.some(v => v.versionId === props.versionId) ? props.versionId : versions.value[0]?.versionId ?? ''; void load(); if (timer) clearInterval(timer); timer = setInterval(() => void load(), 2500) }, { immediate: true })
 watch(versions, value => { if (!value.some(v => v.versionId === source.value)) source.value = value[0]?.versionId ?? '' })
-watch(()=>props.focusId,id=>{if(id){following.value=id;displayedRun.value='';void load()}},{immediate:true})
+watch(()=>props.focusId,id=>{following.value=id||'';displayedRun.value='';openFirst=false;if(id)void load()},{immediate:true})
 onBeforeUnmount(() => { alive = false; if (timer) clearInterval(timer) })
 </script>
 <template>

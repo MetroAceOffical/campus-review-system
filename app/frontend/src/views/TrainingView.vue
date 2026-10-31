@@ -58,6 +58,10 @@ watch([activeTab, busy, followedRun], ([tab, working, id]) => { if (tab === 'tas
 async function viewRun(id: string, navigate = true) {
   stop(); if (navigate) activeTab.value = 'tasks'; const token = ++generation; current.value = await api.run(id); if (token !== generation || !alive) return
   const viewed = current.value
+  if(focusBundleId.value){
+    const bundle=await api.bundle(focusBundleId.value);if(token!==generation||!alive)return
+    if(!bundle.state.steps.some(step=>step.runId===id)){focusBundleId.value='';followedRun.value='';followedAttempt.value='';workflowContext.bundle=undefined}
+  }
   if (detail.value?.datasetId !== viewed.datasetId || versionId.value !== viewed.inputVersionId) { datasetId.value = viewed.datasetId; versionId.value = viewed.inputVersionId; await chooseDataset(); if (token !== generation || !alive) return }
   if (viewed.status === 'COMPLETED' && ['PREPARE', 'GENERATE'].includes(viewed.action)) preparationId.value = viewed.runId
   else if (viewed.options.preparationId) { await recoverPreparation(viewed.options.preparationId); preparationId.value = viewed.options.preparationId }
@@ -108,7 +112,11 @@ async function restoreRoute() {
   if(!parent){parentModel.value=undefined;parentBundleId.value=String(route.query.parentBundle||'')}
   parentWidths.value={}
   if(parentBundleId.value){const previous=await api.bundle(parentBundleId.value);const members=await Promise.all(previous.state.models.map(m=>api.model(m.modelId)));parentWidths.value=Object.fromEntries(members.filter(m=>['cnn','bilstm'].includes(m.family)).map(m=>[m.family,Number(m.manifest.parameters.width||64)]))}
-  focusBundleId.value=String(route.query.bundle||focusBundleId.value)
+  const focus=String(route.query.bundle||'')
+  if(focus!==focusBundleId.value){
+    focusBundleId.value=focus;followedRun.value='';followedAttempt.value=''
+    if(!focus){workflowContext.bundle=undefined;if(route.query.tab==='new'&&!route.query.run){stop();generation++;current.value=null;events.value=[];workflowContext.run=undefined;workflowContext.model=undefined}}
+  }
 
   if (typeof route.query.run === 'string') {
     if (current.value?.runId !== route.query.run) await viewRun(route.query.run)
