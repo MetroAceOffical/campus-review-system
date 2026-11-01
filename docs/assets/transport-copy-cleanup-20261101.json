@@ -1,0 +1,260 @@
+{
+  "status": "COMPLETED_TRANSPORT_COPY_CLEANUP",
+  "scope": "D:\\Data\\GraduationProjectVersionC\\runtime\\overnight-delivery-20261031",
+  "files": [
+    {
+      "path": "runtime/overnight-delivery-20261031/context-frame-0.txt",
+      "bytes": 16335,
+      "sha256": "45b56f7ad6f5fce93359b8f20b0394c7747365d33d162b9033bba66cfd42e4a3",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/context-frame-1.txt",
+      "bytes": 16384,
+      "sha256": "18cabbe62cc433c09f51c002594c2a415c631c7c4daad09a392077e8cc50e8ae",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/context-frame-2.txt",
+      "bytes": 6909,
+      "sha256": "f3149a81e7236634f0f4db6113cce96893407186c83ed752a406cbdf65f117e1",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/development-doc-frame-0.txt",
+      "bytes": 38849,
+      "sha256": "0133987096023c92ff44bdf00e1bdb7306636b88943860ef4ef75414a9afcd9a",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/development-doc-frame-1.txt",
+      "bytes": 36276,
+      "sha256": "4f93f6e3899f6aa7feb8e23653e486ad6b6c663e01c892c04917888c6fc24620",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/development-doc-frame-2.txt",
+      "bytes": 37416,
+      "sha256": "a34ab75f55b622ba3d7ced5e8b8bf2ba742772490095677068a40164c702a921",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/development-doc-frame-3.txt",
+      "bytes": 35504,
+      "sha256": "a9522a3933ca36b8725095f3ba572ff5736c7b726c0ecd4d54474c392713395b",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/development-doc-frame-4.txt",
+      "bytes": 36489,
+      "sha256": "77e179ad47433bf277f293de3d414b6eba3d63e50161d881492a2109eb0dd523",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/development-doc-frame-5.txt",
+      "bytes": 15389,
+      "sha256": "d9adc68d81b8332c313d36a0dd59277cd0081dc2c8a94f448ece0bdce8e22907",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/reload-frame-0.txt",
+      "bytes": 16498,
+      "sha256": "e5507223f97b99a2834d4eec064ab1cc0ae9a2597af6d0d1bf84bcb24a44f1d6",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/reload-frame-1.txt",
+      "bytes": 23214,
+      "sha256": "4add73ac347648dd5ed518bc421c1304626a1b7fbb820a47a4370d1c4274ae90",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/reload-frame-2.txt",
+      "bytes": 38099,
+      "sha256": "ec97d2fb8423e562f1006bbef208a6dfa13e90d045fb7dfdd66246d98e62a9cd",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/reload-frame-3.txt",
+      "bytes": 36728,
+      "sha256": "0d2fce7b5372d9999ef87bda30155a723b9e3239e43632cb90386498545910a6",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/reload-frame-4.txt",
+      "bytes": 37258,
+      "sha256": "ba1a0ab3abe855d3415e953aac4dce69cfe7b15618adf5b8a72563e819ad004e",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/reload-frame-5.txt",
+      "bytes": 35386,
+      "sha256": "e4f5e42e334b3a970525a3a46aa95077c9984e17baac10dd6f5bc9d94242b069",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/reload-frame-6.txt",
+      "bytes": 32651,
+      "sha256": "d811579a535921504a4cb23c8fd57bbd6a85bd0192ee1ac9c34d77a084102dfc",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/reload-frame-7.txt",
+      "bytes": 1782,
+      "sha256": "53846401a52a713a89c0b00f60e9ee760c8adf0100a95f3e2df943ea6ffeea51",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/review-frame-0.txt",
+      "bytes": 16486,
+      "sha256": "b67b6614b37ac26c9b5897e6bc68db8d3429668847bc907b64840a29801569ca",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/review-frame-1.txt",
+      "bytes": 16785,
+      "sha256": "713ca848540d91112e572e83ab281d625e3bf16bc3907fbb9c93819712ed1942",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/review-frame-2.txt",
+      "bytes": 16824,
+      "sha256": "e2edc6d11d9730f112cd82549a9f0b80a4d8632567d98626b3aef656118340a8",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/review-frame-3.txt",
+      "bytes": 17371,
+      "sha256": "01fbcd989f76ea2d24df9dee859e9659f7b5141ffba069618d210ad7f33d4748",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/review-frame-4.txt",
+      "bytes": 9872,
+      "sha256": "486a7a18e4f04dddd993f54a59ebca3c270caae4142bcc08ce11f0019ad34c0a",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/sync-frame-0.txt",
+      "bytes": 16704,
+      "sha256": "4ff6d221b48c96a35e89d15fcf1cb8aec7eafd98da939ae5f4cfc3d9d2e54614",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/sync-frame-1.txt",
+      "bytes": 16934,
+      "sha256": "2f0075beba9833fa37f7a51af8f7bb502de01277fbfc622457b4d68baea2ff62",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/sync-frame-2.txt",
+      "bytes": 16358,
+      "sha256": "07cb21a72f4043cada3161f85f72e363c7c11953ca1058bc0fc9fd6befcd32ef",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/sync-frame-3.txt",
+      "bytes": 16072,
+      "sha256": "1efc9660b963381fe42a9a2ee78740e69f798483abc76210c25f4f0250161b4c",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/sync-frame-4.txt",
+      "bytes": 16848,
+      "sha256": "5272b75d018f2c8457f0718f5fb4e18c5eaa64f909e8abbdbf2e076b04709711",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/sync-frame-5.txt",
+      "bytes": 16764,
+      "sha256": "14f3b95749fbdf8b70ca1d7ceb8e309d32e99d26d81739cc715a8036776ebdd2",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/sync-frame-6.txt",
+      "bytes": 16529,
+      "sha256": "60e2197eeadbbb761ff45639c3d2d211c9bca0a78f0328d5f80a0330a006b782",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/sync-frame-7.txt",
+      "bytes": 17154,
+      "sha256": "64ef0128a48119358e2359e1f6062e6da02b3a62af9ef127a6aa8ea65fd5fbd9",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/sync-frame-8.txt",
+      "bytes": 17190,
+      "sha256": "59679f022265f58d2fc039ab55dd76e1ca6f4b9fa1297aa9c887f724bf99f39f",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/sync-frame-9.txt",
+      "bytes": 17267,
+      "sha256": "84ecc4810733a5b73de8ad7d59098c5437f7a11a57107c416742fbf1c144f3b4",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/sync-frame-10.txt",
+      "bytes": 16435,
+      "sha256": "d31fb3eccfafe30958a748a87498b30900413bd9a5df9761f616645c4d4c2400",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/sync-frame-11.txt",
+      "bytes": 17542,
+      "sha256": "cebd8e26906c10d51d987a30bf1dc778ca8ba56b79168718b08f4057c74b901a",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/sync-frame-12.txt",
+      "bytes": 12211,
+      "sha256": "29c73337eb5e152b69b32a25e1f465848f54455868962ec9ceb36c09753bc3d2",
+      "reason": "GitHub transfer JSON text copy; not runtime source or bound artifact"
+    }
+  ],
+  "groups": [
+    {
+      "prefix": "context",
+      "parts": 3,
+      "sourceSnapshots": 5,
+      "manifestVerified": true
+    },
+    {
+      "prefix": "development-doc",
+      "parts": 6,
+      "sourceSnapshots": 3,
+      "manifestVerified": true
+    },
+    {
+      "prefix": "reload",
+      "parts": 8,
+      "sourceSnapshots": 6,
+      "manifestVerified": true
+    },
+    {
+      "prefix": "review",
+      "parts": 5,
+      "sourceSnapshots": 4,
+      "manifestVerified": true
+    },
+    {
+      "prefix": "sync",
+      "parts": 13,
+      "sourceSnapshots": 21,
+      "manifestVerified": true
+    }
+  ],
+  "completedAt": "2026-11-01T09:14:17.006545+08:00",
+  "deletedFiles": 35,
+  "deletedBytes": 752513,
+  "boundFilesChecked": 185,
+  "preserved": [
+    "GitHub manifests and receipts",
+    "formal datasets/models",
+    "historical reports/configurations/rollback",
+    "kept-manuscript",
+    "active runtime/indexes"
+  ],
+  "qaDatasetAndModelCleanup": "NOT_STARTED_NO_QA_DATASET_OR_MODEL_CREATED"
+}
