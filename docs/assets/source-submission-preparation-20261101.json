@@ -1,0 +1,14 @@
+{
+  "status": "SOURCE_PREPARATION_ONLY_WEB_VALIDATION_PENDING",
+  "createdAt": "2026-11-01T08:44:28.086189+08:00",
+  "archive": "runtime/submission-preparation-20261101/学号_姓名_源码核验包.zip",
+  "sha256": "6b375a6761c296a6d3331267885d0838562652b4da7e956c13f1c54f21a99b28",
+  "files": 609,
+  "bytes": 1487423,
+  "sqlTables": 35,
+  "secretsExcluded": true,
+  "zipIntegrityVerified": true,
+  "completionSignalCreated": false,
+  "assemblyVerified": true,
+  "assemblyTemporaryDirectoryRemoved": true
+}

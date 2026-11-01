@@ -1,0 +1,1771 @@
+{
+  "observedAt": "2026-11-01T08:43:09.206199+08:00",
+  "training": {
+    "observedAt": "2026-10-31T18:57:54.479729+00:00",
+    "trained": 24,
+    "evaluated": 24,
+    "groups": [
+      {
+        "pipelineId": "3a694202-0374-4635-9567-0de08253efaa",
+        "datasetId": "b605eda7-a47f-416e-9024-51f8301cfb37",
+        "preparationId": "78ce7919-e8db-41e8-a047-c21ec592400c",
+        "cleanVersionId": "e4e06a4a-7a72-4099-854f-b94cd0a0f7ae",
+        "status": "COMPLETED",
+        "models": [
+          {
+            "family": "lr",
+            "modelId": "50c3985c-b26f-4dbb-9a20-512964549d55",
+            "evaluationRunId": "df0c09dc-b218-4df7-bb17-8725be9caf39",
+            "trainRows": 41333,
+            "validationRows": 4768,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cpu"
+            },
+            "validation": {
+              "rows": 4768,
+              "accuracy": 0.7191694630872483,
+              "precision": 0.7379413227250124,
+              "recall": 0.6463414634146342,
+              "f1": 0.689110749941955,
+              "macro_f1": 0.7165194216338193,
+              "confusionMatrix": [
+                [
+                  1945,
+                  527
+                ],
+                [
+                  812,
+                  1484
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.7829199226458284,
+              "average_precision": 0.8051797111596616
+            },
+            "test": {
+              "rows": 4799,
+              "accuracy": 0.721191914982288,
+              "precision": 0.7326388888888888,
+              "recall": 0.6489455184534271,
+              "f1": 0.6882572227399814,
+              "macro_f1": 0.7180449325158633,
+              "confusionMatrix": [
+                [
+                  1984,
+                  539
+                ],
+                [
+                  799,
+                  1477
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.7964835116227718,
+              "average_precision": 0.8122349212423684
+            },
+            "modelManifestSha256": "50d81055fa3d17df9084684b4bbf6ab05f7b38715232784075386f7da50f5763",
+            "preparationSha256": "e8f54098c5a639c6793ff8373276faf20190a56d96153669ba48fe8dd6872799",
+            "elapsedSeconds": 15.546999999998661
+          },
+          {
+            "family": "svm",
+            "modelId": "bacfecef-7308-408f-a45d-05fdc0ab45ea",
+            "evaluationRunId": "f6e2a92b-2053-41d1-9fc2-80e357e5ce29",
+            "trainRows": 41333,
+            "validationRows": 4768,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cpu"
+            },
+            "validation": {
+              "rows": 4768,
+              "accuracy": 0.7183305369127517,
+              "precision": 0.7420010157440325,
+              "recall": 0.6363240418118467,
+              "f1": 0.6851113716295428,
+              "macro_f1": 0.7151605046347297,
+              "confusionMatrix": [
+                [
+                  1964,
+                  508
+                ],
+                [
+                  835,
+                  1461
+                ]
+              ],
+              "threshold": 0.0,
+              "roc_auc": 0.7817845584835876,
+              "average_precision": 0.8027802560175819
+            },
+            "test": {
+              "rows": 4799,
+              "accuracy": 0.7234840591789956,
+              "precision": 0.7409852717115287,
+              "recall": 0.6410369068541301,
+              "f1": 0.687396937573616,
+              "macro_f1": 0.7197492814152406,
+              "confusionMatrix": [
+                [
+                  2013,
+                  510
+                ],
+                [
+                  817,
+                  1459
+                ]
+              ],
+              "threshold": 0.0,
+              "roc_auc": 0.796703804785081,
+              "average_precision": 0.8109900017384781
+            },
+            "modelManifestSha256": "7750b6ed8fd2b9ba2b10acdaf2cd1280f8764723fed66eecfb4e8b1323a1dafa",
+            "preparationSha256": "e8f54098c5a639c6793ff8373276faf20190a56d96153669ba48fe8dd6872799",
+            "elapsedSeconds": 15.187999999994645
+          },
+          {
+            "family": "rf",
+            "modelId": "ea71b233-a1bc-469a-a7c4-66487972275d",
+            "evaluationRunId": "b1c2c77c-4ec8-43f4-a9a8-359c1f31f77c",
+            "trainRows": 41333,
+            "validationRows": 4768,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cpu"
+            },
+            "validation": {
+              "rows": 4768,
+              "accuracy": 0.7242030201342282,
+              "precision": 0.7624398073836276,
+              "recall": 0.6206445993031359,
+              "f1": 0.6842737094837935,
+              "macro_f1": 0.7197201725598077,
+              "confusionMatrix": [
+                [
+                  2028,
+                  444
+                ],
+                [
+                  871,
+                  1425
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.7947941156986119,
+              "average_precision": 0.8215562587193219
+            },
+            "test": {
+              "rows": 4799,
+              "accuracy": 0.7407793290268806,
+              "precision": 0.7786177105831533,
+              "recall": 0.6335676625659051,
+              "f1": 0.6986434108527132,
+              "macro_f1": 0.7356105536896107,
+              "confusionMatrix": [
+                [
+                  2113,
+                  410
+                ],
+                [
+                  834,
+                  1442
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.8105084366186096,
+              "average_precision": 0.828488451160059
+            },
+            "modelManifestSha256": "a0eafbba13b67d3a244bd4712703e94f4085f345e7dc16a81d4ebd3cd7c2c056",
+            "preparationSha256": "e8f54098c5a639c6793ff8373276faf20190a56d96153669ba48fe8dd6872799",
+            "elapsedSeconds": 19.140999999995984
+          },
+          {
+            "family": "cnn",
+            "modelId": "ec5b1e81-eb49-4756-825b-08d86c502a14",
+            "evaluationRunId": "0e7c0f37-c008-463f-9228-e7f762a1bdbb",
+            "trainRows": 41333,
+            "validationRows": 4768,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cuda"
+            },
+            "validation": {
+              "rows": 4768,
+              "accuracy": 0.6891778523489933,
+              "precision": 0.7236263736263736,
+              "recall": 0.5736062717770035,
+              "f1": 0.6399416909620991,
+              "macro_f1": 0.683254978322378,
+              "confusionMatrix": [
+                [
+                  1969,
+                  503
+                ],
+                [
+                  979,
+                  1317
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.7450224747133047,
+              "average_precision": 0.7657299752337902
+            },
+            "test": {
+              "rows": 4799,
+              "accuracy": 0.6880600125026047,
+              "precision": 0.7211811470755253,
+              "recall": 0.5579964850615114,
+              "f1": 0.6291800842209562,
+              "macro_f1": 0.6799919482424688,
+              "confusionMatrix": [
+                [
+                  2032,
+                  491
+                ],
+                [
+                  1006,
+                  1270
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.7521922217183633,
+              "average_precision": 0.7625192369286005
+            },
+            "modelManifestSha256": "6f518a805e4b53e25b7f00be76eb0a30551b12725be24123c2a7a7feffbdc91a",
+            "preparationSha256": "e8f54098c5a639c6793ff8373276faf20190a56d96153669ba48fe8dd6872799",
+            "elapsedSeconds": 191.26499999999942
+          },
+          {
+            "family": "bilstm",
+            "modelId": "ba610892-16ca-498f-9303-9557b4ab2420",
+            "evaluationRunId": "c3a71d9f-1338-4a10-8f8a-745cb4cd2eda",
+            "trainRows": 41333,
+            "validationRows": 4768,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cuda"
+            },
+            "validation": {
+              "rows": 4768,
+              "accuracy": 0.7223154362416108,
+              "precision": 0.7165775401069518,
+              "recall": 0.7003484320557491,
+              "f1": 0.7083700440528634,
+              "macro_f1": 0.7216790172225886,
+              "confusionMatrix": [
+                [
+                  1836,
+                  636
+                ],
+                [
+                  688,
+                  1608
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.788081741991137,
+              "average_precision": 0.7931473059561991
+            },
+            "test": {
+              "rows": 4799,
+              "accuracy": 0.687434882267139,
+              "precision": 0.6631623212783851,
+              "recall": 0.6928822495606327,
+              "f1": 0.6776966050709068,
+              "macro_f1": 0.6871492734092398,
+              "confusionMatrix": [
+                [
+                  1722,
+                  801
+                ],
+                [
+                  699,
+                  1577
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.759055703346436,
+              "average_precision": 0.7627283934774437
+            },
+            "modelManifestSha256": "d288e158354ad831ecd3f44babc8dae0b55dd949a27bf87a9e272ba3e6a9aa77",
+            "preparationSha256": "e8f54098c5a639c6793ff8373276faf20190a56d96153669ba48fe8dd6872799",
+            "elapsedSeconds": 1108.9219999999987
+          },
+          {
+            "family": "bert",
+            "modelId": "a1f9e07e-82c6-4085-9880-3a1ca2eaa58a",
+            "evaluationRunId": "726245a5-4623-4ab2-804b-7553f00db5ae",
+            "trainRows": 41333,
+            "validationRows": 4768,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 2e-05,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cuda"
+            },
+            "validation": {
+              "rows": 4768,
+              "accuracy": 0.7831375838926175,
+              "precision": 0.7397416413373861,
+              "recall": 0.8479965156794426,
+              "f1": 0.7901785714285714,
+              "macro_f1": 0.7828931051587301,
+              "confusionMatrix": [
+                [
+                  1787,
+                  685
+                ],
+                [
+                  349,
+                  1947
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.8779217479674797,
+              "average_precision": 0.8738424789850683
+            },
+            "test": {
+              "rows": 4799,
+              "accuracy": 0.7682850593873723,
+              "precision": 0.7165178571428571,
+              "recall": 0.8462214411247804,
+              "f1": 0.7759871071716358,
+              "macro_f1": 0.7680108172888822,
+              "confusionMatrix": [
+                [
+                  1761,
+                  762
+                ],
+                [
+                  350,
+                  1926
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.8676047672485192,
+              "average_precision": 0.8615450454629496
+            },
+            "modelManifestSha256": "9f9deb3ce28b0f4b89ba09d4eab058a6e72981946270408b42e4c088d074c655",
+            "preparationSha256": "e8f54098c5a639c6793ff8373276faf20190a56d96153669ba48fe8dd6872799",
+            "elapsedSeconds": 7055.485000000001
+          }
+        ]
+      },
+      {
+        "pipelineId": "e3a5f53d-6072-47bc-8b18-3586c87f696e",
+        "datasetId": "935fd625-b05a-4953-b7c8-50b85ef8e4d3",
+        "preparationId": "293c6172-7f6e-458c-a69a-4f233efe9d50",
+        "cleanVersionId": "f20572ce-c097-4257-aa3a-0ec9bdd99f4e",
+        "status": "COMPLETED",
+        "models": [
+          {
+            "family": "lr",
+            "modelId": "19a280d4-2174-4caa-827a-9786207de61e",
+            "evaluationRunId": "b9506765-dfea-487e-ad04-a7e76cd19620",
+            "trainRows": 35639,
+            "validationRows": 4449,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cpu"
+            },
+            "validation": {
+              "rows": 4449,
+              "accuracy": 0.7109462800629355,
+              "precision": 0.722386296515062,
+              "recall": 0.5998038254046101,
+              "f1": 0.6554126473740621,
+              "macro_f1": 0.70323865043887,
+              "confusionMatrix": [
+                [
+                  1940,
+                  470
+                ],
+                [
+                  816,
+                  1223
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.7697658114892378,
+              "average_precision": 0.7710314210927999
+            },
+            "test": {
+              "rows": 4457,
+              "accuracy": 0.7141575050482387,
+              "precision": 0.7264150943396226,
+              "recall": 0.6033300685602351,
+              "f1": 0.6591760299625468,
+              "macro_f1": 0.7065200087988932,
+              "confusionMatrix": [
+                [
+                  1951,
+                  464
+                ],
+                [
+                  810,
+                  1232
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.7757188077291982,
+              "average_precision": 0.781386531996215
+            },
+            "modelManifestSha256": "4d0c6a25bad1cbe70b4b363a89002598b2083b4f67c4355e952307b071f6548c",
+            "preparationSha256": "c696a866e7d5106b368deccdf149fb4629cb74e6f58c27913295994f6abc79f7",
+            "elapsedSeconds": 7.7189999999973224
+          },
+          {
+            "family": "svm",
+            "modelId": "87a65648-ae44-4a82-81d4-56d7b534cd8a",
+            "evaluationRunId": "89524e68-1443-4f35-a9e7-1a7bd9bf17af",
+            "trainRows": 35639,
+            "validationRows": 4449,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cpu"
+            },
+            "validation": {
+              "rows": 4449,
+              "accuracy": 0.7125196673409755,
+              "precision": 0.7303030303030303,
+              "recall": 0.5909759686120647,
+              "f1": 0.653293575494714,
+              "macro_f1": 0.7038785020879215,
+              "confusionMatrix": [
+                [
+                  1965,
+                  445
+                ],
+                [
+                  834,
+                  1205
+                ]
+              ],
+              "threshold": 0.0,
+              "roc_auc": 0.7699029709055167,
+              "average_precision": 0.7712026242778793
+            },
+            "test": {
+              "rows": 4457,
+              "accuracy": 0.7146062373794032,
+              "precision": 0.7305389221556886,
+              "recall": 0.5974534769833496,
+              "f1": 0.6573275862068966,
+              "macro_f1": 0.7064031241299765,
+              "confusionMatrix": [
+                [
+                  1965,
+                  450
+                ],
+                [
+                  822,
+                  1220
+                ]
+              ],
+              "threshold": 0.0,
+              "roc_auc": 0.7761878400382849,
+              "average_precision": 0.7819530584315137
+            },
+            "modelManifestSha256": "0dccecc75d88a8f0fe440cf46b1424a083355e8b6304ac35af9e230763b7d736",
+            "preparationSha256": "c696a866e7d5106b368deccdf149fb4629cb74e6f58c27913295994f6abc79f7",
+            "elapsedSeconds": 8.125
+          },
+          {
+            "family": "rf",
+            "modelId": "6fa578e2-6f7d-4b55-8e20-d853a9848a3e",
+            "evaluationRunId": "d914fc2e-287d-4db8-aab6-fc8fd8d1ca12",
+            "trainRows": 35639,
+            "validationRows": 4449,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cpu"
+            },
+            "validation": {
+              "rows": 4449,
+              "accuracy": 0.7091481231737469,
+              "precision": 0.7245328511151296,
+              "recall": 0.5895046591466405,
+              "f1": 0.6500811249323959,
+              "macro_f1": 0.7006174855431211,
+              "confusionMatrix": [
+                [
+                  1953,
+                  457
+                ],
+                [
+                  837,
+                  1202
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.7670450082315999,
+              "average_precision": 0.7745707866083432
+            },
+            "test": {
+              "rows": 4457,
+              "accuracy": 0.7128113080547454,
+              "precision": 0.7278708133971292,
+              "recall": 0.5959843290891284,
+              "f1": 0.6553581044695745,
+              "macro_f1": 0.7046021291578641,
+              "confusionMatrix": [
+                [
+                  1960,
+                  455
+                ],
+                [
+                  825,
+                  1217
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.7744200972131815,
+              "average_precision": 0.7848088632472685
+            },
+            "modelManifestSha256": "ef097948878cc26c1b423f7fa7595efe936b2a2b5f829cf663a8bd7083ac115a",
+            "preparationSha256": "c696a866e7d5106b368deccdf149fb4629cb74e6f58c27913295994f6abc79f7",
+            "elapsedSeconds": 11.75
+          },
+          {
+            "family": "cnn",
+            "modelId": "cc14bf7f-09ca-4e55-8023-56ac7ee90073",
+            "evaluationRunId": "d933483a-c25e-49ee-bd73-f4ca4480e0a5",
+            "trainRows": 35639,
+            "validationRows": 4449,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cuda"
+            },
+            "validation": {
+              "rows": 4449,
+              "accuracy": 0.6850977747808497,
+              "precision": 0.7013888888888888,
+              "recall": 0.5448749386954389,
+              "f1": 0.6133038918023738,
+              "macro_f1": 0.6738557373703812,
+              "confusionMatrix": [
+                [
+                  1937,
+                  473
+                ],
+                [
+                  928,
+                  1111
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.7281299921245261,
+              "average_precision": 0.7379164620717316
+            },
+            "test": {
+              "rows": 4457,
+              "accuracy": 0.6818487772043976,
+              "precision": 0.6914110429447853,
+              "recall": 0.5519098922624878,
+              "f1": 0.6138344226579521,
+              "macro_f1": 0.6716634913747601,
+              "confusionMatrix": [
+                [
+                  1912,
+                  503
+                ],
+                [
+                  915,
+                  1127
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.7284812924445851,
+              "average_precision": 0.7356398245560323
+            },
+            "modelManifestSha256": "cf7cd937cb7f7d2d1e3f4f177276b7347172bf8cb671ad1b880252836a9dd198",
+            "preparationSha256": "c696a866e7d5106b368deccdf149fb4629cb74e6f58c27913295994f6abc79f7",
+            "elapsedSeconds": 175.53100000000268
+          },
+          {
+            "family": "bilstm",
+            "modelId": "c67f7a35-c0ac-4833-9746-7c7463ffe123",
+            "evaluationRunId": "f960d9d9-f727-4afe-9350-66848bf82bc2",
+            "trainRows": 35639,
+            "validationRows": 4449,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cuda"
+            },
+            "validation": {
+              "rows": 4449,
+              "accuracy": 0.7192627556754326,
+              "precision": 0.7388149939540508,
+              "recall": 0.5993133889161354,
+              "f1": 0.6617925805578121,
+              "macro_f1": 0.7109155025747754,
+              "confusionMatrix": [
+                [
+                  1978,
+                  432
+                ],
+                [
+                  817,
+                  1222
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.7865159473259001,
+              "average_precision": 0.7793711310794122
+            },
+            "test": {
+              "rows": 4457,
+              "accuracy": 0.6971056764639892,
+              "precision": 0.6920088790233074,
+              "recall": 0.6106758080313418,
+              "f1": 0.6488033298647242,
+              "macro_f1": 0.6912655702578059,
+              "confusionMatrix": [
+                [
+                  1860,
+                  555
+                ],
+                [
+                  795,
+                  1247
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.7558448563601228,
+              "average_precision": 0.7522811784551491
+            },
+            "modelManifestSha256": "120a0c58417a27f3aa28e3c6f8160a86f841b0df91dbaf2ca14d633042f0f587",
+            "preparationSha256": "c696a866e7d5106b368deccdf149fb4629cb74e6f58c27913295994f6abc79f7",
+            "elapsedSeconds": 412.9689999999973
+          },
+          {
+            "family": "bert",
+            "modelId": "754c6370-f3f1-443f-a63f-827d57adff54",
+            "evaluationRunId": "2205f38b-cee6-43be-b72a-76a442726e23",
+            "trainRows": 35639,
+            "validationRows": 4449,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 2e-05,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cuda"
+            },
+            "validation": {
+              "rows": 4449,
+              "accuracy": 0.7644414475162958,
+              "precision": 0.7601049868766404,
+              "recall": 0.7101520353114271,
+              "f1": 0.7342799188640974,
+              "macro_f1": 0.7613668467957951,
+              "confusionMatrix": [
+                [
+                  1953,
+                  457
+                ],
+                [
+                  591,
+                  1448
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.8325895046591467,
+              "average_precision": 0.7352944457500039
+            },
+            "test": {
+              "rows": 4457,
+              "accuracy": 0.7671079201256451,
+              "precision": 0.7530241935483871,
+              "recall": 0.7316356513222331,
+              "f1": 0.7421758569299552,
+              "macro_f1": 0.7649095323929646,
+              "confusionMatrix": [
+                [
+                  1925,
+                  490
+                ],
+                [
+                  548,
+                  1494
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.8306672709538613,
+              "average_precision": 0.7314317676623354
+            },
+            "modelManifestSha256": "ad61193229e05e4c01e753655aec9c219868f9b641819fb6d9f8b08c57bd05a9",
+            "preparationSha256": "c696a866e7d5106b368deccdf149fb4629cb74e6f58c27913295994f6abc79f7",
+            "elapsedSeconds": 6158.639999999999
+          }
+        ]
+      },
+      {
+        "pipelineId": "31e5fc93-51c3-49ca-9733-a43b9cb73140",
+        "datasetId": "8080db17-bf5e-4740-886a-71ac51b83a84",
+        "preparationId": "e08662ad-f705-4db9-ac39-d8d94c84c090",
+        "cleanVersionId": "0d4afc67-56a6-4511-a0cb-8a0ae84e94da",
+        "status": "COMPLETED",
+        "models": [
+          {
+            "family": "lr",
+            "modelId": "3ff6ccc5-3aac-4f54-a9a2-cdf24f599221",
+            "evaluationRunId": "4f78cc48-f611-45f3-8b56-db7c39f3b3a5",
+            "trainRows": 635,
+            "validationRows": 47,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cpu"
+            },
+            "validation": {
+              "rows": 47,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "macro_f1": 1.0,
+              "confusionMatrix": [
+                [
+                  6,
+                  0
+                ],
+                [
+                  0,
+                  41
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 1.0,
+              "average_precision": 1.0000000000000002
+            },
+            "test": {
+              "rows": 41,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "macro_f1": 1.0,
+              "confusionMatrix": [
+                [
+                  2,
+                  0
+                ],
+                [
+                  0,
+                  39
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "modelManifestSha256": "41eeba44970f745c39612a6de9db975d0f5d674edd607aa80d848334f3262275",
+            "preparationSha256": "3fab2c98a9cee8ccbb963bd229f6f6ca3c86a81ce8895cf634bbba5957e3f6ba",
+            "elapsedSeconds": 1.9690000000045984
+          },
+          {
+            "family": "svm",
+            "modelId": "585de354-947f-416b-819d-4e2a865b3caf",
+            "evaluationRunId": "0178803b-cbd8-4299-b9ec-bc9f0209ef7a",
+            "trainRows": 635,
+            "validationRows": 47,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cpu"
+            },
+            "validation": {
+              "rows": 47,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "macro_f1": 1.0,
+              "confusionMatrix": [
+                [
+                  6,
+                  0
+                ],
+                [
+                  0,
+                  41
+                ]
+              ],
+              "threshold": 0.0,
+              "roc_auc": 1.0,
+              "average_precision": 1.0000000000000002
+            },
+            "test": {
+              "rows": 41,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "macro_f1": 1.0,
+              "confusionMatrix": [
+                [
+                  2,
+                  0
+                ],
+                [
+                  0,
+                  39
+                ]
+              ],
+              "threshold": 0.0,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "modelManifestSha256": "d1bbf737228fbd80ec0eb3ce5b01f7952f1b1cf9693cf488ba7283d0cd02563a",
+            "preparationSha256": "3fab2c98a9cee8ccbb963bd229f6f6ca3c86a81ce8895cf634bbba5957e3f6ba",
+            "elapsedSeconds": 2.0469999999986612
+          },
+          {
+            "family": "rf",
+            "modelId": "9f1c82d3-6e4a-4113-b05f-932265f3746f",
+            "evaluationRunId": "9e3c0911-9a59-4dab-be76-e8b286d28999",
+            "trainRows": 635,
+            "validationRows": 47,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cpu"
+            },
+            "validation": {
+              "rows": 47,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "macro_f1": 1.0,
+              "confusionMatrix": [
+                [
+                  6,
+                  0
+                ],
+                [
+                  0,
+                  41
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "test": {
+              "rows": 41,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "macro_f1": 1.0,
+              "confusionMatrix": [
+                [
+                  2,
+                  0
+                ],
+                [
+                  0,
+                  39
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "modelManifestSha256": "dabb581d48e55fd13ad212fe3fefbc800a8f0469a29bb23f91069a05b0ea534e",
+            "preparationSha256": "3fab2c98a9cee8ccbb963bd229f6f6ca3c86a81ce8895cf634bbba5957e3f6ba",
+            "elapsedSeconds": 2.764999999999418
+          },
+          {
+            "family": "cnn",
+            "modelId": "dddb7e2f-f9ab-47e5-833b-ddd8b2e19387",
+            "evaluationRunId": "5248138e-1143-4e2b-8433-97a049fc2fe9",
+            "trainRows": 635,
+            "validationRows": 47,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cuda"
+            },
+            "validation": {
+              "rows": 47,
+              "accuracy": 0.8723404255319149,
+              "precision": 0.8723404255319149,
+              "recall": 1.0,
+              "f1": 0.9318181818181818,
+              "macro_f1": 0.4659090909090909,
+              "confusionMatrix": [
+                [
+                  0,
+                  6
+                ],
+                [
+                  0,
+                  41
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.8780487804878049,
+              "average_precision": 0.9813768851548538
+            },
+            "test": {
+              "rows": 41,
+              "accuracy": 0.8536585365853658,
+              "precision": 0.9459459459459459,
+              "recall": 0.8974358974358975,
+              "f1": 0.9210526315789473,
+              "macro_f1": 0.4605263157894737,
+              "confusionMatrix": [
+                [
+                  0,
+                  2
+                ],
+                [
+                  4,
+                  35
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.6153846153846154,
+              "average_precision": 0.9768868051888461
+            },
+            "modelManifestSha256": "87433d5447f6188038b48ee34171b80e3f23371921e70eba2381814a4c394dec",
+            "preparationSha256": "3fab2c98a9cee8ccbb963bd229f6f6ca3c86a81ce8895cf634bbba5957e3f6ba",
+            "elapsedSeconds": 6.155999999995402
+          },
+          {
+            "family": "bilstm",
+            "modelId": "ee9339fe-a7bc-4e9b-a4fe-e160bf8fa501",
+            "evaluationRunId": "9915f4ea-4b13-4c19-9595-655f048aca31",
+            "trainRows": 635,
+            "validationRows": 47,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cuda"
+            },
+            "validation": {
+              "rows": 47,
+              "accuracy": 0.9787234042553191,
+              "precision": 0.9761904761904762,
+              "recall": 1.0,
+              "f1": 0.9879518072289156,
+              "macro_f1": 0.9485213581599123,
+              "confusionMatrix": [
+                [
+                  5,
+                  1
+                ],
+                [
+                  0,
+                  41
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 1.0,
+              "average_precision": 1.0000000000000002
+            },
+            "test": {
+              "rows": 41,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "macro_f1": 1.0,
+              "confusionMatrix": [
+                [
+                  2,
+                  0
+                ],
+                [
+                  0,
+                  39
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "modelManifestSha256": "4dfb2a963dfd586c89e1ad49704723c48a7bcf95ad693ce602f82f8aa73711db",
+            "preparationSha256": "3fab2c98a9cee8ccbb963bd229f6f6ca3c86a81ce8895cf634bbba5957e3f6ba",
+            "elapsedSeconds": 29.51600000000326
+          },
+          {
+            "family": "bert",
+            "modelId": "ac19a498-8a58-4b50-9e06-e33765e75849",
+            "evaluationRunId": "8cf9f06e-ba4b-403e-8c5d-baf42bef9d75",
+            "trainRows": 635,
+            "validationRows": 47,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 2e-05,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cuda"
+            },
+            "validation": {
+              "rows": 47,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "macro_f1": 1.0,
+              "confusionMatrix": [
+                [
+                  6,
+                  0
+                ],
+                [
+                  0,
+                  41
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 1.0,
+              "average_precision": 1.0000000000000002
+            },
+            "test": {
+              "rows": 41,
+              "accuracy": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "macro_f1": 1.0,
+              "confusionMatrix": [
+                [
+                  2,
+                  0
+                ],
+                [
+                  0,
+                  39
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "modelManifestSha256": "c08d58d7615ef209b95a775ba6deb406ce1295d92b1d01b64868409785a80c81",
+            "preparationSha256": "3fab2c98a9cee8ccbb963bd229f6f6ca3c86a81ce8895cf634bbba5957e3f6ba",
+            "elapsedSeconds": 124.23400000000402
+          }
+        ]
+      },
+      {
+        "pipelineId": "b16e8ee1-6fc3-4d3c-a044-9f4f3e5e7913",
+        "datasetId": "9213c71e-340f-4fbd-8140-973f1b4ecd4c",
+        "preparationId": "d05d8c9d-d02a-4ec4-a868-109074d39f2a",
+        "cleanVersionId": "19f01124-7c9a-467e-b830-799b5c46b4a2",
+        "status": "COMPLETED",
+        "models": [
+          {
+            "family": "lr",
+            "modelId": "3da091ce-aedd-4282-a455-b98c4a1d65cb",
+            "evaluationRunId": "033db5e4-2f9e-4420-b841-2763033bd56f",
+            "trainRows": 5059,
+            "validationRows": 272,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cpu"
+            },
+            "validation": {
+              "rows": 272,
+              "accuracy": 0.9926470588235294,
+              "precision": 1.0,
+              "recall": 0.9907407407407407,
+              "f1": 0.9953488372093023,
+              "macro_f1": 0.9889024887800897,
+              "confusionMatrix": [
+                [
+                  56,
+                  0
+                ],
+                [
+                  2,
+                  214
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "test": {
+              "rows": 301,
+              "accuracy": 0.9933554817275747,
+              "precision": 0.9948717948717949,
+              "recall": 0.9948717948717949,
+              "f1": 0.9948717948717949,
+              "macro_f1": 0.9927189163038219,
+              "confusionMatrix": [
+                [
+                  105,
+                  1
+                ],
+                [
+                  1,
+                  194
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.9999516207063377,
+              "average_precision": 0.9999738356881214
+            },
+            "modelManifestSha256": "59952202a4c21eefa2aad374a2b477bda5dd88b1e21974b97b3669d2a5cb645c",
+            "preparationSha256": "bb3e85d6b62c961e3b4a2df4d635ae2f947764bbe8d59b8aad2a379fc0af4a51",
+            "elapsedSeconds": 7.485000000000582
+          },
+          {
+            "family": "svm",
+            "modelId": "66fae53f-8360-4b72-ad40-6849084f4a4f",
+            "evaluationRunId": "4983107e-6480-4a9c-a8e4-7473d8015e3c",
+            "trainRows": 5059,
+            "validationRows": 272,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cpu"
+            },
+            "validation": {
+              "rows": 272,
+              "accuracy": 0.9926470588235294,
+              "precision": 1.0,
+              "recall": 0.9907407407407407,
+              "f1": 0.9953488372093023,
+              "macro_f1": 0.9889024887800897,
+              "confusionMatrix": [
+                [
+                  56,
+                  0
+                ],
+                [
+                  2,
+                  214
+                ]
+              ],
+              "threshold": 0.0,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "test": {
+              "rows": 301,
+              "accuracy": 0.9966777408637874,
+              "precision": 1.0,
+              "recall": 0.9948717948717949,
+              "f1": 0.9974293059125964,
+              "macro_f1": 0.9963672351159226,
+              "confusionMatrix": [
+                [
+                  106,
+                  0
+                ],
+                [
+                  1,
+                  194
+                ]
+              ],
+              "threshold": 0.0,
+              "roc_auc": 0.9999516207063377,
+              "average_precision": 0.9999738356881214
+            },
+            "modelManifestSha256": "4cfe26ac262635af4be9637e5a777d7fa29295f778d70541394c72f5869080b9",
+            "preparationSha256": "bb3e85d6b62c961e3b4a2df4d635ae2f947764bbe8d59b8aad2a379fc0af4a51",
+            "elapsedSeconds": 7.235000000000582
+          },
+          {
+            "family": "rf",
+            "modelId": "d1cca2f8-77c6-488c-b4b6-d9b4745979bc",
+            "evaluationRunId": "dd30a6fe-d7dd-439c-9364-7a0299afab33",
+            "trainRows": 5059,
+            "validationRows": 272,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cpu"
+            },
+            "validation": {
+              "rows": 272,
+              "accuracy": 0.9926470588235294,
+              "precision": 1.0,
+              "recall": 0.9907407407407407,
+              "f1": 0.9953488372093023,
+              "macro_f1": 0.9889024887800897,
+              "confusionMatrix": [
+                [
+                  56,
+                  0
+                ],
+                [
+                  2,
+                  214
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 1.0,
+              "average_precision": 1.0
+            },
+            "test": {
+              "rows": 301,
+              "accuracy": 0.9933554817275747,
+              "precision": 1.0,
+              "recall": 0.9897435897435898,
+              "f1": 0.9948453608247423,
+              "macro_f1": 0.9927497832161094,
+              "confusionMatrix": [
+                [
+                  106,
+                  0
+                ],
+                [
+                  2,
+                  193
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.9999032414126754,
+              "average_precision": 0.9999479370037746
+            },
+            "modelManifestSha256": "2ec4c7a387787a2f418aa0e63da2f587306747021c1a07e1e1934ec191dba7f2",
+            "preparationSha256": "bb3e85d6b62c961e3b4a2df4d635ae2f947764bbe8d59b8aad2a379fc0af4a51",
+            "elapsedSeconds": 8.468000000000757
+          },
+          {
+            "family": "cnn",
+            "modelId": "334663b3-1144-4096-bde0-075e2bfbe24f",
+            "evaluationRunId": "fb8dba6c-7941-441c-9f70-dcb3a75d4eb7",
+            "trainRows": 5059,
+            "validationRows": 272,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cuda"
+            },
+            "validation": {
+              "rows": 272,
+              "accuracy": 0.9742647058823529,
+              "precision": 0.995260663507109,
+              "recall": 0.9722222222222222,
+              "f1": 0.9836065573770492,
+              "macro_f1": 0.9618887487739947,
+              "confusionMatrix": [
+                [
+                  55,
+                  1
+                ],
+                [
+                  6,
+                  210
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.9948330026455026,
+              "average_precision": 0.9985471969172856
+            },
+            "test": {
+              "rows": 301,
+              "accuracy": 0.9435215946843853,
+              "precision": 0.968421052631579,
+              "recall": 0.9435897435897436,
+              "f1": 0.9558441558441558,
+              "macro_f1": 0.9387515710096355,
+              "confusionMatrix": [
+                [
+                  100,
+                  6
+                ],
+                [
+                  11,
+                  184
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.9862360909530722,
+              "average_precision": 0.9890501858209257
+            },
+            "modelManifestSha256": "ff34043d77f5377fbcf4eb4794975130aea478cfb6db5790f110877634d7768b",
+            "preparationSha256": "bb3e85d6b62c961e3b4a2df4d635ae2f947764bbe8d59b8aad2a379fc0af4a51",
+            "elapsedSeconds": 28.610000000000582
+          },
+          {
+            "family": "bilstm",
+            "modelId": "29c4e111-4de4-4ffa-93b9-c7e50837f26f",
+            "evaluationRunId": "82714e23-7366-4afe-9815-1f451504a556",
+            "trainRows": 5059,
+            "validationRows": 272,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 0.001,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cuda"
+            },
+            "validation": {
+              "rows": 272,
+              "accuracy": 0.9375,
+              "precision": 0.9853658536585366,
+              "recall": 0.9351851851851852,
+              "f1": 0.9596199524940617,
+              "macro_f1": 0.9107042851901204,
+              "confusionMatrix": [
+                [
+                  53,
+                  3
+                ],
+                [
+                  14,
+                  202
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.9799107142857143,
+              "average_precision": 0.9946612461138296
+            },
+            "test": {
+              "rows": 301,
+              "accuracy": 0.9368770764119602,
+              "precision": 0.9444444444444444,
+              "recall": 0.958974358974359,
+              "f1": 0.9516539440203562,
+              "macro_f1": 0.9303724265556326,
+              "confusionMatrix": [
+                [
+                  95,
+                  11
+                ],
+                [
+                  8,
+                  187
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 0.9748427672955975,
+              "average_precision": 0.9837678730929416
+            },
+            "modelManifestSha256": "c48a8b5a2b0ca4c68e0d55b7eba60c9a8da57df2757a08fdaa5352733e6a61c7",
+            "preparationSha256": "bb3e85d6b62c961e3b4a2df4d635ae2f947764bbe8d59b8aad2a379fc0af4a51",
+            "elapsedSeconds": 235.17199999999866
+          },
+          {
+            "family": "bert",
+            "modelId": "35dd65f1-a31c-4755-b60c-3021897728f8",
+            "evaluationRunId": "aa56bb7f-b0ea-4e77-a228-03f0352d0d0c",
+            "trainRows": 5059,
+            "validationRows": 272,
+            "parameters": {
+              "seed": 20261028,
+              "C": 1,
+              "max_iter": 1000,
+              "class_weight": "none",
+              "n_estimators": 100,
+              "max_depth": 20,
+              "min_samples_leaf": 1,
+              "epochs": 3,
+              "batch_size": 8,
+              "learning_rate": 2e-05,
+              "width": 64,
+              "dropout": 0.2,
+              "max_length": 512,
+              "patience": 0,
+              "weight_decay": 0.01,
+              "gradient_accumulation": 1,
+              "device": "cuda"
+            },
+            "validation": {
+              "rows": 272,
+              "accuracy": 0.9963235294117647,
+              "precision": 0.9953917050691244,
+              "recall": 1.0,
+              "f1": 0.9976905311778291,
+              "macro_f1": 0.99434076108441,
+              "confusionMatrix": [
+                [
+                  55,
+                  1
+                ],
+                [
+                  0,
+                  216
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 1.0,
+              "average_precision": 1.0000000000000002
+            },
+            "test": {
+              "rows": 301,
+              "accuracy": 0.9933554817275747,
+              "precision": 0.9898477157360406,
+              "recall": 1.0,
+              "f1": 0.9948979591836735,
+              "macro_f1": 0.992687074829932,
+              "confusionMatrix": [
+                [
+                  104,
+                  2
+                ],
+                [
+                  0,
+                  195
+                ]
+              ],
+              "threshold": 0.5,
+              "roc_auc": 1.0,
+              "average_precision": 0.9999999999999999
+            },
+            "modelManifestSha256": "f87690e0d7b5184dac7bbb2d81f3f33cadfca984b34f0811c1a86aea01f9a492",
+            "preparationSha256": "bb3e85d6b62c961e3b4a2df4d635ae2f947764bbe8d59b8aad2a379fc0af4a51",
+            "elapsedSeconds": 864.4690000000046
+          }
+        ]
+      }
+    ],
+    "oldFormalGenerationRemainsPaused": true
+  },
+  "publication": {
+    "activeReleaseId": "dcff924e-12cf-4630-a979-eff10c4b5069",
+    "compatibleReleaseId": "1d5dfa7f-73a2-4deb-b3a9-a01c81ecb2cc",
+    "scope": "0:TEXT_REUSE",
+    "verifiedSwitchEventIds": [
+      10,
+      11,
+      12
+    ],
+    "liveReceipt": {
+      "qaDatasets": "",
+      "releaseEvents": "12\t0:TEXT_REUSE\t1d5dfa7f-73a2-4deb-b3a9-a01c81ecb2cc\tdcff924e-12cf-4630-a979-eff10c4b5069\n11\t0:TEXT_REUSE\tdcff924e-12cf-4630-a979-eff10c4b5069\t1d5dfa7f-73a2-4deb-b3a9-a01c81ecb2cc\n10\t0:TEXT_REUSE\tNULL\tdcff924e-12cf-4630-a979-eff10c4b5069",
+      "pointers": "1:TEXT_REUSE\tNULL\n0:TEXT_REUSE\tdcff924e-12cf-4630-a979-eff10c4b5069\n2:PAIR_PREDICTION\tf7442ec3-9128-4ddd-b0cc-318b711ad931",
+      "queue": "runs\t0\npipelines\t0"
+    }
+  },
+  "webValidation": "INCOMPLETE",
+  "keptArticle": "MATERIAL_PREPARED_NOT_SUBMITTED",
+  "finalArchive": "NOT_CREATED",
+  "completionSignal": false
+}
