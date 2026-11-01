@@ -16,7 +16,7 @@ const flow={flowId:'flow',kind:'CONTINUE' as const,name:'继续训练',revision:
 const data={datasetId:'news',organizationId:'1',kind:'PAIRS',name:'正式数据',versions:[{versionId:'clean',stage:'CLEAN',status:'READY'}],runs:[]}
 const model={modelId:'cnn',runId:'cnn',bundleId:'parents',datasetId:'news',inputVersionId:'clean',organizationId:'1',family:'cnn',name:'CNN',archived:false,manifest:{family:'cnn',trainRows:5000,validationRows:600,elapsedSeconds:100,reloadMaxDifference:0,validation:{macro_f1:.7,accuracy:.7,precision:.7,recall:.7,f1:.7,roc_auc:.7},parameters:{width:64}}}
 const run=(id:string)=>({runId:id,datasetId:'news',inputVersionId:'clean',status:'COMPLETED',action:'TRAIN',options:{family:'cnn'},result:{}})
-const stubs={...Object.fromEntries(['ModelBundles','ModelComparison','TrainingProgress','EvaluationCharts','PredictionAnalysis','ExperimentAnalysis','PredictionResults','ParentModelComparison','FormalTrainingProgress','NewsSampleReport','ExperimentChart'].map(name=>[name,true])),AutomaticPipeline:defineComponent({name:'AutomaticPipeline',props:['focusId'],inheritAttrs:false,template:'<div />'})}
+const stubs={...Object.fromEntries(['ModelBundles','ModelComparison','TrainingProgress','EvaluationCharts','PredictionAnalysis','ExperimentAnalysis','PredictionResults','ParentModelComparison','FormalTrainingProgress','NewsSampleReport','ExperimentChart'].map(name=>[name,true])),AutomaticPipeline:defineComponent({name:'AutomaticPipeline',props:['focusId','models'],inheritAttrs:false,template:'<div />'})}
 const settle=async()=>{for(let i=0;i<4;i++)await flushPromises()}
 afterEach(()=>{request.mockReset();activeFlow.value=undefined;workflowContext.bundle=undefined;workflowContext.dataset=undefined;workflowContext.run=undefined;workflowContext.model=undefined})
 
@@ -65,5 +65,45 @@ it('leaves group A for a new task and opens unrelated history B without inheriti
   expect(wrapper.findComponent({name:'AutomaticPipeline'}).props('focusId')).toBe('')
   await wrapper.findAll('button').find(b=>b.text()==='查看')!.trigger('click');await settle()
   expect(router.currentRoute.value.query.run).toBe('history-b');expect(router.currentRoute.value.query.bundle).toBeUndefined()
+ }finally{wrapper.unmount()}
+})
+
+it('starts preparation from the primary action instead of opening an empty preparation step',async()=>{
+ request.mockImplementation(async(path:string,options?:RequestInit)=>{
+  if(path.startsWith('/api/workbench/datasets?'))return page([data])
+  if(path==='/api/workbench/datasets/news')return data
+  if(path.startsWith('/api/workbench/training/runs?'))return page()
+  if(path==='/api/workbench/training/runs'&&options?.method==='POST')throw new Error('PREPARATION_DISPATCHED')
+  throw new Error('Unexpected request '+path)
+ })
+ const router=createRouter({history:createMemoryHistory(),routes:[{path:'/training',component:TrainingView}]})
+ await router.push('/training?dataset=news&version=clean');await router.isReady()
+ const wrapper=mount(TrainingView,{global:{plugins:[ElementPlus,router],stubs}})
+ try{
+  await settle();await wrapper.findAll('button').find(b=>b.text()==='准备样本')!.trigger('click');await settle()
+  expect(request.mock.calls.some(([path,options])=>path==='/api/workbench/training/runs'&&options?.method==='POST')).toBe(true)
+  expect(wrapper.text()).toContain('PREPARATION_DISPATCHED')
+ }finally{wrapper.unmount()}
+})
+
+it('restores each neural family learning rate from its own parent group member',async()=>{
+ const members=['lr','svm','rf','cnn','bilstm','bert'].map(family=>({...model,modelId:family,runId:family,family,manifest:{...model.manifest,parameters:{width:64,learning_rate:family==='bert'?.00002:.001,epochs:3}}}))
+ request.mockImplementation(async(path:string)=>{
+  if(path.startsWith('/api/workbench/datasets?'))return page([data])
+  if(path==='/api/workbench/datasets/news')return data
+  if(path.startsWith('/api/workbench/training/runs?'))return page()
+  if(path==='/api/workbench/pipelines/parents')return {pipelineId:'parents',state:{models:members.map(m=>({family:m.family,modelId:m.modelId}))}}
+  const found=members.find(m=>path===`/api/workbench/training/models/${m.modelId}`);if(found)return found
+  throw new Error('Unexpected request '+path)
+ })
+ const router=createRouter({history:createMemoryHistory(),routes:[{path:'/training',component:TrainingView}]})
+ await router.push('/training?dataset=news&version=clean&parentModel=bert&step=2');await router.isReady()
+ const wrapper=mount(TrainingView,{global:{plugins:[ElementPlus,router],stubs}})
+ try{
+  await settle();const panel=wrapper.findComponent({name:'AutomaticPipeline'})
+  const models=panel.props('models') as Array<{family:string;parameters:{learning_rate:number}}>
+  expect(models.find(m=>m.family==='cnn')!.parameters.learning_rate).toBe(.001)
+  expect(models.find(m=>m.family==='bilstm')!.parameters.learning_rate).toBe(.001)
+  expect(models.find(m=>m.family==='bert')!.parameters.learning_rate).toBe(.00002)
  }finally{wrapper.unmount()}
 })

@@ -50,7 +50,7 @@ async function sync(){
     }
     if(route.query.preparation){const preparation=String(route.query.preparation);if(run?.action==='TRAIN'&&run.options.preparationId!==preparation)throw new Error('该训练与所选样本划分不一致');if(context.preparationId!==preparation){delete context.trainingRunId;delete context.modelId;delete context.evaluationRunId;delete context.releaseId}context.preparationId=preparation}
     if(route.path==='/reference-imports'&&route.query.batch)context.importId=String(route.query.batch)
-    if(flow&&!dataset){workflowContext.dataset=undefined;workflowContext.version='';workflowContext.run=undefined;workflowContext.model=undefined}
+    let resolvedData:datasets.Detail|undefined
     if(dataset){
       const data=await datasets.dataset(dataset)
       if(!valid())return
@@ -60,15 +60,20 @@ async function sync(){
       const missing=await Promise.all(bound.map(id=>training.run(id)));if(!valid())return
       data.runs.push(...missing as unknown as datasets.Run[])
       if(context.releaseId){const release=await delivery.release(context.releaseId);if(!valid())return;data.modelReleases=[...(data.modelReleases||[]).filter(r=>r.id!==release.id),{id:release.id,versionId:context.versionId||'',status:release.status,active:release.active}]}
-      workflowContext.dataset=data;workflowContext.version=version
-      if(flow){workflowContext.run=context.trainingRunId;workflowContext.model=context.modelId}
-      if(run?.action==='TRAIN'){workflowContext.run=run.runId;workflowContext.model=run.status==='COMPLETED'?run.runId:undefined}
-      if(context.modelId){workflowContext.model=context.modelId;workflowContext.run=context.trainingRunId}
+      resolvedData=data
     }
     if(flow&&valid()){
       const step=String(route.query.flowStep||({'/datasets':context.datasetId?'quality':'data','/training':run?(['PREPARE','GENERATE'].includes(run.action)?'prepare':'train'):route.query.step==='1'?'prepare':route.query.step==='2'?'train':'data','/models':route.query.selectParent?'parent':route.query.tab==='prediction'?'predict':'evaluate','/reference-imports':'library','/releases':'predict'} as Record<string,string>)[route.path]||flow.currentStep||'data')
       if(JSON.stringify(context)!==JSON.stringify(flow.context)||step!==flow.currentStep){saving.value=true;const updated=await updateFlow(flow,context,step);if(valid())activeFlow.value=updated}
       else activeFlow.value=flow
+    }
+    if(valid()){
+      if(resolvedData){
+        workflowContext.dataset=resolvedData;workflowContext.version=version
+        if(flow){workflowContext.run=context.trainingRunId;workflowContext.model=context.modelId}
+        if(run?.action==='TRAIN'){workflowContext.run=run.runId;workflowContext.model=run.status==='COMPLETED'?run.runId:undefined}
+        if(context.modelId){workflowContext.model=context.modelId;workflowContext.run=context.trainingRunId}
+      }else if(flow){workflowContext.dataset=undefined;workflowContext.version='';workflowContext.run=undefined;workflowContext.model=undefined}
     }
   }catch(e){if(valid()){error.value=e instanceof Error?e.message:'读取任务失败';activeFlow.value=undefined;workflowContext.dataset=undefined;workflowContext.version='';workflowContext.model=undefined;workflowContext.run=undefined}}finally{saving.value=false}
 }
