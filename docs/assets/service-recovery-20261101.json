@@ -1,0 +1,76 @@
+{
+  "observedAt": "2026-11-01T09:10:02.639359+08:00",
+  "serviceRecovery": "READY",
+  "previousObservation": "All four project services were not listening; no cause inferred",
+  "health": {
+    "java": {
+      "owned": true,
+      "listening": true,
+      "ready": true,
+      "busy": false
+    },
+    "detector": {
+      "owned": true,
+      "listening": true,
+      "ready": true,
+      "busy": false,
+      "runId": "35b742c3-c70e-420a-9102-15b2be0d3408",
+      "activeAttemptId": null,
+      "errorCode": null,
+      "availableTextConfigs": [
+        {
+          "configId": "text-89f0a1c8a4c24a89b43869a60d9b242b9bc8c110493b5dc1847964c50c73c65e",
+          "profileId": null
+        },
+        {
+          "configId": "text-393f674ef0ce299ee2f2cc0c99a84a056a1df9dba9c6a2b3c93e4e785602f02a",
+          "profileId": null
+        },
+        {
+          "configId": "text-bfafb42353288c59ac3ac8a0732d85e19f0cf5f5d171784647a24624dcd855fb",
+          "profileId": null
+        },
+        {
+          "configId": "text-bbbbe2f485c16796c68d8e54f3551da6bb141f0b6ba1c093243d7177a69c05a6",
+          "profileId": null
+        },
+        {
+          "configId": "text-1e6f8490873eb23b8d80ee99b9ea09e039c94fb7ca48c687f854ba3cdce149e1",
+          "profileId": null
+        }
+      ],
+      "imageSchema": "image-v1",
+      "contextualText": true,
+      "refinedText": true
+    },
+    "ocr": {
+      "owned": true,
+      "listening": true,
+      "ready": true,
+      "busy": false,
+      "runId": "6e2fd2f6-caeb-4abd-b4e9-2fae33848e0c",
+      "activeAttemptId": null,
+      "errorCode": null,
+      "availableTextConfigs": null
+    },
+    "mysql": {
+      "port": 3308,
+      "listening": true
+    }
+  },
+  "activeTasks": {
+    "ml_run": 0,
+    "ml_pipeline": 0,
+    "document_check": 0,
+    "reference_import": 0,
+    "model_release": 0
+  },
+  "trained": 24,
+  "evaluated": 24,
+  "releasePointers": "1:TEXT_REUSE\tNULL\n0:TEXT_REUSE\tdcff924e-12cf-4630-a979-eff10c4b5069\n2:PAIR_PREDICTION\tf7442ec3-9128-4ddd-b0cc-318b711ad931",
+  "jarSha256": "4460434fa03c44f143e6d015a27c0774d7249d5dbc8f1daf800195a6573a140c",
+  "newEnvironmentInstalled": false,
+  "sampleGenerationCommandStarted": false,
+  "browserValidationCompleted": false,
+  "completionSignalExists": false
+}
