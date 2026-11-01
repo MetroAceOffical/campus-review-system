@@ -1,0 +1,311 @@
+{
+  "status": "LOCAL_DELIVERY_VERIFIED",
+  "observedAt": "2026-11-01T10:13:10.651699+08:00",
+  "formalTraining": 24,
+  "formalIndependentEvaluation": 24,
+  "publishedBindingsVerified": 150,
+  "formalReleaseId": "dcff924e-12cf-4630-a979-eff10c4b5069",
+  "qaValidation": {
+    "upload": true,
+    "quality": true,
+    "cleaning": true,
+    "preparation": true,
+    "sixTraining": true,
+    "sixEvaluation": true,
+    "publication": true,
+    "prediction": true,
+    "rollback": true
+  },
+  "qaCleanup": {
+    "datasets": 1,
+    "versions": 2,
+    "runs": 15,
+    "models": 6,
+    "bundles": 1,
+    "releases": 1,
+    "predictions": 1,
+    "flows": 2,
+    "paths": 20,
+    "formalModelsPreserved": 24
+  },
+  "normalKeep": {
+    "workId": "88",
+    "title": "春风送暖开学季，南京汉开书院师生走进南传国际！",
+    "sourceFile": "normal-whole-news.json",
+    "checkIds": [
+      "2391d744-f7cf-4e1a-a5f2-219eb313a6b1",
+      "ff62641e-2682-487e-b851-1996faba4da8"
+    ],
+    "retainAfterQA": true,
+    "normalBodyCharacters": 917,
+    "preprocessing": "Removed site navigation and footer; complete article wording preserved. Older check retained in history; cleaned full body rechecked. Not an aggregate false-positive estimate."
+  },
+  "rewriteSixResults": [
+    {
+      "family": "lr",
+      "modelId": "50c3985c-b26f-4dbb-9a20-512964549d55",
+      "suspectedReuse": true,
+      "warningSources": 1,
+      "alerts": [
+        {
+          "sourceWorkId": "97",
+          "sourceTitle": "从AI漫剧到通才计划，这场讲座干货满满",
+          "semanticSummary": {
+            "status": "EVALUATED",
+            "corroborated": false,
+            "lexicalFloor": 0.25,
+            "minimumPairs": 2,
+            "evaluatedPairs": 178,
+            "scoreThreshold": 0.5,
+            "suspectedReuse": true,
+            "selectionMethod": "anchored-context-v1",
+            "supportingPairs": 8,
+            "pairedCharacters": 195,
+            "minimumCharacters": 64,
+            "matchedQueryCharacters": 231,
+            "minimumPairedCharacters": 64,
+            "beforeMutualSupportGuard": true
+          },
+          "literalSummary": {
+            "longest_match": 0,
+            "matched_characters": 0,
+            "query_character_coverage": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "family": "svm",
+      "modelId": "bacfecef-7308-408f-a45d-05fdc0ab45ea",
+      "suspectedReuse": true,
+      "warningSources": 1,
+      "alerts": [
+        {
+          "sourceWorkId": "97",
+          "sourceTitle": "从AI漫剧到通才计划，这场讲座干货满满",
+          "semanticSummary": {
+            "status": "EVALUATED",
+            "corroborated": false,
+            "lexicalFloor": 0.25,
+            "minimumPairs": 2,
+            "evaluatedPairs": 178,
+            "scoreThreshold": 0.5,
+            "suspectedReuse": true,
+            "selectionMethod": "anchored-context-v1",
+            "supportingPairs": 9,
+            "pairedCharacters": 218,
+            "minimumCharacters": 64,
+            "matchedQueryCharacters": 252,
+            "minimumPairedCharacters": 64,
+            "beforeMutualSupportGuard": true
+          },
+          "literalSummary": {
+            "longest_match": 0,
+            "matched_characters": 0,
+            "query_character_coverage": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "family": "rf",
+      "modelId": "ea71b233-a1bc-469a-a7c4-66487972275d",
+      "suspectedReuse": true,
+      "warningSources": 1,
+      "alerts": [
+        {
+          "sourceWorkId": "97",
+          "sourceTitle": "从AI漫剧到通才计划，这场讲座干货满满",
+          "semanticSummary": {
+            "status": "EVALUATED",
+            "corroborated": false,
+            "lexicalFloor": 0.25,
+            "minimumPairs": 2,
+            "evaluatedPairs": 178,
+            "scoreThreshold": 0.5,
+            "suspectedReuse": true,
+            "selectionMethod": "anchored-context-v1",
+            "supportingPairs": 13,
+            "pairedCharacters": 262,
+            "minimumCharacters": 64,
+            "matchedQueryCharacters": 369,
+            "minimumPairedCharacters": 64,
+            "beforeMutualSupportGuard": true
+          },
+          "literalSummary": {
+            "longest_match": 0,
+            "matched_characters": 0,
+            "query_character_coverage": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "family": "cnn",
+      "modelId": "ec5b1e81-eb49-4756-825b-08d86c502a14",
+      "suspectedReuse": false,
+      "warningSources": 0,
+      "alerts": []
+    },
+    {
+      "family": "bilstm",
+      "modelId": "ba610892-16ca-498f-9303-9557b4ab2420",
+      "suspectedReuse": true,
+      "warningSources": 1,
+      "alerts": [
+        {
+          "sourceWorkId": "97",
+          "sourceTitle": "从AI漫剧到通才计划，这场讲座干货满满",
+          "semanticSummary": {
+            "status": "EVALUATED",
+            "corroborated": false,
+            "lexicalFloor": 0.25,
+            "minimumPairs": 2,
+            "evaluatedPairs": 178,
+            "scoreThreshold": 0.5,
+            "suspectedReuse": true,
+            "selectionMethod": "anchored-context-v1",
+            "supportingPairs": 16,
+            "pairedCharacters": 453,
+            "minimumCharacters": 64,
+            "matchedQueryCharacters": 522,
+            "minimumPairedCharacters": 64,
+            "beforeMutualSupportGuard": true
+          },
+          "literalSummary": {
+            "longest_match": 0,
+            "matched_characters": 0,
+            "query_character_coverage": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "family": "bert",
+      "modelId": "a1f9e07e-82c6-4085-9880-3a1ca2eaa58a",
+      "suspectedReuse": true,
+      "warningSources": 1,
+      "alerts": [
+        {
+          "sourceWorkId": "97",
+          "sourceTitle": "从AI漫剧到通才计划，这场讲座干货满满",
+          "semanticSummary": {
+            "status": "EVALUATED",
+            "corroborated": false,
+            "lexicalFloor": 0.25,
+            "minimumPairs": 2,
+            "evaluatedPairs": 178,
+            "scoreThreshold": 0.5,
+            "suspectedReuse": true,
+            "selectionMethod": "anchored-context-v1",
+            "supportingPairs": 20,
+            "pairedCharacters": 535,
+            "minimumCharacters": 64,
+            "matchedQueryCharacters": 613,
+            "minimumPairedCharacters": 64,
+            "beforeMutualSupportGuard": true
+          },
+          "literalSummary": {
+            "longest_match": 0,
+            "matched_characters": 0,
+            "query_character_coverage": 0.0
+          }
+        }
+      ]
+    }
+  ],
+  "normalSixResults": [
+    {
+      "family": "lr",
+      "modelId": "50c3985c-b26f-4dbb-9a20-512964549d55",
+      "suspectedReuse": false,
+      "warningSources": 0,
+      "alerts": []
+    },
+    {
+      "family": "svm",
+      "modelId": "bacfecef-7308-408f-a45d-05fdc0ab45ea",
+      "suspectedReuse": false,
+      "warningSources": 0,
+      "alerts": []
+    },
+    {
+      "family": "rf",
+      "modelId": "ea71b233-a1bc-469a-a7c4-66487972275d",
+      "suspectedReuse": false,
+      "warningSources": 0,
+      "alerts": []
+    },
+    {
+      "family": "cnn",
+      "modelId": "ec5b1e81-eb49-4756-825b-08d86c502a14",
+      "suspectedReuse": false,
+      "warningSources": 0,
+      "alerts": []
+    },
+    {
+      "family": "bilstm",
+      "modelId": "ba610892-16ca-498f-9303-9557b4ab2420",
+      "suspectedReuse": false,
+      "warningSources": 0,
+      "alerts": []
+    },
+    {
+      "family": "bert",
+      "modelId": "a1f9e07e-82c6-4085-9880-3a1ca2eaa58a",
+      "suspectedReuse": false,
+      "warningSources": 0,
+      "alerts": []
+    }
+  ],
+  "package": {
+    "status": "FINAL_SOURCE_PACKAGE_VERIFIED",
+    "createdAt": "2026-11-01T10:10:36.927103+08:00",
+    "archive": "D:\\Data\\GraduationProjectVersionC\\runtime\\submission-final-20261101\\学号_姓名_期末项目代码.zip",
+    "sha256": "325bc4c64381892103c2588719a1089678b340354d46fa4db3da9eb745b7f0b3",
+    "files": 612,
+    "bytes": 1532880,
+    "sqlTables": 35,
+    "migrationChecksums": 13,
+    "secretsExcluded": true,
+    "zipIntegrityVerified": true,
+    "completionSignalCreated": false,
+    "extractionVerified": true,
+    "sourceAssemblyVerified": true,
+    "requiredEntrancesVerified": 12,
+    "migrationChecksumsVerified": 13,
+    "restoredFiles": 607
+  },
+  "allSixQueuesIdle": true,
+  "oldSampleGenerationPaused": true,
+  "scope": "Observed real case evidence; no aggregate accuracy claim from one normal/rewrite article.",
+  "keptManuscript": {
+    "workId": "87",
+    "submissionId": "43",
+    "batchIds": [
+      "43"
+    ],
+    "itemIds": [
+      "175"
+    ],
+    "attemptIds": [
+      "177"
+    ],
+    "reviewIds": [
+      "19"
+    ],
+    "title": "聚焦人机协同创作，南传专题讲座连接产业实践与青年成长",
+    "reviewDecision": "RETURN",
+    "formalReleaseId": "dcff924e-12cf-4630-a979-eff10c4b5069",
+    "libraryGenerationId": "22"
+  },
+  "referenceImport": {
+    "datasetId": "8080db17-bf5e-4740-886a-71ac51b83a84",
+    "batchId": "b29c192f-a707-41e7-ad96-af1111cc20af",
+    "rows": 209,
+    "inserted": 129,
+    "duplicates": 80,
+    "rejected": 0,
+    "libraryGenerationId": "22"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "status": "FINAL_SOURCE_PACKAGE_VERIFIED",
+  "createdAt": "2026-11-01T10:10:36.927103+08:00",
+  "archive": "D:\\Data\\GraduationProjectVersionC\\runtime\\submission-final-20261101\\学号_姓名_期末项目代码.zip",
+  "sha256": "325bc4c64381892103c2588719a1089678b340354d46fa4db3da9eb745b7f0b3",
+  "files": 612,
+  "bytes": 1532880,
+  "sqlTables": 35,
+  "migrationChecksums": 13,
+  "secretsExcluded": true,
+  "zipIntegrityVerified": true,
+  "completionSignalCreated": false,
+  "extractionVerified": true,
+  "sourceAssemblyVerified": true,
+  "requiredEntrancesVerified": 12,
+  "migrationChecksumsVerified": 13,
+  "restoredFiles": 607
+}

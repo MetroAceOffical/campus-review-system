@@ -1,0 +1,29 @@
+{
+  "observedAt": "2026-11-01T10:16:26.436965+08:00",
+  "removed": [
+    {
+      "path": "runtime/overnight-delivery-20261031/preparation-flow-preview.png",
+      "bytes": 76886,
+      "sha256": "cd6a65a83f89ebbd017749aaaa879e93aaff21b71532eba2c067ca3e921a17f3"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/__pycache__/cleanup-qa.cpython-311.pyc",
+      "bytes": 16800,
+      "sha256": "b8f002ca31da524b8ede3d56ac4f2a9c2b67ea2a36f7e0245e73277338624201"
+    },
+    {
+      "path": "runtime/overnight-delivery-20261031/__pycache__/package-final-sources.cpython-311.pyc",
+      "bytes": 17339,
+      "sha256": "ade34f8d4c29c71b98d0ddccead52ab224ec9bd79f5dba814f52cfc71d8784fc"
+    }
+  ],
+  "reason": "Only the superseded loading-only preview screenshot and this task compiled helper caches; verified source, frozen artifacts, historical reports and runtime resources retained.",
+  "qaCleanupReceipt": "runtime/overnight-delivery-20261031/qa-cleanup-receipt.json",
+  "transportCleanupReceipt": "docs/assets/transport-copy-cleanup-20261101.json",
+  "formalModelsPreserved": 24,
+  "keptWorks": [
+    "87",
+    "88"
+  ],
+  "sourcePreparationSnapshotRetained": "Older source preparation ZIP is referenced by the dated preparation receipt and remains historical evidence."
+}
