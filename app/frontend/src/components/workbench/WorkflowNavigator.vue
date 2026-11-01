@@ -9,7 +9,7 @@ import { session } from '../../session'
 import { workflowContext } from '../../workflow-context'
 import { activeFlow } from '../../flow-session'
 import { flowSteps,flowDestination } from '../../flow-navigation'
-import {bindBundleContext} from '../../bundle-navigation'
+import {bindBundleContext,bundleOwnsRun} from '../../bundle-navigation'
 import { versionName } from '../../workbench-guidance'
 import AppIcon from '../AppIcon.vue'
 const route=useRoute(),error=ref(''),saving=ref(false)
@@ -21,8 +21,10 @@ async function sync(){
   if(owner!==user){activeFlow.value=undefined;workflowContext.dataset=undefined;workflowContext.version='';workflowContext.run=undefined;workflowContext.model=undefined;owner=user}
   if(!paths.includes(route.path)||!user||session.user?.role==='MEMBER'){activeFlow.value=undefined;return}
   error.value=''
+  let loadedFlow:Awaited<ReturnType<typeof getFlow>>|undefined
   try{
     const id=String(route.query.flow||''),flow=id?await getFlow(id):undefined
+    loadedFlow=flow
     if(!valid())return
     if(!id)activeFlow.value=undefined
     let context:FlowContext={...flow?.context},dataset=String(route.query.dataset||context.datasetId||''),version=String(route.query.version||context.versionId||'')
@@ -36,7 +38,7 @@ async function sync(){
     if(route.path==='/training'&&route.query.run){
       run=await training.run(String(route.query.run));dataset=run.datasetId;version=run.inputVersionId
       context.datasetId=dataset;context.versionId=version
-      if(bundle){if(!bundle.state.steps.some(s=>s.runId===run!.runId))throw new Error('该运行不属于当前模型组')}
+      if(bundle){if(!bundleOwnsRun(bundle,run.runId))throw new Error('该运行不属于当前模型组')}
       else if(run.action==='TRAIN'){
         if(flow&&(flow.kind==='CONTINUE'?(run.options.parentModelId||'')!==(context.parentModelId||''):!!run.options.parentModelId))throw new Error('该训练使用了不同起始模型，请从任务首页单独打开')
         if(context.trainingRunId!==run.runId){delete context.modelId;delete context.evaluationRunId;delete context.releaseId}context.trainingRunId=run.runId;if(run.status==='COMPLETED')context.modelId=run.runId;if(run.options.preparationId)context.preparationId=run.options.preparationId
@@ -75,10 +77,10 @@ async function sync(){
         if(context.modelId){workflowContext.model=context.modelId;workflowContext.run=context.trainingRunId}
       }else if(flow){workflowContext.dataset=undefined;workflowContext.version='';workflowContext.run=undefined;workflowContext.model=undefined}
     }
-  }catch(e){if(valid()){error.value=e instanceof Error?e.message:'读取任务失败';activeFlow.value=undefined;workflowContext.dataset=undefined;workflowContext.version='';workflowContext.model=undefined;workflowContext.run=undefined}}finally{saving.value=false}
+  }catch(e){if(valid()){error.value=e instanceof Error?e.message:'读取任务失败';activeFlow.value=loadedFlow;workflowContext.dataset=undefined;workflowContext.version='';workflowContext.model=undefined;workflowContext.run=undefined}}finally{saving.value=false}
 }
 async function schedule(){pending=true;if(working)return;working=true;try{while(pending&&alive){pending=false;await sync()}}finally{working=false}}
-watch(()=>[route.fullPath,session.user?.userId,workflowContext.bundle?.status,workflowContext.bundle?.trainedCount,workflowContext.bundle?.evaluatedCount,workflowContext.dataset?.runs.map(r=>r.runId+':'+r.status).join('|')],()=>void schedule(),{immediate:true})
+watch([()=>route.fullPath,()=>session.user?.userId,()=>workflowContext.bundle?.status,()=>workflowContext.bundle?.trainedCount,()=>workflowContext.bundle?.evaluatedCount,()=>workflowContext.dataset?.runs.map(r=>r.runId+':'+r.status).join('|')],()=>void schedule(),{immediate:true})
 onBeforeUnmount(()=>{alive=false})
 const steps=computed(()=>activeFlow.value?flowSteps(activeFlow.value,workflowContext.dataset,workflowContext.bundle).filter(s=>session.user?.role==='ADMIN'||!['parent','prepare','train'].includes(s.key)):[])
 const current=computed(()=>String(route.query.flowStep||activeFlow.value?.currentStep||''))

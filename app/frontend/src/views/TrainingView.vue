@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import RecordPagination from '../components/RecordPagination.vue'
-import {trainingSelection} from '../bundle-navigation'
+import {trainingSelection,bundleOwnsRun} from '../bundle-navigation'
 const dataSize = ref(12), runSize = ref(20)
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -60,7 +60,7 @@ async function viewRun(id: string, navigate = true) {
   const viewed = current.value
   if(focusBundleId.value){
     const bundle=await api.bundle(focusBundleId.value);if(token!==generation||!alive)return
-    if(!bundle.state.steps.some(step=>step.runId===id)){focusBundleId.value='';followedRun.value='';followedAttempt.value='';workflowContext.bundle=undefined}
+    if(!bundleOwnsRun(bundle,id)){focusBundleId.value='';followedRun.value='';followedAttempt.value='';workflowContext.bundle=undefined}
   }
   if (detail.value?.datasetId !== viewed.datasetId || versionId.value !== viewed.inputVersionId) { datasetId.value = viewed.datasetId; versionId.value = viewed.inputVersionId; await chooseDataset(); if (token !== generation || !alive) return }
   if (viewed.status === 'COMPLETED' && ['PREPARE', 'GENERATE'].includes(viewed.action)) preparationId.value = viewed.runId

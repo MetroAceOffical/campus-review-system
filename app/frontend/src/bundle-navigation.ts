@@ -1,6 +1,10 @@
 import type {ModelBundle} from './api/training'
 import type {FlowContext} from './api/flows'
 
+export function bundleOwnsRun(bundle:ModelBundle,runId:string):boolean{
+ return bundle.state.preparationId===runId||bundle.state.steps.some(step=>step.runId===runId)
+}
+
 export function trainingSelection(input:{dataset:string;version:string;preparation?:string;step:number;parentBundle?:string;parentModel?:string}):Record<string,string>{
  return {dataset:input.dataset,version:input.version,tab:'new',step:String(input.step),...(input.preparation?{preparation:input.preparation}:{}),...(input.parentBundle?{parentBundle:input.parentBundle}:{}),...(input.parentModel?{parentModel:input.parentModel}:{})}
 }
